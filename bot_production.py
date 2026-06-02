@@ -1,252 +1,177 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - 53 COMPLETE FEATURES
-Production Ready for Cloud Deployment
-Accessible to Everyone 24/7
+COACH AVNI BOT - MEALZY STYLE
+✅ All Mealzy Questions
+✅ Minimal Typing (Max Buttons)
+✅ Same Structure
+✅ Uses Your Name
 """
 
 import os
 import sys
-import json
-from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
-# Load environment variables
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN not found")
+    print("ERROR: TELEGRAM_TOKEN not found in .env")
     sys.exit(1)
 
 # ============================================================================
-# 53 COMPLETE FEATURES
+# MEALZY-STYLE QUESTIONS - MINIMAL TYPING, MAXIMUM BUTTONS
 # ============================================================================
 
-# FEATURES 1-5: QUESTION SYSTEM
 QUESTIONS = {
-    # Personal Data (Text Input)
-    1: {"type": "text", "text": "📝 Q1: What's your name?", "section": "Personal"},
-    2: {"type": "text", "text": "📝 Q2: Age?", "section": "Personal"},
-    3: {"type": "text", "text": "📝 Q3: Weight (kg)?", "section": "Personal"},
-    4: {"type": "text", "text": "📝 Q4: Height (cm)?", "section": "Personal"},
+    # 1. ABOUT YOU (Personal Data)
+    1: {"type": "text", "text": "What's your full name?", "section": "About You"},
+    2: {"type": "text", "text": "What's your age?", "section": "About You"},
+    3: {"type": "text", "text": "Current height (cm)?", "section": "About You"},
+    4: {"type": "text", "text": "Current weight (kg)?", "section": "About You"},
+    5: {"type": "buttons", "text": "What's your profession?", "section": "About You",
+        "options": ["Software Engineer", "Doctor", "Student", "Teacher", "Business Owner", "Consultant", "Other"]},
+    6: {"type": "buttons", "text": "Biological sex?", "section": "About You",
+        "options": ["Male", "Female", "Other"]},
     
-    # Personality (Buttons)
-    5: {"type": "buttons", "text": "🎯 Q5: Main goal?", "section": "Personality", 
-        "options": ["Lose weight", "Build muscle", "Get healthy", "More energy", "Look better"]},
-    6: {"type": "buttons", "text": "⚖️ Q6: Your personality?", "section": "Personality",
-        "options": ["Goal-Driven 🎯", "Balanced ⚖️", "Fun-Loving 🎉", "Scientific 🧠", "Lazy 😎"]},
-    7: {"type": "buttons", "text": "📅 Q7: Age range?", "section": "Demographics",
-        "options": ["18-25", "26-35", "36-45", "46-55", "55+"]},
-    8: {"type": "buttons", "text": "😴 Q8: Sleep hours?", "section": "Health",
-        "options": ["<5", "5-6", "6-7", "7-8", "8+"]},
-    9: {"type": "buttons", "text": "😰 Q9: Stress level?", "section": "Health",
-        "options": ["Low", "Moderate", "High", "Very High"]},
-    10: {"type": "buttons", "text": "🏃 Q10: Activity level?", "section": "Health",
-        "options": ["Sedentary", "Light", "Moderate", "Active", "Very Active"]},
-    11: {"type": "buttons", "text": "🍔 Q11: Eating pattern?", "section": "Nutrition",
-        "options": ["Mostly junk", "Mix", "Mostly healthy", "Very healthy"]},
-    12: {"type": "buttons_custom", "text": "🚫 Q12: Foods you dislike?", "section": "Nutrition",
-        "options": ["Vegetables", "Fish", "Spicy", "Dairy"], "custom": "Add food"},
-    13: {"type": "buttons_custom", "text": "🥗 Q13: Diet preference?", "section": "Nutrition",
-        "options": ["Vegan", "Vegetarian", "Omnivore", "Low-carb"], "custom": "Other"},
-    14: {"type": "buttons", "text": "💧 Q14: Water intake?", "section": "Nutrition",
-        "options": ["<2L/day", "2-4L/day", "4-6L/day", "6+L/day"]},
-    15: {"type": "buttons", "text": "👨‍🍳 Q15: Cook frequency?", "section": "Nutrition",
+    # 2. DIET & FOOD
+    7: {"type": "buttons", "text": "Dietary preference?", "section": "Diet & Food",
+        "options": ["Non-Vegetarian", "Vegetarian", "Eggetarian", "Vegan", "Jain"]},
+    8: {"type": "buttons_custom", "text": "Foods you dislike or avoid?", "section": "Diet & Food",
+        "options": ["Bitter gourd", "Eggplant", "Mushroom", "Okra", "Capsicum", "Onion", "Garlic", "Fish", "Egg", "Dairy"]},
+    9: {"type": "buttons_custom", "text": "Cuisines you enjoy?", "section": "Diet & Food",
+        "options": ["North Indian", "South Indian", "Bengali", "Gujarati", "Maharashtrian", "Continental", "Chinese", "Italian", "Mexican", "Japanese", "Thai", "Mediterranean"]},
+    
+    # 3. YOUR DAY
+    10: {"type": "text", "text": "Describe your daily routine (e.g., wake time, work hours, meals, sleep)", "section": "Your Day"},
+    11: {"type": "text", "text": "Describe your current diet (breakfast, lunch, dinner, snacks)", "section": "Your Day"},
+    12: {"type": "text", "text": "Describe your average weekend", "section": "Your Day"},
+    
+    # 4. HEALTH
+    13: {"type": "buttons_custom", "text": "Any medical conditions?", "section": "Health",
+        "options": ["Diabetes", "Thyroid", "PCOS/PCOD", "Hypertension", "High Cholesterol", "Fatty Liver", "None"]},
+    14: {"type": "text", "text": "Any allergies or food intolerances?", "section": "Health"},
+    15: {"type": "text", "text": "Current medications?", "section": "Health"},
+    16: {"type": "text", "text": "Any digestive issues? (e.g., bloating, acidity, constipation)", "section": "Health"},
+    17: {"type": "text", "text": "Any injuries or physical limitations?", "section": "Health"},
+    
+    # 5. SUPPLEMENTS & HABITS
+    18: {"type": "text", "text": "Do you use any supplements? (e.g., Multivitamin, Fish Oil)", "section": "Supplements & Habits"},
+    19: {"type": "buttons", "text": "Protein supplement experience?", "section": "Supplements & Habits",
+        "options": ["Yes, currently using", "Used before", "Never used"]},
+    20: {"type": "buttons", "text": "Do you smoke?", "section": "Supplements & Habits",
+        "options": ["No", "Occasionally", "Regularly"]},
+    21: {"type": "buttons", "text": "Do you drink alcohol?", "section": "Supplements & Habits",
+        "options": ["No", "Occasionally", "Regularly"]},
+    22: {"type": "buttons", "text": "How often do you eat out?", "section": "Supplements & Habits",
+        "options": ["Never", "1-2 times/week", "2-3 times/week", "4+ times/week"]},
+    
+    # 6. SLEEP & STRESS
+    23: {"type": "buttons", "text": "Rate your daily stress level (1-10)", "section": "Sleep & Stress",
+        "options": ["1 (Very Low)", "2", "3", "4", "5 (Moderate)", "6", "7", "8", "9", "10 (Very High)"]},
+    24: {"type": "buttons", "text": "Rate your sleep quality (1-10)", "section": "Sleep & Stress",
+        "options": ["1 (Very Poor)", "2", "3", "4", "5 (Fair)", "6", "7", "8", "9", "10 (Excellent)"]},
+    25: {"type": "buttons", "text": "Is your sleep restless?", "section": "Sleep & Stress",
+        "options": ["Yes", "No"]},
+    26: {"type": "buttons", "text": "Do you wake up feeling refreshed?", "section": "Sleep & Stress",
+        "options": ["Yes", "No"]},
+    27: {"type": "buttons", "text": "Do you meditate?", "section": "Sleep & Stress",
+        "options": ["Yes", "No"]},
+    28: {"type": "text", "text": "What are your major stressors?", "section": "Sleep & Stress"},
+    
+    # 7. FITNESS
+    29: {"type": "buttons", "text": "Days per week physically active (0-7)?", "section": "Fitness",
+        "options": ["0", "1", "2", "3", "4", "5", "6", "7"]},
+    30: {"type": "buttons", "text": "Resistance training experience?", "section": "Fitness",
+        "options": ["None", "Beginner (<6mo)", "Intermediate (6mo-2yr)", "Advanced (2+ yr)"]},
+    31: {"type": "text", "text": "What do your current workouts look like?", "section": "Fitness"},
+    32: {"type": "text", "text": "Other activities you enjoy?", "section": "Fitness"},
+    33: {"type": "text", "text": "How many hours sitting per day?", "section": "Fitness"},
+    34: {"type": "buttons", "text": "Where do you prefer to work out?", "section": "Fitness",
+        "options": ["Gym", "Home", "Both", "Outdoors"]},
+    
+    # 8. FOOD & COOKING
+    35: {"type": "buttons", "text": "How often do you cook?", "section": "Food & Cooking",
         "options": ["Never", "Sometimes", "Often", "Daily"]},
-    16: {"type": "buttons", "text": "💪 Q16: Fitness experience?", "section": "Fitness",
-        "options": ["Beginner", "Some exp", "Regular", "Advanced"]},
-    17: {"type": "buttons", "text": "📊 Q17: Previous attempts?", "section": "Fitness",
-        "options": ["Never tried", "Once", "Multiple", "Many"]},
-    18: {"type": "buttons", "text": "🏋️ Q18: Gym access?", "section": "Fitness",
-        "options": ["No gym", "Home only", "Gym", "Both"]},
-    19: {"type": "buttons", "text": "💯 Q19: Favorite workout?", "section": "Fitness",
-        "options": ["Strength", "Cardio", "Yoga", "Mix", "Sports"]},
-    20: {"type": "buttons", "text": "🎯 Q20: Past success?", "section": "Fitness",
-        "options": ["Never", "Some", "Good", "Great"]},
-    21: {"type": "buttons", "text": "⏰ Q21: How busy?", "section": "Lifestyle",
-        "options": ["Very free", "Somewhat", "Quite busy", "Very busy", "Insanely busy"]},
-    22: {"type": "buttons", "text": "💼 Q22: Work type?", "section": "Lifestyle",
-        "options": ["Office", "Physical", "Mix", "Remote", "Variable"]},
-    23: {"type": "buttons", "text": "🚗 Q23: Commute time?", "section": "Lifestyle",
-        "options": ["None", "<30min", "30-60min", "1-2hr", "2+hr"]},
-    24: {"type": "buttons", "text": "🌅 Q24: Morning or night?", "section": "Lifestyle",
-        "options": ["Early bird", "Morning", "Flexible", "Night", "Night owl"]},
-    25: {"type": "buttons", "text": "🎮 Q25: Free time activity?", "section": "Lifestyle",
-        "options": ["Sports", "Gym", "Yoga", "Gaming", "Outdoor"]},
-    26: {"type": "buttons", "text": "🏥 Q26: Medical conditions?", "section": "Medical",
-        "options": ["None", "Minor", "Moderate", "Serious"]},
-    27: {"type": "buttons_custom", "text": "🤕 Q27: Injuries?", "section": "Medical",
-        "options": ["None", "Old", "Current"], "custom": "Describe"},
-    28: {"type": "buttons", "text": "💊 Q28: Medications?", "section": "Medical",
-        "options": ["No", "Occasional", "Regular"]},
-    29: {"type": "buttons_custom", "text": "🍫 Q29: Allergies?", "section": "Medical",
-        "options": ["None", "Food", "Other"], "custom": "List"},
-    30: {"type": "buttons", "text": "😴 Q30: Sleep quality?", "section": "Medical",
-        "options": ["Poor", "Fair", "Good", "Excellent"]},
-    31: {"type": "buttons", "text": "🔥 Q31: Commitment?", "section": "Motivation",
-        "options": ["20%", "50%", "75%", "100%"]},
-    32: {"type": "buttons", "text": "📅 Q32: Timeline?", "section": "Motivation",
-        "options": ["1 month", "3 months", "6 months", "1+ year"]},
-    33: {"type": "buttons", "text": "💰 Q33: Budget?", "section": "Motivation",
-        "options": ["Free", "Low", "Medium", "Unlimited"]},
-    34: {"type": "buttons_custom", "text": "🚧 Q34: Obstacles?", "section": "Motivation",
-        "options": ["Time", "Money", "Motivation", "Support"], "custom": "Other"},
-    35: {"type": "buttons", "text": "📢 Q35: Feedback style?", "section": "Motivation",
-        "options": ["Gentle", "Balanced", "Direct", "Aggressive"]},
-    36: {"type": "buttons", "text": "🏆 Q36: Success means?", "section": "Support",
-        "options": ["Scale weight", "Clothes fit", "Energy", "Confidence", "All"]},
-    37: {"type": "buttons", "text": "👥 Q37: Who supports you?", "section": "Support",
-        "options": ["Partner", "Family", "Friends", "No one", "Community"]},
-    38: {"type": "buttons", "text": "💪 Q38: Support level?", "section": "Support",
-        "options": ["Unsupportive", "Neutral", "Supportive", "Very supportive"]},
-    39: {"type": "buttons", "text": "👨‍👩‍👧 Q39: Family fitness?", "section": "Support",
-        "options": ["Not into", "Somewhat", "Very focused"]},
-    40: {"type": "buttons", "text": "🤝 Q40: Solo or group?", "section": "Support",
-        "options": ["Solo", "Prefer solo", "Flexible", "Prefer group", "Group"]},
-    41: {"type": "buttons", "text": "📋 Q41: Need accountability?", "section": "Accountability",
-        "options": ["No", "Maybe", "Definitely", "Essential"]},
-    42: {"type": "buttons", "text": "💡 Q42: Motivation?", "section": "Accountability",
-        "options": ["Competition", "Progress", "Community", "Rewards", "Habit"]},
-    43: {"type": "buttons", "text": "📱 Q43: Communication?", "section": "Accountability",
-        "options": ["Text", "Video", "Voice", "Mixed"]},
-    44: {"type": "buttons", "text": "🎲 Q44: Need variety?", "section": "Accountability",
-        "options": ["Same", "Some", "Lots", "Daily"]},
-    45: {"type": "buttons", "text": "⭐ Q45: Motivates most?", "section": "Accountability",
-        "options": ["Results", "Consistency", "Fun", "Challenge", "Support"]},
-    46: {"type": "buttons", "text": "😰 Q46: If struggle?", "section": "Accountability",
-        "options": ["Give up", "Break", "Support", "Push"]},
-    47: {"type": "buttons", "text": "🎉 Q47: Fun important?", "section": "Accountability",
-        "options": ["Not", "Somewhat", "Very", "Essential"]},
-    48: {"type": "buttons", "text": "🚀 Q48: Ready now?", "section": "Final",
-        "options": ["Not sure", "Somewhat", "Pretty", "100%"]},
-    49: {"type": "buttons_custom", "text": "😨 Q49: What scares you?", "section": "Final",
-        "options": ["Failure", "No results", "Judgment", "Unknown"], "custom": "Other"},
-    50: {"type": "buttons", "text": "🎯 Q50: Expect from coach?", "section": "Final",
-        "options": ["Plan", "Support", "Accountability", "Everything"]},
-    51: {"type": "buttons", "text": "📊 Q51: Check-in frequency?", "section": "Final",
-        "options": ["Weekly", "Bi-weekly", "Monthly", "As needed"]},
+    36: {"type": "buttons", "text": "Food budget preference?", "section": "Food & Cooking",
+        "options": ["Budget-friendly", "Medium", "Premium"]},
+    
+    # 9. YOUR GOALS
+    37: {"type": "text", "text": "Describe your fitness goals (what do you want to achieve?)", "section": "Your Goals"},
+    38: {"type": "text", "text": "What body type are you working toward?", "section": "Your Goals"},
+    39: {"type": "text", "text": "Timeline to achieve your goals?", "section": "Your Goals"},
+    40: {"type": "text", "text": "Why do you want to achieve this goal?", "section": "Your Goals"},
+    41: {"type": "text", "text": "Have you tried achieving this before? What approach did you take?", "section": "Your Goals"},
+    42: {"type": "text", "text": "Have you worked with a coach? How was the experience?", "section": "Your Goals"},
+    43: {"type": "text", "text": "What's your biggest barrier to achieving this goal?", "section": "Your Goals"},
+    44: {"type": "text", "text": "Any specific performance goals? (e.g., run 5K in 30 min, deadlift 100kg)", "section": "Your Goals"},
+    45: {"type": "text", "text": "Does your health status affect your life quality?", "section": "Your Goals"},
+    46: {"type": "text", "text": "How will you feel achieving this goal?", "section": "Your Goals"},
+    47: {"type": "text", "text": "How will you feel if you don't achieve it?", "section": "Your Goals"},
+    
+    # 10. COMMITMENT
+    48: {"type": "buttons", "text": "Days per week willing to train (1-7)?", "section": "Commitment",
+        "options": ["1", "2", "3", "4", "5", "6", "7"]},
+    49: {"type": "buttons", "text": "Willing to reduce eating out?", "section": "Commitment",
+        "options": ["Yes", "No"]},
+    50: {"type": "buttons", "text": "Willing to reduce drinking?", "section": "Commitment",
+        "options": ["Yes", "No"]},
+    51: {"type": "text", "text": "Food groups you're not willing to give up?", "section": "Commitment"},
+    52: {"type": "text", "text": "Anything else your coach should know?", "section": "Commitment"},
 }
 
-# FEATURES 6-10: PERSONALITY TYPES (5 Types)
-PERSONALITIES = {
-    "Goal-Driven": {"emoji": "🎯", "desc": "Competitive, results-focused", "tone": "Direct, metric-driven"},
-    "Balanced": {"emoji": "⚖️", "desc": "Steady, sustainable", "tone": "Supportive, balanced"},
-    "Fun-Loving": {"emoji": "🎉", "desc": "Social, energetic", "tone": "Playful, celebratory"},
-    "Scientific": {"emoji": "🧠", "desc": "Data-driven, logical", "tone": "Analytical, research-backed"},
-    "Lazy": {"emoji": "😎", "desc": "Convenient, minimal effort", "tone": "Casual, efficient"}
-}
+# Sections for progress
+SECTIONS = [
+    "About You",
+    "Diet & Food",
+    "Your Day",
+    "Health",
+    "Supplements & Habits",
+    "Sleep & Stress",
+    "Fitness",
+    "Food & Cooking",
+    "Your Goals",
+    "Commitment"
+]
 
-# FEATURES 11-15: BARRIERS & SOLUTIONS (7+ Barriers)
-BARRIERS = {
-    "time": {"name": "TIME", "solution": "20-min HIIT, 3x/week home"},
-    "money": {"name": "BUDGET", "solution": "Free YouTube + apps"},
-    "motivation": {"name": "MOTIVATION", "solution": "Buddy system + gamification"},
-    "gym": {"name": "NO GYM", "solution": "Bodyweight + bands"},
-    "stress": {"name": "STRESS", "solution": "Yoga + meditation"},
-    "sleep": {"name": "SLEEP", "solution": "Evening routine + consistency"},
-    "support": {"name": "NO SUPPORT", "solution": "Community + accountability partner"}
-}
+# ============================================================================
+# USER SESSION
+# ============================================================================
 
-# FEATURE 16-20: SCORING SYSTEMS (4 Scores)
-class SmartAnalyzer:
-    def __init__(self, answers):
-        self.answers = answers
-        self.health_score = self.calc_health()
-        self.success_prob = self.calc_success()
-        self.readiness = self.calc_readiness()
-        self.personality_conf = 60 + (len(answers) // 10)
-        self.barriers = self.identify_barriers()
-        self.risks = self.detect_risks()
-        self.recommendations = self.get_recommendations()
-    
-    def calc_health(self):
-        score = 50
-        if self.answers.get(8) in ["7-8", "8+"]: score += 15
-        if self.answers.get(9) in ["Low", "Moderate"]: score += 15
-        if self.answers.get(10) in ["Active", "Very Active"]: score += 20
-        if self.answers.get(11) in ["Mostly healthy", "Very healthy"]: score += 15
-        if self.answers.get(26) == "None": score += 15
-        if self.answers.get(30) in ["Good", "Excellent"]: score += 10
-        return min(100, score)
-    
-    def calc_success(self):
-        score = 50
-        if self.answers.get(31) in ["75%", "100%"]: score += 30
-        if self.answers.get(32) in ["3 months", "6 months"]: score += 25
-        if self.answers.get(38) in ["Supportive", "Very supportive"]: score += 20
-        if self.answers.get(41) in ["Definitely", "Essential"]: score += 15
-        if self.answers.get(16) in ["Regular", "Advanced"]: score += 10
-        return min(100, score)
-    
-    def calc_readiness(self):
-        score = 50
-        if self.answers.get(42) in ["Progress", "Rewards"]: score += 30
-        if self.answers.get(38) in ["Supportive", "Very supportive"]: score += 25
-        if self.answers.get(5) in ["Lose weight", "Build muscle"]: score += 20
-        if self.answers.get(32) in ["3 months", "6 months"]: score += 15
-        return min(100, score)
-    
-    def identify_barriers(self):
-        barriers = []
-        if self.answers.get(21) in ["Very busy", "Insanely busy"]: barriers.append("time")
-        if self.answers.get(33) == "Free": barriers.append("money")
-        if self.answers.get(31) in ["20%", "50%"]: barriers.append("motivation")
-        if self.answers.get(18) == "No gym": barriers.append("gym")
-        if self.answers.get(9) in ["High", "Very High"]: barriers.append("stress")
-        if self.answers.get(8) == "<5": barriers.append("sleep")
-        if self.answers.get(37) == "No one": barriers.append("support")
-        return barriers
-    
-    def detect_risks(self):
-        risks = []
-        if self.answers.get(26) in ["Moderate", "Serious"] and self.answers.get(9) in ["High", "Very High"]:
-            risks.append("⚠️ Medical + Stress: Consult doctor")
-        if self.answers.get(17) == "Many" and self.answers.get(31) == "20%":
-            risks.append("⚠️ Failures + Low commitment: Address root cause")
-        return risks
-    
-    def get_recommendations(self):
-        personality = self.answers.get(6, "Balanced").split()[0]
-        recs = {
-            "Goal-Driven": ["Set aggressive targets", "Track weekly", "90-day results", "High-intensity 4x/week"],
-            "Balanced": ["Build steadily", "Consistency focus", "6-month plan", "Strength+cardio 3-4x/week"],
-            "Fun-Loving": ["Group activities", "Challenges", "4-month plan", "3x/week flexible"],
-            "Scientific": ["Evidence-based", "Data tracking", "Research-backed", "5x/week periodization"],
-            "Lazy": ["20-min HIIT", "3x/week home", "Minimal effort", "Maximum results"]
-        }
-        return recs.get(personality, recs["Balanced"])
-
-# FEATURE 21-25: USER SESSION
 class UserSession:
     def __init__(self):
         self.current_q = 1
         self.answers = {}
-        self.personality = None
-        self.analyzer = None
+        self.name = None
+        self.waiting_custom = None
 
-# FEATURE 26: Bot Handlers
+# ============================================================================
+# BOT HANDLERS
+# ============================================================================
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start assessment"""
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
     
-    text = """🤖 Hi! I'm Coach Avni!
+    text = """🤖 Welcome to Mealzy Coach!
 
-📋 51 SMART QUESTIONS
-✅ Real-time personality detection (5 types)
-📊 Health & success scores
-🎯 Personalized recommendations
-⏱️ Takes 5-10 minutes
+📋 Complete Fitness Assessment
+✅ 52 Smart Questions
+✅ Minimal Typing (Max Buttons!)
+📊 Personalized Plan
+🎯 Real Results
 
-Ready? Let's go! 🚀"""
+Let's go! 🚀"""
     
-    keyboard = [[InlineKeyboardButton("▶️ START", callback_data="q1")]]
+    keyboard = [[InlineKeyboardButton("▶️ START ASSESSMENT", callback_data="start")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
-async def ask_q(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
+async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
+    """Display current question"""
     user_id = update.effective_user.id
+    
     if user_id not in context.user_data:
         await start(update, context)
         return
@@ -254,34 +179,47 @@ async def ask_q(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     session = context.user_data[user_id]
     q_num = session.current_q
     
-    if q_num > 51:
-        await show_results(update, context)
+    # Check if done
+    if q_num > 52:
+        await update.message.reply_text("✅ Assessment complete! Thank you!")
         return
     
     question = QUESTIONS[q_num]
-    progress = int(((q_num - 1) / 51) * 100)
+    section = question.get("section", "")
+    progress = int(((q_num - 1) / 52) * 100)
     bar = "█" * (progress // 5) + "░" * (20 - (progress // 5))
     
-    text = f"{bar} {progress}% ({q_num}/51)\n\n{question['text']}"
+    # Progress with name
+    name_part = f"\n👋 {session.name}" if session.name else ""
+    text = f"{bar} {progress}% | {section}{name_part}\n\n{question['text']}"
     
+    # Text input
     if question['type'] == 'text':
         if query:
             await query.edit_message_text(text)
         else:
             await update.message.reply_text(text)
+        return
+    
+    # Button questions
+    buttons = [
+        [InlineKeyboardButton(opt, callback_data=f"a_{q_num}_{i}")]
+        for i, opt in enumerate(question['options'])
+    ]
+    
+    # Add custom if needed
+    if question['type'] == 'buttons_custom':
+        buttons.append([InlineKeyboardButton("✏️ Custom", callback_data=f"c_{q_num}")])
+    
+    markup = InlineKeyboardMarkup(buttons)
+    
+    if query:
+        await query.edit_message_text(text, reply_markup=markup)
     else:
-        buttons = [[InlineKeyboardButton(opt, callback_data=f"ans_{q_num}_{i}")] 
-                   for i, opt in enumerate(question['options'])]
-        
-        if question['type'] == 'buttons_custom':
-            buttons.append([InlineKeyboardButton("✏️ Custom", callback_data=f"custom_{q_num}")])
-        
-        if query:
-            await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
-        else:
-            await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(buttons))
+        await update.message.reply_text(text, reply_markup=markup)
 
-async def handle_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle button clicks"""
     query = update.callback_query
     user_id = query.from_user.id
     
@@ -293,117 +231,107 @@ async def handle_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.user_data[user_id]
     data = query.data
     
-    if data.startswith("ans_"):
+    # Start
+    if data == "start":
+        session.current_q = 1
+        await ask_question(update, context, query)
+        return
+    
+    # Answer
+    if data.startswith("a_"):
         parts = data.split("_")
         q_num = int(parts[1])
         ans_idx = int(parts[2])
         
         question = QUESTIONS[q_num]
-        session.answers[q_num] = question['options'][ans_idx]
-        
-        if q_num == 6:
-            session.personality = question['options'][ans_idx].split()[0]
+        answer = question['options'][ans_idx]
+        session.answers[q_num] = answer
         
         session.current_q = q_num + 1
-    elif data == "q1":
-        session.current_q = 1
+        
+        if session.name:
+            await query.edit_message_text(f"✅ Got it, {session.name}!\n⏳ Next...")
+        
+        await ask_question(update, context, query)
+        return
     
-    await ask_q(update, context, query)
+    # Custom
+    if data.startswith("c_"):
+        q_num = int(data.split("_")[1])
+        session.waiting_custom = q_num
+        await query.edit_message_text("📝 Type your custom answer:")
 
-async def handle_txt(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle text input"""
     user_id = update.effective_user.id
+    
     if user_id not in context.user_data:
         await start(update, context)
         return
     
     session = context.user_data[user_id]
-    q_num = session.current_q
     text = update.message.text.strip()
     
-    # Validate
+    # Custom answer
+    if session.waiting_custom:
+        q_num = session.waiting_custom
+        session.answers[q_num] = text
+        session.waiting_custom = None
+        session.current_q = q_num + 1
+        
+        if session.name:
+            await update.message.reply_text(f"✅ {session.name}, got: {text}\n⏳ Next...")
+        
+        await ask_question(update, context)
+        return
+    
+    q_num = session.current_q
+    
+    # Validate age
     if q_num == 2:
         try:
             age = int(text)
             if not 13 <= age <= 100:
-                await update.message.reply_text("❌ Age 13-100 please:")
+                await update.message.reply_text("❌ Age 13-100. Try again:")
                 return
         except:
             await update.message.reply_text("❌ Enter a number:")
             return
     
+    # Store name
+    if q_num == 1:
+        session.name = text
+    
     session.answers[q_num] = text
     session.current_q += 1
-    await ask_q(update, context)
-
-async def show_results(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    session = context.user_data[user_id]
     
-    session.analyzer = SmartAnalyzer(session.answers)
+    if session.name:
+        await update.message.reply_text(f"✅ Thanks, {session.name}!\n⏳ Next...")
     
-    name = session.answers.get(1, "Friend")
-    personality = session.personality or "Balanced"
-    
-    result = f"""🎉 COMPLETE!
-
-👤 {name.upper()}
-
-🎯 PERSONALITY: {personality}
-Confidence: {session.analyzer.personality_conf}%
-
-📊 SCORES:
-🏥 Health: {session.analyzer.health_score}/100
-📈 Success: {session.analyzer.success_prob}%
-⚡ Readiness: {session.analyzer.readiness}/100
-
-🚧 BARRIERS:
-"""
-    
-    if session.analyzer.barriers:
-        for b in session.analyzer.barriers:
-            barrier = BARRIERS[b]
-            result += f"✓ {barrier['name']}: {barrier['solution']}\n"
+    if session.current_q > 52:
+        await update.message.reply_text("🎉 Assessment complete! Thank you for your detailed responses!")
     else:
-        result += "✅ No major barriers!\n"
-    
-    result += f"\n⚠️ RISKS:\n"
-    if session.analyzer.risks:
-        for risk in session.analyzer.risks:
-            result += f"{risk}\n"
-    else:
-        result += "✅ No major risks!\n"
-    
-    result += f"\n🎯 RECOMMENDATIONS:\n"
-    for rec in session.analyzer.recommendations:
-        result += f"✅ {rec}\n"
-    
-    result += f"\n🚀 NEXT: Connect with coach!\n"
-    
-    await update.message.reply_text(result)
+        await ask_question(update, context)
 
 def main():
+    """Start bot"""
     print("\n" + "=" * 70)
-    print("🤖 COACH AVNI BOT - 53 FEATURES - PRODUCTION READY")
+    print("🤖 MEALZY-STYLE COACH BOT")
     print("=" * 70)
-    print("✅ 51 Smart Questions")
-    print("✅ 5 Personality Types")
-    print("✅ 4 Scoring Systems")
-    print("✅ 7+ Barriers with Solutions")
-    print("✅ Real-time Analysis")
-    print("✅ Risk Detection")
-    print("✅ Session Persistence")
-    print("✅ Accessible to EVERYONE 24/7")
+    print("✅ 52 Questions (Mealzy Structure)")
+    print("✅ Minimal Typing (Max Buttons)")
+    print("✅ All Mealzy Questions Included")
+    print("✅ Uses Your Name")
+    print("✅ Production Ready")
     print("=" * 70)
     
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_btn))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_txt))
+    app.add_handler(CallbackQueryHandler(button_handler))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
     
-    print("🚀 BOT RUNNING - READY FOR DEPLOYMENT!")
-    print("=" * 70 + "\n")
-    
+    print("🚀 BOT RUNNING!\n")
     app.run_polling()
 
 if __name__ == "__main__":
