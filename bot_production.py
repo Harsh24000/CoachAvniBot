@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
+"""
+COACH AVNI BOT - ONE QUESTION PER SCREEN
+✅ ONE question per screen only
+✅ ZERO confusion
+✅ Crystal clear
+✅ No mixing
+"""
+
 import os
+import sys
+import random
 import asyncio
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -9,201 +19,291 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN not in .env!")
-    exit(1)
+    print("ERROR: TELEGRAM_TOKEN not found in .env")
+    sys.exit(1)
 
-SCREENS = {
-    1: {"title": "👤 Basic Info", "questions": {
-        "name": {"q": "👤 Full name?", "type": "text", "req": True},
-        "age": {"q": "🎂 Age?", "type": "text", "req": True},
-    }},
-    2: {"title": "💼 Work", "questions": {
-        "profession": {"q": "💼 Profession?", "type": "buttons", "req": True, "opts": ["💻 Software", "👨‍⚕️ Doctor", "📚 Student", "➕ Other"], "custom": True},
-    }},
-    3: {"title": "🎯 Ready?", "questions": {
-        "ready": {"q": "🚀 Ready to start?", "type": "buttons", "req": True, "opts": ["🔥 YES!", "✅ Yes", "🤔 Maybe"], "custom": False},
-    }},
-}
+FUN_RESPONSES = [
+    "🔥 Crushing it! Next!",
+    "💯 Love it!",
+    "⚡ Perfect!",
+    "🎯 Got it!",
+    "✨ Amazing!",
+    "🚀 Moving on!",
+    "💪 Strong!",
+    "👏 Great!",
+]
 
-class Session:
+# ============================================================================
+# QUESTIONS - ONE PER SCREEN (No mixing)
+# ============================================================================
+
+QUESTIONS = [
+    # Screen 1-4: Basic Info (Text)
+    {"screen": 1, "section": "👤 About You", "question": "👤 What's your full name?", "type": "text", "required": True},
+    {"screen": 2, "section": "👤 About You", "question": "🎂 What's your age?", "type": "text", "required": True},
+    {"screen": 3, "section": "👤 About You", "question": "📏 Height (cm)?", "type": "text", "required": True},
+    {"screen": 4, "section": "👤 About You", "question": "⚖️ Weight (kg)?", "type": "text", "required": True},
+    
+    # Screen 5: Profession
+    {"screen": 5, "section": "👤 About You", "question": "💼 What's your profession?", "type": "buttons", "required": True,
+     "options": ["💻 Software Eng", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]},
+    
+    # Screen 6: Biological sex
+    {"screen": 6, "section": "👤 About You", "question": "⚡ Biological sex?", "type": "buttons", "required": True,
+     "options": ["👨 Male", "👩 Female", "🌈 Other"]},
+    
+    # Screen 7: Dietary preference
+    {"screen": 7, "section": "🍽️ Diet & Food", "question": "🍽️ Dietary preference?", "type": "buttons", "required": True,
+     "options": ["🍗 Non-Veg", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]},
+    
+    # Screen 8: Disliked foods
+    {"screen": 8, "section": "🍽️ Diet & Food", "question": "🚫 Foods you HATE? (select multiple or skip)", "type": "buttons_multi", "required": False,
+     "options": ["🥒 Bitter gourd", "🍆 Eggplant", "🍄 Mushroom", "🪴 Okra", "🌶️ Capsicum", "🧅 Onion", "🧄 Garlic", "🐟 Fish", "🥚 Egg", "🥛 Dairy"]},
+    
+    # Screen 9: Cuisines
+    {"screen": 9, "section": "🍽️ Diet & Food", "question": "👨‍🍳 Cuisines you LOVE? (select multiple or skip)", "type": "buttons_multi", "required": False,
+     "options": ["🇮🇳 North Indian", "🔥 South Indian", "🇧🇩 Bengali", "🥘 Gujarati", "🌶️ Continental", "🥡 Chinese", "🍝 Italian", "🌮 Mexican", "🍜 Thai"]},
+    
+    # Screen 10: Wake time
+    {"screen": 10, "section": "☀️ Your Day", "question": "🌅 What time do you wake up?", "type": "buttons", "required": True,
+     "options": ["⏰ 5:00", "⏰ 5:30", "⏰ 6:00", "⏰ 6:30", "⏰ 7:00", "⏰ 7:30", "⏰ 8:00", "🛏️ 8:30+"]},
+    
+    # Screen 11: Breakfast
+    {"screen": 11, "section": "☀️ Your Day", "question": "☕ Breakfast time?", "type": "buttons", "required": True,
+     "options": ["🌅 6:00", "🌅 6:30", "🌅 7:00", "🌅 7:30", "🌅 8:00", "🌅 8:30", "🌅 9:00", "⏭️ Skip"]},
+    
+    # Screen 12: Sleep
+    {"screen": 12, "section": "☀️ Your Day", "question": "😴 Sleep time?", "type": "buttons", "required": True,
+     "options": ["🌙 9:00", "🌙 9:30", "🌙 10:00", "🌙 10:30", "🌙 11:00", "🌙 11:30", "🌙 12:00", "🌙 12:30+"]},
+    
+    # Screen 13: Medical conditions
+    {"screen": 13, "section": "🏥 Health", "question": "⚕️ Any medical conditions? (select or skip)", "type": "buttons_multi", "required": False,
+     "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS", "❤️ Hypertension", "⚠️ High Cholesterol", "🍗 Fatty Liver", "✅ None"]},
+    
+    # Screen 14: Allergies
+    {"screen": 14, "section": "🏥 Health", "question": "🤧 Any allergies?", "type": "buttons", "required": True,
+     "options": ["✅ No", "🍔 Food", "🌫️ Environmental", "🔀 Both"]},
+    
+    # Screen 15: Injuries
+    {"screen": 15, "section": "🏥 Health", "question": "🤕 Any injuries?", "type": "buttons", "required": True,
+     "options": ["✅ No", "Old (healed)", "Current"]},
+    
+    # Screen 16: Active days
+    {"screen": 16, "section": "💪 Fitness", "question": "💪 Days per week physically active?", "type": "buttons", "required": True,
+     "options": ["😴 0", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7"]},
+    
+    # Screen 17: Strength training
+    {"screen": 17, "section": "💪 Fitness", "question": "🏋️ Strength training experience?", "type": "buttons", "required": True,
+     "options": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"]},
+    
+    # Screen 18: Workout location
+    {"screen": 18, "section": "💪 Fitness", "question": "📍 Preferred workout location?", "type": "buttons", "required": True,
+     "options": ["🏢 Gym", "🏠 Home", "🌳 Outdoors", "🔀 Gym+Home", "🌍 All"]},
+    
+    # Screen 19: Main goal
+    {"screen": 19, "section": "🎯 Your Goals", "question": "🎯 What's your PRIMARY goal?", "type": "buttons", "required": True,
+     "options": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "🏃 Endurance", "❤️ Better health", "✨ All"]},
+    
+    # Screen 20: Timeline
+    {"screen": 20, "section": "🎯 Your Goals", "question": "⏱️ Timeline for goal?", "type": "buttons", "required": True,
+     "options": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year", "📅 1+ year"]},
+    
+    # Screen 21: Training days
+    {"screen": 21, "section": "🤝 Commitment", "question": "📅 Training days per week?", "type": "buttons", "required": True,
+     "options": ["1️⃣ 1", "2️⃣ 2", "3️⃣ 3", "4️⃣ 4", "5️⃣ 5", "6️⃣ 6", "7️⃣ 7"]},
+    
+    # Screen 22: Ready
+    {"screen": 22, "section": "🤝 Commitment", "question": "🚀 Ready to START your transformation?", "type": "buttons", "required": True,
+     "options": ["🔥 YES! 100%!", "✅ Yes, somewhat", "🤔 Maybe", "⏳ Not yet"]},
+]
+
+class UserSession:
     def __init__(self):
-        self.screen = 1
-        self.inputs = {}
+        self.current_question = 0
+        self.all_answers = {}
         self.name = None
-        self.waiting_custom = None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    uid = update.effective_user.id
-    context.user_data[uid] = Session()
+    user_id = update.effective_user.id
+    context.user_data[user_id] = UserSession()
     
-    text = "🤖 MEALZY COACH 🎉\n\n💪 Transform Your Body\n✨ Transform Your Life\n\nLet's go! 🚀"
-    kb = [[InlineKeyboardButton("🎯 START", callback_data="start")]]
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(kb))
+    text = """🤖 ╔════════════════════════════════════════╗
+   ║  WELCOME TO MEALZY COACH! 🎉           ║
+   ║                                         ║
+   ║  💪 Transform Your Body               ║
+   ║  🧠 Transform Your Mind               ║
+   ║  ✨ Transform Your Life               ║
+   ╚════════════════════════════════════════╝
 
-async def show_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
-    uid = update.effective_user.id
-    if uid not in context.user_data:
+📋 Quick Assessment
+✅ 22 Simple Questions
+✅ ONE question per screen (CRYSTAL CLEAR!)
+✅ NO confusion
+✅ Fast & Easy
+🎯 Your Personalized Plan
+
+Let's go! 🚀"""
+    
+    keyboard = [[InlineKeyboardButton("🎯 START NOW!", callback_data="start")]]
+    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def show_question(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
+    user_id = update.effective_user.id
+    
+    if user_id not in context.user_data:
         await start(update, context)
         return
     
-    sess = context.user_data[uid]
-    sn = sess.screen
+    session = context.user_data[user_id]
+    q_idx = session.current_question
     
-    if sn > 3:
-        msg = f"🎉 COMPLETE!\n\n👋 {sess.name or 'Champion'}!\n\nYour profile READY!\nCoaches creating plan!\n\nThank you! 🙏"
-        if query:
-            await query.edit_message_text(msg)
-        else:
-            await update.message.reply_text(msg)
+    if q_idx >= len(QUESTIONS):
+        final_msg = f"""🎉 ╔════════════════════════════════════════╗
+   ║  ASSESSMENT COMPLETE! 🏆               ║
+   ╚════════════════════════════════════════╝
+
+👋 {session.name or 'Champion'}! You did it! 💪
+
+Assessment done in record time! ⚡
+
+Your fitness profile is READY!
+Coaches creating your plan NOW!
+
+📊 Next:
+✅ Health score
+✅ Custom plan  
+✅ Transform begins!
+
+Thank you! 🙏
+Ready to CHANGE YOUR LIFE? 🚀"""
+        await update.message.reply_text(final_msg)
         return
     
-    screen = SCREENS[sn]
-    prog = int((sn / 3) * 100)
-    bar = "█" * (prog // 10) + "░" * (10 - (prog // 10))
+    q = QUESTIONS[q_idx]
+    progress = int((q_idx / len(QUESTIONS)) * 100)
+    bar = "█" * (progress // 5) + "░" * (20 - (progress // 5))
     
-    text = f"{bar} {prog}%\n\n{screen['title']}\n\n"
+    text = f"{bar} {progress}%\n\n{q['section']}\n\n{q['question']}\n\n"
     
-    for fk, qd in screen['questions'].items():
-        if fk in sess.inputs:
-            text += f"{qd['q']} ✅\n"
+    if q['type'] == 'text':
+        text += "*(Type your answer in chat)*"
+        if query:
+            await query.edit_message_text(text)
+        else:
+            await update.message.reply_text(text)
+        return
     
+    # Buttons
     buttons = []
-    first_unanswered = None
-    for fk, qd in screen['questions'].items():
-        if fk not in sess.inputs and first_unanswered is None:
-            first_unanswered = (fk, qd)
-    
-    if first_unanswered:
-        fk, qd = first_unanswered
-        text += f"\n{qd['q']} [Tap below]\n\n"
+    for i, opt in enumerate(q['options']):
+        button = InlineKeyboardButton(opt, callback_data=f"ans_{q_idx}_{i}")
         
-        if qd['type'] == 'buttons':
-            for i, opt in enumerate(qd['opts']):
-                btn = InlineKeyboardButton(opt, callback_data=f"a_{sn}_{fk}_{i}")
-                if not buttons or len(buttons[-1]) >= 2:
-                    buttons.append([btn])
-                else:
-                    buttons[-1].append(btn)
-            
-            if qd.get('custom'):
-                buttons.append([InlineKeyboardButton("📝 Custom", callback_data=f"c_{sn}_{fk}")])
-        
-        elif qd['type'] == 'text':
-            text += "*(Type in chat)*\n\n"
+        if len(buttons) == 0 or len(buttons[-1]) >= 2:
+            buttons.append([button])
+        else:
+            buttons[-1].append(button)
     
-    buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"nx_{sn}")])
+    # Add skip button for optional questions
+    if not q['required']:
+        buttons.append([InlineKeyboardButton("⏭️ SKIP", callback_data=f"skip_{q_idx}")])
     
-    kb = InlineKeyboardMarkup(buttons)
+    markup = InlineKeyboardMarkup(buttons)
+    
     if query:
-        await query.edit_message_text(text, reply_markup=kb)
+        await query.edit_message_text(text, reply_markup=markup)
     else:
-        await update.message.reply_text(text, reply_markup=kb)
+        await update.message.reply_text(text, reply_markup=markup)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    uid = query.from_user.id
+    user_id = query.from_user.id
     
-    if uid not in context.user_data:
+    if user_id not in context.user_data:
         await start(update, context)
         return
     
     await query.answer()
-    sess = context.user_data[uid]
+    session = context.user_data[user_id]
     data = query.data
     
     if data == "start":
-        sess.screen = 1
-        await show_screen(update, context, query)
+        session.current_question = 0
+        await show_question(update, context, query)
         return
     
-    if data.startswith("a_"):
+    if data.startswith("ans_"):
         parts = data.split("_")
-        sn, fk, aidx = int(parts[1]), parts[2], int(parts[3])
-        screen = SCREENS[sn]
-        qd = screen['questions'][fk]
-        ans = qd['opts'][aidx]
+        q_idx = int(parts[1])
+        ans_idx = int(parts[2])
         
-        sess.inputs[fk] = ans
-        qtxt = qd['q'].replace("?", "").strip()
-        await update.callback_query.message.reply_text(f"✅ {qtxt}\n→ {ans}")
+        q = QUESTIONS[q_idx]
+        answer = q['options'][ans_idx]
         
+        session.all_answers[q_idx] = answer
+        
+        fun_msg = random.choice(FUN_RESPONSES)
+        await query.answer(fun_msg, show_alert=False)
+        
+        session.current_question += 1
         await asyncio.sleep(0.5)
-        await show_screen(update, context, query)
+        await show_question(update, context, query)
     
-    if data.startswith("c_"):
-        parts = data.split("_")
-        sn, fk = int(parts[1]), parts[2]
-        sess.waiting_custom = (sn, fk)
-        screen = SCREENS[sn]
-        qd = screen['questions'][fk]
-        qtxt = qd['q'].replace("?", "").strip()
-        await update.callback_query.message.reply_text(f"📝 Type your answer for:\n{qtxt}")
-    
-    if data.startswith("nx_"):
-        sn = int(data.split("_")[1])
-        screen = SCREENS[sn]
+    if data.startswith("skip_"):
+        q_idx = int(data.split("_")[1])
+        session.all_answers[q_idx] = "Skipped"
         
-        for fk, qd in screen['questions'].items():
-            if qd['req'] and fk not in sess.inputs:
-                await query.answer("⚠️ Answer all!", show_alert=True)
-                return
+        await query.answer("⏭️ Skipped!", show_alert=False)
         
-        sess.screen += 1
-        sess.inputs = {}
-        await show_screen(update, context, query)
+        session.current_question += 1
+        await asyncio.sleep(0.5)
+        await show_question(update, context, query)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    uid = update.effective_user.id
-    if uid not in context.user_data:
+    user_id = update.effective_user.id
+    
+    if user_id not in context.user_data:
         await start(update, context)
         return
     
-    sess = context.user_data[uid]
-    txt = update.message.text.strip()
+    session = context.user_data[user_id]
+    q_idx = session.current_question
     
-    if sess.waiting_custom:
-        sn, fk = sess.waiting_custom
-        screen = SCREENS[sn]
-        qd = screen['questions'][fk]
-        
-        sess.inputs[fk] = txt
-        sess.waiting_custom = None
-        
-        qtxt = qd['q'].replace("?", "").strip()
-        await update.message.reply_text(f"✅ {qtxt}\n→ {txt}")
-        
-        await asyncio.sleep(1)
-        await show_screen(update, context)
+    if q_idx >= len(QUESTIONS):
         return
     
-    sn = sess.screen
-    screen = SCREENS[sn]
+    q = QUESTIONS[q_idx]
+    text = update.message.text.strip()
     
-    text_fields = [k for k, v in screen['questions'].items() if v['type'] == 'text' and k not in sess.inputs]
-    if not text_fields:
-        return
+    session.all_answers[q_idx] = text
     
-    fk = text_fields[0]
-    qd = screen['questions'][fk]
+    if q_idx == 0:  # Name
+        session.name = text
+        await update.message.reply_text(f"✅ Got your name: {text}! 👋")
+    else:
+        await update.message.reply_text(f"✅ Saved! 👍")
     
-    sess.inputs[fk] = txt
-    sess.name = txt if fk == 'name' else sess.name
-    
-    qtxt = qd['q'].replace("?", "").strip()
-    await update.message.reply_text(f"✅ {qtxt}\n→ {txt}")
+    session.current_question += 1
     
     await asyncio.sleep(1)
-    await show_screen(update, context)
+    await show_question(update, context)
 
 def main():
-    print("🚀 BOT STARTING...\n")
+    print("\n" + "=" * 70)
+    print("✅ ONE QUESTION PER SCREEN BOT")
+    print("=" * 70)
+    print("✅ ONE question per screen ONLY")
+    print("✅ CRYSTAL CLEAR")
+    print("✅ ZERO confusion")
+    print("✅ 22 simple questions")
+    print("=" * 70)
+    
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
     
-    print("✅ BOT RUNNING!\n")
+    print("🚀 BOT RUNNING!\n")
     app.run_polling()
 
 if __name__ == "__main__":
