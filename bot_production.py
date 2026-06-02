@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - BOXED QUESTIONS
-✅ EACH question in its OWN BOX
-✅ Clear visual separation
-✅ NO confusion
-✅ Grouped but separated
+COACH AVNI BOT - FINAL VERSION
+✅ Multiple questions per screen
+✅ Buttons DIRECTLY below each question
+✅ Clear grouping
+✅ Chat history
 """
 
 import os
@@ -22,147 +22,135 @@ if not TOKEN:
     print("ERROR: TELEGRAM_TOKEN not found in .env")
     sys.exit(1)
 
-FUN_RESPONSES = [
-    "🔥 Great!",
-    "💯 Love it!",
-    "⚡ Perfect!",
-    "🎯 Got it!",
-    "✨ Amazing!",
-]
-
-# ============================================================================
-# SCREENS - 2-3 QUESTIONS PER SCREEN, EACH IN OWN BOX
-# ============================================================================
+FUN_RESPONSES = ["🔥 Great!", "💯 Love it!", "⚡ Perfect!", "🎯 Got it!", "✨ Amazing!"]
 
 SCREENS = {
     1: {
-        "title": "👤 About You - Basic Info",
-        "section": "👤 About You",
+        "title": "👤 Basic Info",
         "questions": {
-            "name": {"text": "👤 Full name?", "type": "text", "required": True},
-            "age": {"text": "🎂 Age?", "type": "text", "required": True},
-            "height": {"text": "📏 Height (cm)?", "type": "text", "required": True},
-            "weight": {"text": "⚖️ Weight (kg)?", "type": "text", "required": True},
+            "name": {"q": "👤 Full name?", "type": "text", "req": True},
+            "age": {"q": "🎂 Age?", "type": "text", "req": True},
+            "height": {"q": "📏 Height (cm)?", "type": "text", "req": True},
+            "weight": {"q": "⚖️ Weight (kg)?", "type": "text", "req": True},
         }
     },
     
     2: {
-        "title": "👤 Work & Details",
-        "section": "👤 About You",
+        "title": "💼 Work & Details",
         "questions": {
             "profession": {
-                "text": "💼 What's your profession?", 
-                "type": "buttons", 
-                "required": True,
-                "options": ["💻 Software Eng", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]
+                "q": "💼 Profession?",
+                "type": "buttons",
+                "req": True,
+                "opts": ["💻 Software Eng", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]
             },
             "sex": {
-                "text": "⚡ Biological sex?", 
-                "type": "buttons", 
-                "required": True,
-                "options": ["👨 Male", "👩 Female", "🌈 Other"]
+                "q": "⚡ Biological sex?",
+                "type": "buttons",
+                "req": True,
+                "opts": ["👨 Male", "👩 Female", "🌈 Other"]
             },
         }
     },
     
     3: {
-        "title": "🍽️ Diet",
-        "section": "🍽️ Diet & Food",
+        "title": "🍽️ Diet & Food",
         "questions": {
             "dietary_pref": {
-                "text": "🍽️ Dietary preference?", 
-                "type": "buttons", 
-                "required": True,
-                "options": ["🍗 Non-Veg", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]
+                "q": "🍽️ Dietary preference?",
+                "type": "buttons",
+                "req": True,
+                "opts": ["🍗 Non-Veg", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]
+            },
+            "disliked_foods": {
+                "q": "🚫 Dislike any foods?",
+                "type": "buttons_multi",
+                "req": False,
+                "opts": ["🥒 Bitter gourd", "🍆 Eggplant", "🍄 Mushroom", "🧅 Onion", "🧄 Garlic"]
             },
         }
     },
     
     4: {
         "title": "☀️ Your Day",
-        "section": "☀️ Your Day",
         "questions": {
             "wake_time": {
-                "text": "🌅 Wake time?",
+                "q": "🌅 Wake time?",
                 "type": "buttons",
-                "required": True,
-                "options": ["⏰ 5:00", "⏰ 6:00", "⏰ 7:00", "⏰ 8:00", "🛏️ 8:30+"]
+                "req": True,
+                "opts": ["⏰ 5:00", "⏰ 6:00", "⏰ 7:00", "⏰ 8:00", "🛏️ 8:30+"]
             },
             "sleep_time": {
-                "text": "😴 Sleep time?",
+                "q": "😴 Sleep time?",
                 "type": "buttons",
-                "required": True,
-                "options": ["🌙 9:00", "🌙 10:00", "🌙 11:00", "🌙 12:00", "🌙 12:30+"]
+                "req": True,
+                "opts": ["🌙 9:00", "🌙 10:00", "🌙 11:00", "🌙 12:00", "🌙 12:30+"]
             },
         }
     },
     
     5: {
         "title": "🏥 Health",
-        "section": "🏥 Health",
         "questions": {
             "allergies": {
-                "text": "🤧 Any allergies?",
+                "q": "🤧 Allergies?",
                 "type": "buttons",
-                "required": True,
-                "options": ["✅ No", "🍔 Food", "🌫️ Environmental", "🔀 Both"]
+                "req": True,
+                "opts": ["✅ No", "🍔 Food", "🌫️ Environmental", "🔀 Both"]
             },
             "injuries": {
-                "text": "🤕 Any injuries?",
+                "q": "🤕 Injuries?",
                 "type": "buttons",
-                "required": True,
-                "options": ["✅ No", "Old (healed)", "Current"]
+                "req": True,
+                "opts": ["✅ No", "Old (healed)", "Current"]
             },
         }
     },
     
     6: {
         "title": "💪 Fitness",
-        "section": "💪 Fitness",
         "questions": {
             "active_days": {
-                "text": "💪 Active days/week?",
+                "q": "💪 Active days/week?",
                 "type": "buttons",
-                "required": True,
-                "options": ["😴 0", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7"]
+                "req": True,
+                "opts": ["😴 0", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7"]
             },
             "strength_exp": {
-                "text": "🏋️ Strength training?",
+                "q": "🏋️ Strength training?",
                 "type": "buttons",
-                "required": True,
-                "options": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"]
+                "req": True,
+                "opts": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"]
             },
         }
     },
     
     7: {
         "title": "🎯 Goals",
-        "section": "🎯 Goals",
         "questions": {
             "main_goal": {
-                "text": "🎯 Main goal?",
+                "q": "🎯 Main goal?",
                 "type": "buttons",
-                "required": True,
-                "options": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "❤️ Better health"]
+                "req": True,
+                "opts": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "❤️ Better health"]
             },
             "timeline": {
-                "text": "⏱️ Timeline?",
+                "q": "⏱️ Timeline?",
                 "type": "buttons",
-                "required": True,
-                "options": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year"]
+                "req": True,
+                "opts": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year"]
             },
         }
     },
     
     8: {
         "title": "🤝 Ready?",
-        "section": "🤝 Commitment",
         "questions": {
             "ready": {
-                "text": "🚀 Ready to START?",
+                "q": "🚀 Ready to START?",
                 "type": "buttons",
-                "required": True,
-                "options": ["🔥 YES! 100%!", "✅ Yes", "🤔 Maybe", "⏳ Not yet"]
+                "req": True,
+                "opts": ["🔥 YES! 100%!", "✅ Yes", "🤔 Maybe", "⏳ Not yet"]
             },
         }
     },
@@ -170,67 +158,30 @@ SCREENS = {
 
 class UserSession:
     def __init__(self):
-        self.current_screen = 1
-        self.current_inputs = {}
-        self.all_answers = {}
+        self.screen = 1
+        self.inputs = {}
+        self.answers = {}
         self.name = None
-        self.pending_text_fields = []
+        self.pending_text = []
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
     
-    text = """🤖 Welcome to MEALZY COACH! 🎉
+    text = """🤖 MEALZY COACH 🎉
 
 💪 Transform Your Body
-🧠 Transform Your Mind
 ✨ Transform Your Life
 
 📋 Quick Assessment
 ✅ 8 Screens
-✅ Each question CLEARLY BOXED
-✅ NO confusion
-✅ 7 minutes total
+✅ Questions with buttons below
+✅ 7 minutes
 
 Let's go! 🚀"""
     
-    keyboard = [[InlineKeyboardButton("🎯 START NOW!", callback_data="start")]]
+    keyboard = [[InlineKeyboardButton("🎯 START", callback_data="start")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
-
-def build_screen_message(screen_num, session, screens=SCREENS):
-    """Build formatted message with boxed questions"""
-    if screen_num > len(screens):
-        return None
-    
-    screen = screens[screen_num]
-    progress = int((screen_num / len(screens)) * 100)
-    bar = "█" * (progress // 5) + "░" * (20 - (progress // 5))
-    
-    # Header
-    text = f"{bar} {progress}%\n\n"
-    text += f"{screen['title']}\n"
-    text += "━" * 40 + "\n\n"
-    
-    # Each question in its own box
-    for field_key, q_data in screen['questions'].items():
-        # Skip answered text fields
-        if q_data['type'] == 'text' and field_key in session.current_inputs:
-            continue
-        
-        # Box for this question
-        text += f"{q_data['text']}\n"
-        
-        if q_data['type'] in ['buttons', 'buttons_multi']:
-            text += "• " + " • ".join([f"[{opt.split()[-1]}]" for opt in q_data['options'][:3]])
-            if len(q_data['options']) > 3:
-                text += f"\n  + {len(q_data['options']) - 3} more options"
-        elif q_data['type'] == 'text':
-            text += "• *Type in chat*"
-        
-        # Divider between questions
-        text += "\n" + "─" * 40 + "\n\n"
-    
-    return text.strip()
 
 async def show_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     user_id = update.effective_user.id
@@ -240,172 +191,162 @@ async def show_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=
         return
     
     session = context.user_data[user_id]
-    screen_num = session.current_screen
+    sn = session.screen
     
-    if screen_num > 8:
-        final_msg = f"""🎉 ASSESSMENT COMPLETE! 🏆
+    if sn > 8:
+        msg = f"""🎉 COMPLETE! 🏆
 
-👋 {session.name or 'Champion'}! You did it! 💪
+👋 {session.name or 'Champion'}!
 
-Your fitness profile is READY!
-Coaches creating your plan NOW!
+Your profile is READY!
+Coaches creating plan NOW!
 
 Thank you! 🙏
 Ready to TRANSFORM? 🚀"""
-        await update.message.reply_text(final_msg)
+        await update.message.reply_text(msg)
         return
     
-    screen = SCREENS[screen_num]
-    progress = int((screen_num / 8) * 100)
-    bar = "█" * (progress // 5) + "░" * (20 - (progress // 5))
+    screen = SCREENS[sn]
+    prog = int((sn / 8) * 100)
+    bar = "█" * (prog // 5) + "░" * (20 - (prog // 5))
     
-    # Get text fields that need answers
+    # Get text fields
     text_fields = [k for k, v in screen['questions'].items() if v['type'] == 'text']
-    unanswered_text = [k for k in text_fields if k not in session.current_inputs]
-    session.pending_text_fields = unanswered_text
+    unanswered_text = [k for k in text_fields if k not in session.inputs]
+    session.pending_text = unanswered_text
     
     # Build message
-    text = f"{bar} {progress}%\n\n{screen['title']}\n\n"
+    text = f"{bar} {prog}%\n\n{screen['title']}\n\n"
     
-    # Build buttons - SEPARATE BY QUESTION
     buttons = []
     
-    for field_key, q_data in screen['questions'].items():
-        # Skip answered text fields
-        if q_data['type'] == 'text' and field_key in session.current_inputs:
+    for fkey, qdata in screen['questions'].items():
+        # Skip answered text
+        if qdata['type'] == 'text' and fkey in session.inputs:
             continue
         
-        # Question heading
-        text += f"{q_data['text']}\n"
+        # Question
+        text += f"{qdata['q']}\n"
         
-        # Buttons for this question only
-        if q_data['type'] in ['buttons', 'buttons_multi']:
-            options = q_data['options']
-            for i, opt in enumerate(options):
-                button = InlineKeyboardButton(opt, callback_data=f"ans_{screen_num}_{field_key}_{i}")
-                
-                # 2 buttons per row
+        # Buttons directly below question
+        if qdata['type'] in ['buttons', 'buttons_multi']:
+            for i, opt in enumerate(qdata['opts']):
+                btn = InlineKeyboardButton(opt, callback_data=f"a_{sn}_{fkey}_{i}")
                 if not buttons or len(buttons[-1]) >= 2:
-                    buttons.append([button])
+                    buttons.append([btn])
                 else:
-                    buttons[-1].append(button)
+                    buttons[-1].append(btn)
             
-            # Space between questions
-            text += "\n"
-        elif q_data['type'] == 'text':
-            text += "*(Type your answer in chat)*\n\n"
+            text += "\n"  # Space between questions
+        elif qdata['type'] == 'text':
+            text += "*(Type in chat)*\n\n"
     
-    # Next button
-    buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"next_{screen_num}")])
+    buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"nx_{sn}")])
     
     markup = InlineKeyboardMarkup(buttons)
     
     if query:
-        try:
-            await query.edit_message_text(text, reply_markup=markup)
-        except:
-            pass
+        await query.edit_message_text(text, reply_markup=markup)
     else:
         await update.message.reply_text(text, reply_markup=markup)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    user_id = query.from_user.id
+    uid = query.from_user.id
     
-    if user_id not in context.user_data:
+    if uid not in context.user_data:
         await start(update, context)
         return
     
     await query.answer()
-    session = context.user_data[user_id]
+    sess = context.user_data[uid]
     data = query.data
     
     if data == "start":
-        session.current_screen = 1
+        sess.screen = 1
         await show_screen(update, context, query)
         return
     
-    if data.startswith("ans_"):
+    if data.startswith("a_"):
         parts = data.split("_")
-        screen_num = int(parts[1])
-        field_key = parts[2]
-        ans_idx = int(parts[3])
+        sn = int(parts[1])
+        fkey = parts[2]
+        aidx = int(parts[3])
         
-        screen = SCREENS[screen_num]
-        q_data = screen['questions'][field_key]
-        answer = q_data['options'][ans_idx]
+        screen = SCREENS[sn]
+        qdata = screen['questions'][fkey]
+        ans = qdata['opts'][aidx]
         
-        session.current_inputs[field_key] = answer
-        session.all_answers[field_key] = answer
+        sess.inputs[fkey] = ans
+        sess.answers[fkey] = ans
         
-        fun_msg = random.choice(FUN_RESPONSES)
-        await query.answer(fun_msg, show_alert=False)
+        fun = random.choice(FUN_RESPONSES)
+        await query.answer(fun, show_alert=False)
         
-        # Show answer in chat
-        q_text = q_data['text'].replace("?", "").strip()
-        await update.callback_query.message.reply_text(f"✅ {q_text}\n→ {answer}")
+        # Show in chat
+        qtxt = qdata['q'].replace("?", "").strip()
+        await update.callback_query.message.reply_text(f"✅ {qtxt}\n→ {ans}")
         
         await asyncio.sleep(0.5)
         await show_screen(update, context, query)
         
-    if data.startswith("next_"):
-        screen_num = int(data.split("_")[1])
-        screen = SCREENS[screen_num]
+    if data.startswith("nx_"):
+        sn = int(data.split("_")[1])
+        screen = SCREENS[sn]
         
-        # Check all required answered
-        for field_key, q_data in screen['questions'].items():
-            if q_data['required'] and field_key not in session.current_inputs:
-                await query.answer("⚠️ Answer all questions!", show_alert=True)
+        # Check required
+        for fkey, qdata in screen['questions'].items():
+            if qdata['req'] and fkey not in sess.inputs:
+                await query.answer("⚠️ Answer all!", show_alert=True)
                 return
         
-        session.current_screen += 1
-        session.current_inputs = {}
-        session.pending_text_fields = []
+        sess.screen += 1
+        sess.inputs = {}
+        sess.pending_text = []
         await show_screen(update, context, query)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    uid = update.effective_user.id
     
-    if user_id not in context.user_data:
+    if uid not in context.user_data:
         await start(update, context)
         return
     
-    session = context.user_data[user_id]
-    screen_num = session.current_screen
-    screen = SCREENS[screen_num]
-    text = update.message.text.strip()
+    sess = context.user_data[uid]
+    sn = sess.screen
+    screen = SCREENS[sn]
+    txt = update.message.text.strip()
     
-    if not session.pending_text_fields:
+    if not sess.pending_text:
         return
     
-    field_key = session.pending_text_fields[0]
-    q_data = screen['questions'][field_key]
+    fkey = sess.pending_text[0]
+    qdata = screen['questions'][fkey]
     
-    session.current_inputs[field_key] = text
-    session.all_answers[field_key] = text
+    sess.inputs[fkey] = txt
+    sess.answers[fkey] = txt
     
-    # Show in chat
-    q_text = q_data['text'].replace("?", "").strip()
-    if field_key == 'name':
-        session.name = text
+    qtxt = qdata['q'].replace("?", "").strip()
+    if fkey == 'name':
+        sess.name = txt
     
-    await update.message.reply_text(f"✅ {q_text}\n→ {text}")
-    session.pending_text_fields.pop(0)
+    await update.message.reply_text(f"✅ {qtxt}\n→ {txt}")
+    sess.pending_text.pop(0)
     
     await asyncio.sleep(1)
     await show_screen(update, context)
 
 def main():
     print("\n" + "=" * 70)
-    print("✅ BOXED QUESTIONS BOT")
+    print("✅ FINAL BOT - OPTION 2")
     print("=" * 70)
-    print("✅ EACH question in its OWN BOX")
-    print("✅ Clear visual separation")
-    print("✅ NO confusion")
+    print("✅ Multiple questions per screen")
+    print("✅ Buttons DIRECTLY below each question")
+    print("✅ Clear grouping")
+    print("✅ Chat history")
     print("=" * 70)
     
     app = Application.builder().token(TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
