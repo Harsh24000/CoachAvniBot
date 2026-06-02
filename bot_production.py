@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - MAX STABILITY HIERARCHY (WATER & CUSTOM FIXES)
-✅ Fixed: Shortened callback payload hashes to completely eliminate Telegram's 64-byte callback limits.
-✅ Includes ALL 61+ original questions, specific additions, and full-body photo upload logic.
-✅ Fully functional "✍️ Custom / Other" fallback inputs on every button grid matrix.
+COACH AVNI BOT - ABSOLUTE FINAL PRODUCTION VERSION
+✅ Fixed: Completely resolved all ID_MAP short-code key collisions (ws, we, etc.).
+✅ Fixed: Multi-select array data isolation preserved across screen text injections.
+✅ Features: 61+ original metrics, full-body custom inputs, and optional photo uploads.
 """
 
 import os
@@ -20,83 +20,86 @@ if not TOKEN:
     sys.exit(1)
 
 # ============================================================================
-# COMPACT DICTIONARY MAPS (Reduces byte size to stay safely within 64 bytes)
+# 100% UNIQUE SHORT-CODE MAPPING MATRIX (Zero Collisions Guarantee)
 # ============================================================================
 ID_MAP = {
-    "q1": "n",     # Name
-    "q2": "ag",    # Age
-    "q3": "ht",    # Height
-    "q4": "wt",    # Weight
-    "q5": "pf",    # Profession
-    "q6": "sx",    # Sex
-    "q7": "dp",    # Diet Preference
-    "q8": "fh",    # Foods Hated
-    "q9": "cl",    # Cuisines Loved
-    "q10": "wu",   # Wake up
-    "q11": "bt",   # Breakfast time
-    "q12": "ws",   # Work start
-    "q13": "we",   # Work end
-    "q14": "lt",   # Lunch time
-    "q15": "dt",   # Dinner time
-    "q16": "st",   # Sleep time
-    "q17": "sn",   # Snacking
-    "q_water": "w", # Water Consumption
-    "q18": "eo",   # Eating Out
-    "q19": "ww",   # Weekend Wakeup
-    "q20": "wb",   # Weekend Bedtime
-    "q21": "cc",   # Clinical Conditions
-    "q_specific_health": "sh", # Specific Symptoms
-    "q22": "al",   # Allergies
-    "q23": "dp",   # Daily Prescriptions
-    "q24": "dc",   # Digestive Comfort
-    "q25": "si",   # Structural Injuries
-    "q26": "da",   # Discomfort Areas
-    "q27": "su",   # Supplement Usage
-    "q_supp_d3": "d3",  # Vitamin D3
-    "q_supp_b12": "b12", # Vitamin B12
-    "q_supp_fishoil": "fo", # Fish Oil
-    "q_supp_multi": "mv",  # Multivitamin
-    "q28": "ps",   # Protein Supplement
-    "q29": "sm",   # Smoking
-    "q30": "af",   # Alcohol Frequency
-    "q31": "rm",   # Restaurant Meals
-    "q32": "sl",   # Stress Levels
-    "q33": "sd",   # Sleep Deepness
-    "q34": "rt",   # Restless Tossing
-    "q35": "mf",   # Morning Fatigue
-    "q36": "mp",   # Meditation Practices
-    "q37": "sf",   # Stress Factor
-    "q38": "ad",   # Active Days
-    "q_steps": "sp", # Daily Steps
-    "q39": "wl",   # Weight Lifting Knowledge
-    "q40": "ws",   # Weight Sessions
-    "q41": "cf",   # Cardio Frequency
-    "q42": "ya",   # Yoga Allocation
-    "q43": "ts",   # Team Sports
-    "q44": "ds",   # Desk Sitting
-    "q45": "tl",   # Training Location
-    "q46": "cf",   # Cooking Frequency
-    "q47": "bf",   # Budget Flexibility
-    "q48": "mp",   # Meal Preps
-    "q49": "po",   # Physical Objective
-    "q50": "ws",   # Weight Shift
-    "q51": "ah",   # Achievement Horizon
-    "q52": "pa",   # Past Attempts
-    "q53": "rb",   # Root Barrier
-    "q54": "ec",   # Experience Coaches
-    "q55": "om",   # Optimize Meals
-    "q56": "we",   # Workout Execution
-    "q57": "aw",   # Allocation Windows
-    "q58": "ce",   # Curb External Treats
-    "q59": "aa",   # Adjust Alcohol
-    "q60": "ml",   # Maintain Logging
-    "q61": "mr",   # Mentally Ready
-    "q_photos": "ph" # Photos Module
+    "q1": "n",       # Name
+    "q2": "ag",      # Age
+    "q3": "ht",      # Height
+    "q4": "wt",      # Weight
+    "q5": "pf",      # Profession
+    "q6": "sx",      # Sex
+    "q7": "dp",      # Diet Preference
+    "q8": "fh",      # Foods Hated
+    "q9": "cl",      # Cuisines Loved
+    "q10": "wu",     # Wake up time
+    "q11": "bt",     # Breakfast time
+    "q12": "wst",    # Work start (Changed from 'ws' -> 'wst')
+    "q13": "wen",    # Work end (Changed from 'we' -> 'wen')
+    "q14": "lt",     # Lunch time
+    "q15": "dt",     # Dinner time
+    "q16": "st",     # Sleep time
+    "q17": "sn",     # Snacking habits
+    "q_water": "w",   # Water consumption level
+    "q18": "eo",     # Eating Out frequency
+    "q19": "ww",     # Weekend Wakeup routine
+    "q20": "wb",     # Weekend Bedtime routine
+    "q21": "cc",     # Clinical Conditions
+    "q_specific_health": "sh", # Targeted Symptoms
+    "q22": "al",     # Allergies
+    "q23": "dpr",    # Daily Prescriptions (Changed to avoid potential matches)
+    "q24": "dc",     # Digestive Comfort
+    "q25": "si",     # Structural Injuries
+    "q26": "da",     # Discomfort Areas
+    "q27": "su",     # Supplement Usage baseline
+    "q_supp_d3": "d3",  # Vitamin D3 baseline
+    "q_supp_b12": "b12", # Vitamin B12 baseline
+    "q_supp_fishoil": "fo", # Fish Oil baseline
+    "q_supp_multi": "mv",  # Multivitamin baseline
+    "q28": "ps",     # Protein Supplement baseline
+    "q29": "sm",     # Smoking habit status
+    "q30": "af",     # Alcohol frequency
+    "q31": "rm",     # Restaurant Meals frequency
+    "q32": "sl",     # Stress Levels evaluation
+    "q33": "sd",     # Sleep Deepness metric
+    "q34": "rt",     # Restless Tossing metric
+    "q35": "mf",     # Morning Fatigue metric
+    "q36": "mp",     # Meditation Practices
+    "q37": "sf",     # Stress Factor baseline
+    "q38": "ad",     # Active Days baseline
+    "q_steps": "sp", # Daily Steps metric
+    "q39": "wl",     # Weight Lifting Knowledge
+    "q40": "wse",    # Weight Sessions (Changed from 'ws' -> 'wse')
+    "q41": "cf",     # Cardio Frequency
+    "q42": "ya",     # Yoga Allocation
+    "q43": "ts",     # Team Sports assignment
+    "q44": "ds",     # Desk Sitting parameters
+    "q45": "tl",     # Training Location
+    "q46": "ckf",    # Cooking Frequency (Changed to avoid clashing)
+    "q47": "bf",     # Budget Flexibility parameters
+    "q48": "mpr",    # Meal Preps baseline
+    "q49": "po",     # Physical Objective targets
+    "q50": "wsh",    # Weight Shift targeted (Changed from 'ws' -> 'wsh')
+    "q51": "ah",     # Achievement Horizon
+    "q52": "pa",     # Past Attempts evaluation
+    "q53": "rb",     # Root Barrier blockages
+    "q54": "ec",     # Experience with Coaches
+    "q55": "om",     # Optimize Meals strategy
+    "q56": "wex",    # Workout Execution readiness (Changed from 'we' -> 'wex')
+    "q57": "aw",     # Allocation Windows metric
+    "q58": "ce",     # Curb External Treats status
+    "q59": "aa",     # Adjust Alcohol parameter
+    "q60": "ml",     # Maintain Logging commitment
+    "q61": "mr",     # Mentally Ready benchmark
+    "q_photos": "ph" # Photos Module tracking
 }
 
-# Reverse mapping for dynamic response evaluations
+# Reverse mapping loop used during bot query translation
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
+# ============================================================================
+# COMPREHENSIVE ONBOARDING CORE QUESTIONNAIRE DATA OBJECT
+# ============================================================================
 SCREENS = [
     # --- SCREEN 1 - 4: Core Metrics ---
     {"id": 1, "section": "👤 About You", "fields": [{"id": "q1", "text": "👤 What's your full name?", "type": "text", "required": True}]},
@@ -132,7 +135,7 @@ SCREENS = [
         {"id": "q16", "text": "😴 When do you go to sleep?", "type": "buttons", "required": True, "options": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🌙 1:00 AM+"]}
     ]},
     
-    # --- SCREEN 9: Hydration Parameters Fixed ---
+    # --- SCREEN 9: Hydration Parameters ---
     {"id": 9, "section": "🥤 Hydration & Snacking", "fields": [
         {"id": "q17", "text": "🍿 Do you have mid-day snacks?", "type": "buttons", "required": True, "options": ["✅ Yes, 1-2 times", "✅ Yes, 3+ times", "⏱️ Rarely", "🚫 No"]},
         {"id": "q_water", "text": "💧 Daily water consumption level?", "type": "buttons", "required": True, "options": ["🥛 Less than 1 Litre", "💧 1 - 2 Litres", "🚰 2 - 3 Litres", "🌊 More than 3 Litres"]}
@@ -248,9 +251,9 @@ SCREENS = [
         {"id": "q61", "text": "🚀 Are you mentally ready to begin?", "type": "buttons", "required": True, "options": ["🔥 READY NOW. LET'S GO!", "⏳ Finalizing mental readiness"]}
     ]},
 
-    # --- SCREEN 25: PHOTO VECTOR ASSESSMENT ---
+    # --- SCREEN 25: PHOTO ASSIGNMENTS MODULE ---
     {"id": 25, "section": "📸 Full-Body Assessment Photo", "fields": [
-        {"id": "q_photos", "text": "📸 [Optional] Please upload a front/side full-body assessment photo to assist with baseline posture & fat composition analysis. (Or click below to bypass)", "type": "media", "required": False}
+        {"id": "q_photos", "text": "📸 [Optional] Please upload a front/side full-body assessment photo to assist with baseline posture & fat composition evaluations. (Or click below to bypass)", "type": "media", "required": False}
     ]}
 ]
 
@@ -271,10 +274,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "   <b>║                                        ║</b>\n"
         "   <b>║     💪 Complete Health Blueprint       ║</b>\n"
         "   <b>║     🧠 Performance Strategy            ║</b>\n"
-        "   <b>║     ✨ Payload Limits Patched          ║</b>\n"
+        "   <b>║     🚀 Collision Bug Fixed!            ║</b>\n"
         "   <b>╚════════════════════════════════════════╝</b>\n\n"
-        "📋 <b>All Bugs Solved. High Elastic Memory Engine Active.</b>\n"
-        "📝 Click <b>'✍️ Custom / Other'</b> to customize answers.\n\n"
+        "📋 <b>All background maps cleared and rebuilt.</b>\n"
+        "📝 Use <b>'✍️ Custom / Other'</b> to type answers anywhere.\n\n"
         "Let's initialize your profile! 🚀"
     )
     keyboard = [[InlineKeyboardButton("🎯 INITIALIZE ASSESSMENT", callback_data="start")]]
@@ -293,8 +296,8 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
             f"🎉 <b>╔════════════════════════════════════════╗</b>\n"
             f"   <b>║     DIAGNOSTICS PROFILE ACQUIRED       ║</b>\n"
             f"   <b>╚════════════════════════════════════════╝</b>\n\n"
-            f"👋 <b>{session.name or 'Champion'}!</b> Your onboarding registration is verified! 💪\n\n"
-            f"All structural options and parameters have been logged successfully!"
+            f"👋 <b>{session.name or 'Champion'}!</b> Your onboarding profile registration is complete! 💪\n\n"
+            f"All metrics, including custom structural answers, have been logged successfully!"
         )
         if query:
             await query.edit_message_text(final_msg, parse_mode="HTML")
@@ -327,7 +330,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                 text_lines.append(f"❓ <b>{field['text']}</b>\n👉 Active: <i>{ans}</i> ✅")
         else:
             if field['type'] == 'text':
-                text_lines.append(f"❓ <b>{field['text']}</b>\n🛸 [Type answer directly in chat box below]")
+                text_lines.append(f"❓ <b>{field['text']}</b>\n🛸 [Type answer directly in your message box below]")
             elif field['type'] == 'media':
                 text_lines.append(f"❓ <b>{field['text']}</b>\n📸 [Upload file/photo or press skip below]")
             else:
@@ -343,7 +346,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
             keyboard.append([InlineKeyboardButton(f"── {clean_q} ──", callback_data="ignore")])
             
             row = []
-            short_field_id = ID_MAP[field['id']] # Enforce short-code encoding transformations
+            short_field_id = ID_MAP[field['id']]
             
             for idx, opt in enumerate(field['options']):
                 display_opt = opt
@@ -351,7 +354,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                 
                 if field['type'] == 'buttons' and ans == opt:
                     display_opt = f"⭐ {opt}"
-                elif field['type'] == 'buttons_multi' and ans and opt in ans:
+                elif field['type'] == 'buttons_multi' and ans and isinstance(ans, list) and opt in ans:
                     display_opt = f"⭐ {opt}"
                     
                 cb_data = f"s_{short_field_id}_{idx}"
@@ -363,7 +366,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
             if row:
                 keyboard.append(row)
             
-            # Appends custom option payload block matching the shortened hash map pattern
             custom_label = "✍️ Custom / Other"
             ans = session.answers.get(field['id'])
             if ans and not isinstance(ans, list) and ans not in field['options']:
@@ -411,7 +413,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     if data == "locked":
-        await query.answer("⚠️ Complete options or provide custom answers to continue!", show_alert=True)
+        await query.answer("⚠️ Complete options or provide custom answers to unblock this section!", show_alert=True)
         return
         
     if data == "next_screen":
@@ -431,7 +433,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         short_id = data.split("_")[1]
         field_id = REV_MAP[short_id]
         session.awaiting_custom_field_id = field_id
-        await query.answer("⌨️ Type your custom response directly in chat box!", show_alert=True)
+        await query.answer("⌨️ Type your custom response directly into chat box below!", show_alert=True)
         await render_screen(update, context, query)
         return
         
@@ -455,7 +457,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             session.answers[field_id] = selected_opt
         elif field['type'] == 'buttons_multi':
             current_ans = session.answers.get(field_id, [])
-            if isinstance(current_ans, str):
+            if not isinstance(current_ans, list):
                 current_ans = []
             if selected_opt in current_ans:
                 current_ans.remove(selected_opt)
@@ -543,7 +545,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     print("\n" + "=" * 80)
-    print("🚀 COACH AVNI BOT - WATER LOGIC & CALLBACK PAYLOAD BUG SOLVED")
+    print("🚀 COACH AVNI BOT - ALL STRUCTURAL COLLISION ERRORS RESOLVED")
     print("=" * 80)
     
     app = Application.builder().token(TOKEN).build()
