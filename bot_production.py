@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - THE PURE ONBOARDING EDITION (FEATURES 2, 3, 4 LOADED)
-Features Added:
-- Feature 2: Live Dynamic Summaries & Metabolic Risk Indicators during selection.
-- Feature 3: Smart PDF Generation Engine via ReportLab (Deploys personalized welcome protocol instantly).
-- Feature 4: Calendly Strategy Call CTA integration upon submission.
+COACH AVNI BOT - THE PURE ONBOARDING ENGINE
+Features Included:
+- Complete 61-Question Assessments Across 26 Interactive Layout Screens
+- Dynamic Live Health Status Metrics & Metabolic Risk Summaries (Feature 2)
+- Fully Automated Welcome PDF Generator via ReportLab (Feature 3)
+- Instant Calendly Strategy Kickoff Call Booking Link Integration (Feature 4)
+- 2-Way Navigation Hierarchy (⬅️ BACK / CONTINUE ➡️)
+- Review & Submit Section Modifier Dashboard Modifiers
+- 64-Byte Compressed Hex Payload Protection Engine (Bypasses Telegram's String Break Limits)
 """
 
 import os
@@ -17,7 +21,7 @@ from telegram.ext import (
     filters, ContextTypes
 )
 
-# PDF Generation Libraries
+# PDF Layout Libraries
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -31,7 +35,7 @@ if not TOKEN:
     print("ERROR: TELEGRAM_TOKEN missing from environment configuration.")
     sys.exit(1)
 
-# Compressed key translation engine for strict Telegram payload constraints
+# Compressed key map engine to comfortably pass inside Telegram's strict 64-Byte payload cap
 ID_MAP = {
     "age": "a", "sex": "s", "name": "n", "height": "h", "weight": "w", "profession": "p",
     "diet_type": "dt", "dislikes": "dl", "cuisine": "cs", "tea_coffee": "tc",
@@ -51,7 +55,7 @@ ID_MAP = {
 }
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
-# Core 61-Question Layout Struct
+# Core 61-Question Sequential Framework Layout
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "name", "text": "What is your full name?", "type": "text", "required": True},
@@ -130,7 +134,7 @@ SCREENS = [
         {"id": "dark_circles", "text": "Do you have dark circles under your eyes?", "type": "buttons", "required": True, "options": ["👁️ Prominent/Dark", "👁️ Faint", "✅ None"]}
     ]},
     {"id": 17, "section": "🏃 Physical Biomechanics", "fields": [
-        {"id": "cramps", "text": "Do you experience regular muscle twitching/cramps?", "type": "buttons", "required": True, "options": ["⚡ Frequent cramps", "⚡ Rarely", "🚫 Never"]},
+        {"id": "crams", "text": "Do you experience regular muscle twitching/cramps?", "type": "buttons", "required": True, "options": ["⚡ Frequent cramps", "⚡ Rarely", "🚫 Never"]},
         {"id": "activity", "text": "Current physical activity routine parameters?", "type": "buttons", "required": True, "options": ["🏋️ Heavy lifting 3-5x", "🏃 Cardio/Running", "🧘 Yoga/Walking", "🛋️ Sedentary/None"]},
         {"id": "steps", "text": "Average daily step count logs?", "type": "buttons", "required": True, "options": ["🐌 Under 3,000 steps", "🚶 3,000 - 5,000 steps", "🏃 5,000 - 8,000 steps", "⚡ 10,000+ steps!"]}
     ]},
@@ -183,8 +187,6 @@ class UserSession:
         self.answers = {}
         self.name = None
         self.awaiting_custom_field_id = None
-        self.last_commentary = ""
-        self.nudge_job = None
         self.is_submitted = False
         
     def calculate_readiness_score(self):
@@ -203,7 +205,7 @@ class UserSession:
         return max(10, min(100, score))
 
 # =========================================================================
-# FEATURE 2: LIVE METABOLIC RISK SUMMARIES ENGINE
+# FEATURE 2: METABOLIC LIVE RISK COMPILER SUMMARY
 # =========================================================================
 def check_metabolic_indicators(session) -> str:
     indicators = []
@@ -212,18 +214,18 @@ def check_metabolic_indicators(session) -> str:
     es = str(session.answers.get("energy_slumps", ""))
     
     if "< 1" in wa:
-        indicators.append("🚨 <b>CRITICAL HYDRATION ALERT</b>: Cellular fluid deficit detected.")
-    if "8+" in sth:
-        indicators.append("🛋️ <b>BIOMECHANICAL RISK</b>: High desk-sitting hours found.")
+        indicators.append("🚨 <b>HYDRATION WARNING:</b> Cellular water deficit can slow down metabolism.")
+    if "8+ Hours" in sth:
+        indicators.append("🛋️ <b>POSTURAL HAZARD:</b> High sitting hours detected. Lower back tension risk.")
     if "3 PM crash" in es or "Constant" in es:
-        indicators.append("🥱 <b>METABOLIC SLUMP DETECTED</b>: Insulin/glucose management requires focus.")
+        indicators.append("🥱 <b>ENERGY CRASH TRACE:</b> Blood sugar variability is high. Needs macro stabilization.")
         
     if not indicators:
-        return "✨ <b>Current Biomarkers:</b> Stable performance baselines logged."
+        return "✨ <b>Current Biomarkers:</b> Stable metabolic parameters baseline logged."
     return "\n".join(indicators)
 
 # =========================================================================
-# FEATURE 3: REPORTLAB AUTOMATED ONBOARDING PDF GENERATOR
+# FEATURE 3: REPORTLAB BACKEND AUTOMATED BRIEF GENERATOR
 # =========================================================================
 def generate_onboarding_pdf(session) -> BytesIO:
     buffer = BytesIO()
@@ -232,23 +234,18 @@ def generate_onboarding_pdf(session) -> BytesIO:
     
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
-        'DocTitle', parent=styles['Heading1'], fontSize=24, leading=28, textColor=colors.HexColor("#1A365D"), spaceAfter=15
-    )
-    section_style = ParagraphStyle(
-        'SecTitle', parent=styles['Heading2'], fontSize=14, leading=18, textColor=colors.HexColor("#2B6CB0"), spaceBefore=12, spaceAfter=6
+        'DocTitle', parent=styles['Heading1'], fontSize=22, leading=26, textColor=colors.HexColor("#1A365D"), spaceAfter=12
     )
     body_style = ParagraphStyle(
         'BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748")
     )
     
-    # PDF Header Elements
-    story.append(Paragraph(f"COACH AVNI — OFFICIAL PROTOCOL BRIEF", title_style))
-    story.append(Paragraph(f"<b>Client Profile Name:</b> {session.name or 'Valued Client'}", body_style))
-    story.append(Paragraph(f"<b>Metabolic Evaluation Baseline Score:</b> {session.calculate_readiness_score()}/100", body_style))
+    story.append(Paragraph(f"COACH AVNI — STRATEGIC CLIENT ONBOARDING SUMMARY", title_style))
+    story.append(Paragraph(f"<b>Client Profile Target Name:</b> {session.name or 'Valued Client'}", body_style))
+    story.append(Paragraph(f"<b>Metabolic Readiness Baseline Score:</b> {session.calculate_readiness_score()}/100", body_style))
     story.append(Spacer(1, 15))
     
-    # Tabulating User Logs 
-    data = [["Assessment Metric", "Logged Status Point"]]
+    data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
     for screen in SCREENS:
         for field in screen['fields']:
             ans = session.answers.get(field['id'])
@@ -257,13 +254,13 @@ def generate_onboarding_pdf(session) -> BytesIO:
                 clean_lbl = field['text'].split('?')[0]
                 data.append([Paragraph(clean_lbl, body_style), Paragraph(val_str, body_style)])
                 
-    t = Table(data, colWidths=[240, 260])
+    t = Table(data, colWidths=[250, 250])
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
         ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+        ('TOPPADDING', (0,0), (-1,-1), 5),
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
         ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
     ]))
@@ -287,14 +284,14 @@ def check_screen_satisfied(session, screen_data) -> bool:
     return True
 
 # =========================================================================
-# SYSTEM CORE RENDER AND BUTTON HANDLERS
+# CORE USER INTERFACE RENDER CONTROLLER
 # =========================================================================
 async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None, chat_id=None):
     user_id = update.effective_user.id
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
-    # PATH A: FINAL SUBMISSION REVIEW MATRIX
+    # SYSTEM CONTROLLER A: REVIEW SUMMARY ENGINE DASHBOARD
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
         review_text = "📋 <b>Review & Confirm Your Onboarding Answers</b>\n\n"
         processed_sections = []
@@ -325,7 +322,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         else: await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # PATH B: SUCCESS PLATFORM W/ CALENDLY CALL TO ACTION (FEATURE 4)
+    # SYSTEM CONTROLLER B: COMPLETION & FEATURE 4 CALENDLY LINK ACTIVATION
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         success_text = (
@@ -343,15 +340,15 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         else: await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # PATH C: SCREEN STEPPING CONTROLLER (FEATURE 2 INJECTED HERE)
+    # SYSTEM CONTROLLER C: REGULAR INTERACTIVE ASSESSMENT LAYOUTS
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     
-    # Calculate live indicators on the fly
+    # Feature 2 Injection
     live_risk_bar = check_metabolic_indicators(session)
     
     text = (
-        f"⚙️ <b>Evaluation Setup: {progress}% Done</b>\n"
+        f"⚙️ <b>Evaluation Setup: {progress}% Complete</b>\n"
         f"Module: <i>{screen_data['section']}</i>\n"
         f"-----------------------------------------\n"
         f"{live_risk_bar}\n"
@@ -390,19 +387,26 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         elif field['type'] == 'media':
             keyboard.append([InlineKeyboardButton("⏭️ Skip Profile Image Uploads", callback_data="skip_media")])
             
+    # CRUCIAL DEDICATED TWO-WAY BACK NAVIGATION STRUCTURE ENGINE
     nav_row = []
     if session.current_screen_idx > 0:
         nav_row.append(InlineKeyboardButton("⬅️ BACK", callback_data="back_screen"))
     if has_multi or is_multi_question:
-        if check_screen_satisfied(session, screen_data): nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
-        else: nav_row.append(InlineKeyboardButton("🔒 Finish Selection Profile", callback_data="locked"))
-    if nav_row: keyboard.append(nav_row)
+        if check_screen_satisfied(session, screen_data): 
+            nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
+        else: 
+            nav_row.append(InlineKeyboardButton("🔒 Finish Selection Profile", callback_data="locked"))
+    if nav_row: 
+        keyboard.append(nav_row)
 
     try:
         if query: await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         else: await context.bot.send_message(chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
     except Exception: pass
 
+# =========================================================================
+# TELEGRAM FRAMEWORK STREAM LOGIC ROUTERS
+# =========================================================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
@@ -414,7 +418,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     session = context.user_data.get(user_id)
-    if not session: return await query.answer("System update. Tap /start.", show_alert=True)
+    if not session: return await query.answer("System reset. Tap /start.", show_alert=True)
     
     data = query.data
     if data in ["ignore", "locked"]: return await query.answer()
@@ -425,6 +429,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await render_screen(update, context, query)
         return
 
+    # RETROGRADE NAVIGATION LOGIC ROUTING LAYER (THE BACK BUTTON RE-RENDER COMMANDER)
     if data == "back_screen":
         await query.answer()
         if session.current_screen_idx > 0: 
@@ -446,15 +451,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await render_screen(update, context, query)
         return
         
-    # PROCESS SUBMISSION -> DISPATCH AUTOMATED PDF ATTACHMENT (FEATURE 3)
+    # FINAL CONFIRMATION DISPATCH ENGINE LINKED TO AUTOMATIC GENERATION FLOW
     if data == "final_submit":
         await query.answer("💾 Compiling Onboarding Document Bundle...", show_alert=True)
         session.is_submitted = True
-        
-        # Render the template out to chat window
         await render_screen(update, context, query)
         
-        # Fire off document transmission asynchronously
         pdf_file = generate_onboarding_pdf(session)
         filename = f"Onboarding_Brief_{session.name or 'Client'}.pdf".replace(" ", "_")
         await context.bot.send_document(
@@ -474,4 +476,93 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "skip_media":
         await query.answer()
-        session.answers["photos"] = "Ski
+        session.answers["photos"] = "Bypassed"
+        session.current_screen_idx += 1
+        await render_screen(update, context, query)
+        return
+
+    if data.startswith("c_"):
+        field_id = REV_MAP[data.split("_")[1]]
+        session.awaiting_custom_field_id = field_id
+        await query.answer("⌨️ Type into your message bar window.")
+        await render_screen(update, context, query)
+        return
+        
+    if data.startswith("s_"):
+        parts = data.split("_")
+        field_id = REV_MAP[parts[1]]
+        opt_idx = int(parts[2])
+        screen_data = SCREENS[session.current_screen_idx]
+        field = next((f for f in screen_data['fields'] if f['id'] == field_id), None)
+        if not field: return
+        
+        selected = field['options'][opt_idx]
+        session.awaiting_custom_field_id = None
+        
+        if field['type'] == 'buttons':
+            session.answers[field_id] = selected
+        elif field['type'] == 'buttons_multi':
+            curr = session.answers.get(field_id, [])
+            if not isinstance(curr, list): curr = []
+            if selected in curr: curr.remove(selected)
+            else: curr.append(selected)
+            session.answers[field_id] = curr
+            
+        await query.answer()
+        has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
+        is_multi_question = len(screen_data['fields']) > 1
+        
+        if not has_multi and not is_multi_question: 
+            session.current_screen_idx += 1
+        await render_screen(update, context, query)
+
+async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    session = context.user_data.get(user_id)
+    if not session or session.current_screen_idx >= len(SCREENS): return
+    text = update.message.text.strip()
+    
+    if session.awaiting_custom_field_id:
+        session.answers[session.awaiting_custom_field_id] = text
+        session.awaiting_custom_field_id = None
+        if check_screen_satisfied(session, SCREENS[session.current_screen_idx]): 
+            session.current_screen_idx += 1
+        await render_screen(update, context, chat_id=update.message.chat_id)
+        return
+
+    screen_data = SCREENS[session.current_screen_idx]
+    txt_fields = [f for f in screen_data['fields'] if f['type'] == 'text']
+    if not txt_fields: return
+    
+    for field in txt_fields:
+        if not session.answers.get(field['id']):
+            session.answers[field['id']] = text
+            if field['id'] == 'name': session.name = text
+            break
+            
+    if check_screen_satisfied(session, screen_data):
+        session.current_screen_idx += 1
+        
+    await render_screen(update, context, chat_id=update.message.chat_id)
+
+async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    session = context.user_data.get(user_id)
+    if not session or session.current_screen_idx >= len(SCREENS): return
+    session.answers["photos"] = "Visual Biometric Profiles Cached ✅"
+    session.current_screen_idx += 1
+    await render_screen(update, context, chat_id=update.message.chat_id)
+
+def main():
+    print("🚀 COACH AVNI PURE ONBOARDING INFRASTRUCTURE ONLINE AND POLLING LIVE")
+    app = Application.builder().token(TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(button_handler))
+    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.ALL, media_handler))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
+    
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
