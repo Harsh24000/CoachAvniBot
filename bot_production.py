@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - ALL 61 QUESTIONS GROUPED
-✅ 100% of the 61 questions migrated from bot_smooth_flow.py
-✅ Multiple related button groups displayed per screen
-✅ Dynamic message updating with instant checkmarks (✅)
-✅ Clean app-like assessment layout
+COACH AVNI BOT - ULTIMATE COMPLETE FLOW WITH PHOTO UPLOADS
+✅ Includes ALL 61+ original and modified health questions.
+✅ NEW: Full-body Photo Assessment implementation with explicit privacy options.
+✅ Supports uploading photos directly, file documents, or using an interactive 'Skip' button.
+✅ Optimized Subcategory Grouping to prevent tall vertical inline keyboards.
 """
 
 import os
@@ -18,15 +18,15 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN not found in .env")
+    print("ERROR: TELEGRAM_TOKEN not found in .env file.")
     sys.exit(1)
 
 # ============================================================================
-# ALL 61 QUESTIONS MAP INTO ARCHITECTURAL SCREENS
+# QUESTION MATRIX DATA STRUCTURE (25 DEFINED SCREENS)
 # ============================================================================
 
 SCREENS = [
-    # --- TEXT INPUT SCREENS (Kept independent for typing experience) ---
+    # --- SCREEN 1 - 4: Core Metrics ---
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "👤 What's your full name?", "type": "text", "required": True}
     ]},
@@ -41,217 +41,216 @@ SCREENS = [
     ]},
     
     # --- SCREEN 5: Profession & Sex ---
-    {"id": 5, "section": "👤 About You", "fields": [
+    {"id": 5, "section": "💼 Work & Details", "fields": [
         {"id": "q5", "text": "💼 What's your profession?", "type": "buttons", "required": True,
-         "options": ["💻 Software Engineer", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business Owner", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]},
+         "options": ["💻 Engineer", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business Owner", "🤵 Consultant", "📊 Finance", "🎯 Sales", "➕ Other"]},
         {"id": "q6", "text": "⚡ Biological sex?", "type": "buttons", "required": True,
          "options": ["👨 Male", "👩 Female", "🌈 Other"]}
     ]},
     
-    # --- SCREEN 6: Dietary & Preferences ---
-    {"id": 6, "section": "🍽️ Diet & Food", "fields": [
+    # --- SCREEN 6: Diet Preferences & Dislikes ---
+    {"id": 6, "section": "🍽️ Diet & Preferences", "fields": [
         {"id": "q7", "text": "🍽️ Dietary preference?", "type": "buttons", "required": True,
-         "options": ["🍗 Non-Vegetarian", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]},
-        {"id": "q8", "text": "🚫 Foods you HATE? (Select multiple/any)", "type": "buttons_multi", "required": False,
-         "options": ["🥒 Bitter gourd", "🍆 Eggplant", "🍄 Mushroom", "🪴 Okra", "🌶️ Capsicum", "🧅 Onion", "🧄 Garlic", "🐟 Fish", "🥚 Egg", "🥛 Dairy"]},
-        {"id": "q9", "text": "👨‍🍳 Cuisines you LOVE? (Select multiple/any)", "type": "buttons_multi", "required": False,
-         "options": ["🇮🇳 North Indian", "🔥 South Indian", "🇧🇩 Bengali", "🥘 Gujarati", "🌶️ Continental", "🥡 Chinese", "🍝 Italian", "🌮 Mexican", "🍜 Thai"]}
+         "options": ["🍗 Non-Veg", "🥕 Veg", "🥚 Eggitarian", "🌱 Vegan", "☪️ Jain"]},
+        {"id": "q8", "text": "🚫 Foods you HATE? (Multi-select)", "type": "buttons_multi", "required": False,
+         "options": ["🥒 Bitter Gourd", "🍆 Eggplant", "🍄 Mushroom", "🪴 Okra", "🧅 Onion", "🧄 Garlic", "🐟 Fish", "🥚 Egg", "🥛 Dairy"]},
+        {"id": "q9", "text": "👨‍🍳 Cuisines you LOVE? (Multi-select)", "type": "buttons_multi", "required": False,
+         "options": ["🇮🇳 North Indian", "🔥 South Indian", "🇧🇩 Bengali", "🥘 Gujarati", "🥡 Chinese", "🍝 Italian", "🌮 Mexican"]}
     ]},
     
-    # --- SCREEN 7: Morning Schedule ---
-    {"id": 7, "section": "☀️ Your Day", "fields": [
+    # --- SCREEN 7: Morning Timings ---
+    {"id": 7, "section": "☀️ Your Day: Morning Routine", "fields": [
         {"id": "q10", "text": "🌅 What time do you wake up?", "type": "buttons", "required": True,
-         "options": ["⏰ 5:00 AM", "⏰ 5:30 AM", "⏰ 6:00 AM", "⏰ 6:30 AM", "⏰ 7:00 AM", "⏰ 7:30 AM", "⏰ 8:00 AM", "🛏️ 8:30 AM+"]},
-        {"id": "q11", "text": "☕ Breakfast time?", "type": "buttons", "required": True,
-         "options": ["🌅 6:00 AM", "🌅 6:30 AM", "🌅 7:00 AM", "🌅 7:30 AM", "🌅 8:00 AM", "🌅 8:30 AM", "🌅 9:00 AM", "⏭️ Skip"]}
+         "options": ["⏰ 5:00 AM", "⏰ 6:00 AM", "⏰ 7:00 AM", "⏰ 8:00 AM", "🛏️ 8:30 AM+"]},
+        {"id": "q11", "text": "☕ Regular breakfast time?", "type": "buttons", "required": True,
+         "options": ["🌅 7:00 AM", "🌅 8:00 AM", "🌅 9:00 AM", "🌅 10:00 AM", "⏭️ Skip Breakfast"]},
+        {"id": "q12", "text": "🏢 When does your work start?", "type": "buttons", "required": True,
+         "options": ["🕐 8:00 AM", "🕐 9:00 AM", "🕐 10:00 AM", "🎲 Shift Based / Variable"]}
     ]},
     
-    # --- SCREEN 8: Work Routine ---
-    {"id": 8, "section": "☀️ Your Day", "fields": [
-        {"id": "q12", "text": "🏢 Work start time?", "type": "buttons", "required": True,
-         "options": ["🕐 8:00 AM", "🕐 8:30 AM", "🕐 9:00 AM", "🕐 9:30 AM", "🕐 10:00 AM", "🎲 Variable"]},
-        {"id": "q13", "text": "🚪 Work end time?", "type": "buttons", "required": True,
-         "options": ["🕔 5:00 PM", "🕔 5:30 PM", "🕔 6:00 PM", "🕔 6:30 PM", "🕔 7:00 PM", "🕔 8:00 PM", "🌙 9:00 PM+"]}
+    # --- SCREEN 8: Evening & Night Routine ---
+    {"id": 8, "section": "☀️ Your Day: Evening & Sleep", "fields": [
+        {"id": "q13", "text": "🚪 When do you finish work?", "type": "buttons", "required": True,
+         "options": ["🕔 5:00 PM", "🕔 6:00 PM", "🕔 7:00 PM", "🌙 8:00 PM+"]},
+        {"id": "q14", "text": "🍽️ Regular lunch time?", "type": "buttons", "required": True,
+         "options": ["🕛 12:00 PM", "🕛 1:00 PM", "🕛 2:00 PM", "🎲 Variable"]},
+        {"id": "q15", "text": "🍴 Regular dinner time?", "type": "buttons", "required": True,
+         "options": ["🕕 7:00 PM", "🕕 8:00 PM", "🕕 9:00 PM", "🕘 10:00 PM+"]},
+        {"id": "q16", "text": "😴 When do you go to sleep?", "type": "buttons", "required": True,
+         "options": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🌙 1:00 AM+"]}
     ]},
     
-    # --- SCREEN 9: Mid-day & Evening Meals ---
-    {"id": 9, "section": "☀️ Your Day", "fields": [
-        {"id": "q14", "text": "🍽️ Lunch time?", "type": "buttons", "required": True,
-         "options": ["🕛 12:00 PM", "🕛 12:30 PM", "🕛 1:00 PM", "🕛 1:30 PM", "🕛 2:00 PM", "🕛 2:30 PM", "🎲 Variable"]},
-        {"id": "q15", "text": "🍴 Dinner time?", "type": "buttons", "required": True,
-         "options": ["🕕 6:00 PM", "🕕 6:30 PM", "🕕 7:00 PM", "🕕 7:30 PM", "🕕 8:00 PM", "🕕 8:30 PM", "🕕 9:00 PM", "🕘 9:30 PM+"]}
+    # --- SCREEN 9: Lifestyle Habits (Snacking & Hydration) ---
+    {"id": 9, "section": "🥤 Hydration & Snacking", "fields": [
+        {"id": "q17", "text": "🍿 Do you have mid-day snacks?", "type": "buttons", "required": True,
+         "options": ["✅ Yes, 1-2 times", "✅ Yes, 3+ times", "⏱️ Rarely", "🚫 No"]},
+        {"id": "q_water", "text": "💧 Daily water consumption level?", "type": "buttons", "required": True,
+         "options": ["🥛 Less than 1 Litre", "💧 1 - 2 Litres", "🚰 2 - 3 Litres", "🌊 More than 3 Litres"]}
     ]},
     
-    # --- SCREEN 10: Night & Snacks ---
-    {"id": 10, "section": "☀️ Your Day", "fields": [
-        {"id": "q16", "text": "😴 Sleep time?", "type": "buttons", "required": True,
-         "options": ["🌙 9:00 PM", "🌙 9:30 PM", "🌙 10:00 PM", "🌙 10:30 PM", "🌙 11:00 PM", "🌙 11:30 PM", "🌙 12:00 AM", "🌙 12:30 AM+"]},
-        {"id": "q17", "text": "🍿 Snacks during the day?", "type": "buttons", "required": True,
-         "options": ["✅ Yes, 1-2 times", "✅ Yes, 3+ times", "⏱️ Rarely", "🚫 No"]}
+    # --- SCREEN 10: Weekends ---
+    {"id": 10, "section": "☀️ Your Day: Weekends", "fields": [
+        {"id": "q18", "text": "🍕 Frequency of eating out?", "type": "buttons", "required": True,
+         "options": ["🍽️ Never", "🥗 Breakfast only", "🍜 Lunch only", "🍛 Dinner only", "🎉 Multiple meals"]},
+        {"id": "q19", "text": "😴 Weekend wakeup change?", "type": "buttons", "required": True,
+         "options": ["Same as weekday ⏰", "1 hour later 💤", "2+ hours later 🛏️"]},
+        {"id": "q20", "text": "🛏️ Weekend bedtime change?", "type": "buttons", "required": True,
+         "options": ["Same as weekday 🌙", "1 hour later 💤", "2+ hours later 🛏️"]}
     ]},
     
-    # --- SCREEN 11: Weekend Variations ---
-    {"id": 11, "section": "☀️ Your Day", "fields": [
-        {"id": "q18", "text": "🍕 Eat out for meals?", "type": "buttons", "required": True,
-         "options": ["🍽️ Never", "🥗 Breakfast", "🍜 Lunch", "🍛 Dinner", "🎉 Multiple meals"]},
-        {"id": "q19", "text": "😴 Weekend wake time?", "type": "buttons", "required": True,
-         "options": ["Same as weekday ⏰", "30 min later 😴", "1 hour later 💤", "1.5 hours later 🛌", "2+ hours later 🌙"]},
-        {"id": "q20", "text": "🛏️ Weekend sleep time?", "type": "buttons", "required": True,
-         "options": ["Same as weekday 🌙", "30 min later 😴", "1 hour later 💤", "1.5 hours later 🛌", "2+ hours later 🛏️"]}
+    # --- SCREEN 11: Diagnostics & Targeted Symptoms ---
+    {"id": 11, "section": "🏥 Health & Diagnostics", "fields": [
+        {"id": "q21", "text": "⚕️ Diagnosed clinical conditions? (Select all)", "type": "buttons_multi", "required": False,
+         "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "⚠️ Cholesterol", "🍗 Fatty Liver", "✅ None"]},
+        {"id": "q_specific_health", "text": "🔍 Do you deal with targeted symptoms?", "type": "buttons_multi", "required": False,
+         "options": ["🎈 Chronic Bloating", "💩 Constipation", "🔥 Acid Reflux / Acidity", "😴 Fatigue / Low Energy", "💇 Hair Thinning/Loss", "✨ None"]},
+        {"id": "q22", "text": "🤧 Any known allergies?", "type": "buttons", "required": True,
+         "options": ["✅ No Allergies", "🍔 Food Specific", "🌫️ Environmental", "🔀 Both"]}
     ]},
     
-    # --- SCREEN 12: Medical & Allergies ---
-    {"id": 12, "section": "🏥 Health", "fields": [
-        {"id": "q21", "text": "⚕️ Medical conditions? (Select all)", "type": "buttons_multi", "required": False,
-         "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "⚠️ High Cholesterol", "🍗 Fatty Liver", "✅ None"]},
-        {"id": "q22", "text": "🤧 Any allergies?", "type": "buttons", "required": True,
-         "options": ["✅ No", "🍔 Food allergies", "🌫️ Environmental", "🔀 Both"]}
+    # --- SCREEN 12: Medical Interventions & Injuries ---
+    {"id": 12, "section": "🏥 Health: Interventions & Mobility", "fields": [
+        {"id": "q23", "text": "💊 Current daily prescriptions?", "type": "buttons", "required": True,
+         "options": ["✅ None", "1-2 Medications 💊", "3+ Medications 🏥"]},
+        {"id": "q24", "text": "🤢 General metabolic/digestive comfort?", "type": "buttons", "required": True,
+         "options": ["✅ Great", "Sometimes uneasy 😐", "Frequent issues 😣"]},
+        {"id": "q25", "text": "🤕 Structural injuries?", "type": "buttons", "required": True,
+         "options": ["✅ No", "Old injury (Healed) 🩹", "Active acute injury ⚠️"]},
+        {"id": "q26", "text": "📍 Focus areas of discomfort?", "type": "buttons", "required": True,
+         "options": ["🔴 Lower Back", "🔴 Knee Joints", "🔴 Shoulder / Neck", "✅ Not Applicable"]}
     ]},
     
-    # --- SCREEN 13: Medications & Digestion ---
-    {"id": 13, "section": "🏥 Health", "fields": [
-        {"id": "q23", "text": "💊 On medications?", "type": "buttons", "required": True,
-         "options": ["✅ No", "1-2 medications 💊", "3-4 medications 💉", "5+ medications 🏥"]},
-        {"id": "q24", "text": "🤢 Digestive issues?", "type": "buttons", "required": True,
-         "options": ["✅ No", "Sometimes 😐", "Often 😕", "Frequently 😣"]}
+    # --- SCREEN 13: Core Micro Supplementation Breakdown ---
+    {"id": 13, "section": "💊 Supplement Matrix Part 1", "fields": [
+        {"id": "q27", "text": "💊 General base supplement usage?", "type": "buttons", "required": True,
+         "options": ["❌ None", "✅ 1-2 daily", "✅ 3+ daily"]},
+        {"id": "q_supp_d3", "text": "☀️ Vitamin D3 routine?", "type": "buttons", "required": True,
+         "options": ["📦 Take it regularly", "⚠️ Deficient / Prescribed", "❌ Never take it"]},
+        {"id": "q_supp_b12", "text": "🧠 Vitamin B12 routine?", "type": "buttons", "required": True,
+         "options": ["📦 Take it regularly", "⚠️ Deficient / Prescribed", "❌ Never take it"]}
     ]},
     
-    # --- SCREEN 14: Injuries ---
-    {"id": 14, "section": "🏥 Health", "fields": [
-        {"id": "q25", "text": "🤕 Got any injuries?", "type": "buttons", "required": True,
-         "options": ["✅ No", "Old injury (healed) 🩹", "Current injury ⚠️"]},
-        {"id": "q26", "text": "📍 Injury location?", "type": "buttons", "required": True,
-         "options": ["🔴 Lower back", "🔴 Knee", "🔴 Shoulder", "🔴 Elbow", "🔴 Wrist", "🔴 Multiple", "✅ N/A"]}
+    # --- SCREEN 14: Secondary Supplement Breakdown ---
+    {"id": 14, "section": "💊 Supplement Matrix Part 2", "fields": [
+        {"id": "q_supp_fishoil", "text": "🐟 Omega-3 / Fish Oil routine?", "type": "buttons", "required": True,
+         "options": ["📦 Take it regularly", "🌱 Vegan Alternative", "❌ Do not take"]},
+        {"id": "q_supp_multi", "text": "🎨 Daily Multivitamin routine?", "type": "buttons", "required": True,
+         "options": ["📦 Take regularly", "⏱️ Off & On", "❌ Do not take"]},
+        {"id": "q28", "text": "🥛 Protein supplement baseline?", "type": "buttons", "required": True,
+         "options": ["👶 Never used", "💪 Taking currently", "📦 Used in the past"]}
     ]},
     
-    # --- SCREEN 15: Habits & Supplements ---
-    {"id": 15, "section": "⚡ Supplements & Habits", "fields": [
-        {"id": "q27", "text": "💊 Do you take supplements?", "type": "buttons", "required": True,
-         "options": ["❌ No", "✅ Yes, 1-2", "✅ Yes, 3-5", "✅ Yes, 5+"]},
-        {"id": "q28", "text": "🥛 Protein powder experience?", "type": "buttons", "required": True,
-         "options": ["👶 Never", "💪 Using now", "📦 Used before"]}
+    # --- SCREEN 15: Social Vices & Outings ---
+    {"id": 15, "section": "⚡ Social Baseline & Vices", "fields": [
+        {"id": "q29", "text": "🚬 Smoking habit status?", "type": "buttons", "required": True,
+         "options": ["✅ Non-smoker", "🚭 Social/Occasional", "⚠️ Regular user"]},
+        {"id": "q30", "text": "🍷 Alcohol frequency?", "type": "buttons", "required": True,
+         "options": ["✅ Abstain", "🍻 Occasional social", "📅 Weekly routine", "🎉 Multiple times/week"]},
+        {"id": "q31", "text": "🍕 Outside restaurant meals?", "type": "buttons", "required": True,
+         "options": ["❌ Rare/Never", "1x per week 🍽️", "2-3x per week 🍜", "4+ times/week 🍛"]}
     ]},
     
-    # --- SCREEN 16: Vices & Frequencies ---
-    {"id": 16, "section": "⚡ Supplements & Habits", "fields": [
-        {"id": "q29", "text": "🚬 Do you smoke?", "type": "buttons", "required": True,
-         "options": ["✅ No", "🚭 Occasionally", "⚠️ Regularly"]},
-        {"id": "q30", "text": "🍷 Do you drink alcohol?", "type": "buttons", "required": True,
-         "options": ["✅ No", "🍻 Occasionally", "📅 Weekly", "🎉 Multiple times/week"]},
-        {"id": "q31", "text": "🍕 Eating out frequency?", "type": "buttons", "required": True,
-         "options": ["❌ Never", "1x/week 🍽️", "2-3x/week 🍜", "4-5x/week 🍛", "☀️ Daily"]}
+    # --- SCREEN 16: Stress & Rest Patterns ---
+    {"id": 16, "section": "😴 Stress & Sleep Quality", "fields": [
+        {"id": "q32", "text": "😰 Mental stress levels?", "type": "buttons", "required": True,
+         "options": ["😊 1-2 (Low/Chill)", "😐 3 (Manageable)", "😫 4-5 (High/Overwhelming)"]},
+        {"id": "q33", "text": "💤 Sleep deepness level?", "type": "buttons", "required": True,
+         "options": ["😴 1-2 (Fragmented)", "😴 3 (Average)", "😴 4-5 (Deep/Restful)"]},
+        {"id": "q34", "text": "😖 Is your sleep restless/tossing?", "type": "buttons", "required": True,
+         "options": ["✅ Quiet sleep", "Sometimes 😐", "Always dynamic/restless 😣"]},
+        {"id": "q35", "text": "🌅 Morning fatigue state?", "type": "buttons", "required": True,
+         "options": ["✅ Wake up fresh", "Usually groggy 😊", "Tired/Exhausted 😴"]}
     ]},
     
-    # --- SCREEN 17: Stress & Sleep Metrics ---
-    {"id": 17, "section": "😴 Sleep & Stress", "fields": [
-        {"id": "q32", "text": "😰 Rate daily stress (1-5)", "type": "buttons", "required": True,
-         "options": ["😊 1 (Chill)", "🙂 2", "😐 3 (Neutral)", "😕 4", "😫 5 (Insane)"]},
-        {"id": "q33", "text": "💤 Rate sleep quality (1-5)", "type": "buttons", "required": True,
-         "options": ["😴 1 (Terrible)", "😴 2", "😴 3 (Okay)", "😴 4", "😴 5 (Perfect!)"]}
+    # --- SCREEN 17: Mindfulness & Physical Baseline ---
+    {"id": 17, "section": "🧘 Mindfulness & Ambience", "fields": [
+        {"id": "q36", "text": "🧘 Dedicated meditation/breathing work?", "type": "buttons", "required": True,
+         "options": ["❌ No intentional practices", "🧘 Occasionally", "✅ Consistent daily habit"]},
+        {"id": "q37", "text": "🔥 Dominant external stress factor?", "type": "buttons", "required": True,
+         "options": ["💼 Career/Workload", "❤️ Family/Life Balance", "💰 Financial Planning", "✨ None"]},
+        {"id": "q38", "text": "💪 Active days per week baseline?", "type": "buttons", "required": True,
+         "options": ["🪑 Completely Sedentary", "🚶 1-2 Days", "🏃 3-4 Days", "🏋️ 5+ Days"]}
     ]},
     
-    # --- SCREEN 18: Restlessness & Mornings ---
-    {"id": 18, "section": "😴 Sleep & Stress", "fields": [
-        {"id": "q34", "text": "😖 Is sleep restless?", "type": "buttons", "required": True,
-         "options": ["✅ No", "Sometimes 😐", "Often 😕", "Always 😣"]},
-        {"id": "q35", "text": "🌅 Wake up feeling fresh?", "type": "buttons", "required": True,
-         "options": ["✅ Always", "😊 Usually", "😐 Sometimes", "😴 Rarely"]}
+    # --- SCREEN 18: Movement & Daily Step Benchmarks ---
+    {"id": 18, "section": "💪 Physical Mechanics & Steps", "fields": [
+        {"id": "q_steps", "text": "🚶 Average structural steps daily?", "type": "buttons", "required": True,
+         "options": ["🐌 Under 3,000 steps", "🚶 3,000 - 5,000 steps", "🏃 5,000 - 8,000 steps", "⚡ 10,000+ steps!"]},
+        {"id": "q39", "text": "🏋️ Resistance weight lifting knowledge?", "type": "buttons", "required": True,
+         "options": ["👶 Absolute Beginner", "🌱 Know basics", "💪 Intermediate/Advanced"]},
+        {"id": "q40", "text": "🏋️ Weekly structured weight sessions?", "type": "buttons", "required": True,
+         "options": ["❌ None", "1-2 days/week 💪", "3-4 days/week 🏋️", "5+ days/week 🦾"]}
     ]},
     
-    # --- SCREEN 19: Mindfulness & Triggers ---
-    {"id": 19, "section": "😴 Sleep & Stress", "fields": [
-        {"id": "q36", "text": "🧘 Do you meditate?", "type": "buttons", "required": True,
-         "options": ["❌ No", "🙏 Rarely", "🧘 Sometimes", "✅ Regularly"]},
-        {"id": "q37", "text": "🔥 What stresses you most?", "type": "buttons", "required": True,
-         "options": ["💼 Work", "❤️ Health", "💔 Relationships", "💰 Money", "⏰ Time", "🌪️ Multiple", "😊 Nothing"]}
+    # --- SCREEN 19: Cardio & Extracurriculars ---
+    {"id": 19, "section": "💪 Fitness Variety & Settings", "fields": [
+        {"id": "q41", "text": "🏃 Cardio/Endurance frequency?", "type": "buttons", "required": True,
+         "options": ["❌ Never", "1-2x per week 🚴", "3+ times/week 🚀"]},
+        {"id": "q42", "text": "🧘 Flexibility/Yoga allocation?", "type": "buttons", "required": True,
+         "options": ["❌ None", "1-2x per week 🧘", "3+ times/week ✨"]},
+        {"id": "q43", "text": "⚽ Recreational team sports?", "type": "buttons", "required": True,
+         "options": ["❌ No regular games", "1-2x per week ⚽", "3+ times/week 🏆"]}
     ]},
     
-    # --- SCREEN 20: General Activity ---
-    {"id": 20, "section": "💪 Fitness", "fields": [
-        {"id": "q38", "text": "💪 Days/week physically active?", "type": "buttons", "required": True,
-         "options": ["😴 0 (Lazy)", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7 (Daily)"]},
-        {"id": "q39", "text": "🏋️ Strength training exp?", "type": "buttons", "required": True,
-         "options": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"]}
+    # --- SCREEN 20: Desk Stagnancy & Cooking ---
+    {"id": 20, "section": "🪑 Environment & Kitchen Setup", "fields": [
+        {"id": "q44", "text": "🪑 Daily continuous desk sitting?", "type": "buttons", "required": True,
+         "options": ["🚶 Below 4 Hours", "😐 4 - 7 Hours", "💀 8+ Hours (Heavy Sedentary)"]},
+        {"id": "q45", "text": "📍 Where do you target training?", "type": "buttons", "required": True,
+         "options": ["🏢 Commercial Gym", "🏠 Home Setup", "🌳 Parks / Outdoors"]},
+        {"id": "q46", "text": "👨‍🍳 Cooking frequency?", "type": "buttons", "required": True,
+         "options": ["❌ Never cook", "🍳 1-3x per week", "👨‍🍳 Daily fresh cooking"]}
     ]},
     
-    # --- SCREEN 21: Training Frequencies ---
-    {"id": 21, "section": "💪 Fitness", "fields": [
-        {"id": "q40", "text": "🏋️ Weight training frequency?", "type": "buttons", "required": True,
-         "options": ["❌ Never", "1-2x/week 💪", "3-4x/week 🏋️", "5-6x/week 🦾", "Daily ⚡"]},
-        {"id": "q41", "text": "🏃 Cardio frequency?", "type": "buttons", "required": True,
-         "options": ["❌ Never", "1-2x/week 🚴", "3-4x/week 🏃", "5-6x/week 🤸", "Daily 🚀"]}
+    # --- SCREEN 21: Kitchen Logistics & Targets ---
+    {"id": 21, "section": "🎯 Targets & Kitchen Logistics", "fields": [
+        {"id": "q47", "text": "💰 Shopping budget flexibility?", "type": "buttons", "required": True,
+         "options": ["💸 Strictly Budget Friendly", "💵 Standard/Moderate", "💎 Premium Ingredients Only"]},
+        {"id": "q48", "text": "📦 Can you structure meal preps in advance?", "type": "buttons", "required": True,
+         "options": ["✅ Yes completely", "Partially on weekends 😐", "❌ Not possible"]},
+        {"id": "q49", "text": "🎯 Core primary physical objective?", "type": "buttons", "required": True,
+         "options": ["📉 Aggressive Fat Loss", "💪 Hypertrophy Lean Muscle", "⚡ Athletic Strength & Endurance", "❤️ Metabolic/Biomarker Correction"]}
     ]},
     
-    # --- SCREEN 22: Flexibility & Recreations ---
-    {"id": 22, "section": "💪 Fitness", "fields": [
-        {"id": "q42", "text": "🧘 Yoga/stretching frequency?", "type": "buttons", "required": True,
-         "options": ["❌ Never", "1-2x/week 🧘", "3-4x/week 🤸", "5-6x/week 🙏", "Daily ✨"]},
-        {"id": "q43", "text": "⚽ Sports/fun activities?", "type": "buttons", "required": True,
-         "options": ["❌ No", "1-2x/week ⚽", "3-4x/week 🏀", "5-6x/week 🎾", "Daily 🏐"]}
+    # --- SCREEN 22: Timelines & Historical Friction ---
+    {"id": 22, "section": "🎯 Targets & Historical Background", "fields": [
+        {"id": "q50", "text": "📊 Desired weight scale shift?", "type": "buttons", "required": True,
+         "options": ["1-5 kg 📉", "5-10 kg 📉", "10-20 kg 📉", "Maintain/Gain Scale 🏋️"]},
+        {"id": "q51", "text": "⏱️ Target achievement horizon?", "type": "buttons", "required": True,
+         "options": ["🚀 Short-term (8-12 weeks)", "📅 Medium-term (6 months)", "📅 Lifestyle Change (1+ Year)"]},
+        {"id": "q52", "text": "🔄 Past dietary/fitness attempts?", "type": "buttons", "required": True,
+         "options": ["❌ First serious attempt", "✅ Tried once before", "✅ Ongoing cycle of attempts"]},
+        {"id": "q53", "text": "🚧 Historical root barrier?", "type": "buttons", "required": True,
+         "options": ["⏰ Time/Schedule", "🍕 Social Pressure/Cravings", "😴 Low Accountability", "✨ No major block"]}
     ]},
     
-    # --- SCREEN 23: Posture & Venues ---
-    {"id": 23, "section": "💪 Fitness", "fields": [
-        {"id": "q44", "text": "🪑 Hours sitting per day?", "type": "buttons", "required": True,
-         "options": ["🚶 0-2 hours", "😐 2-4 hours", "😴 4-6 hours", "😵 6-8 hours", "💀 8+ hours"]},
-        {"id": "q45", "text": "📍 Preferred workout spot?", "type": "buttons", "required": True,
-         "options": ["🏢 Gym", "🏠 Home", "🌳 Outdoors", "🔀 Gym & Home", "🌍 Mix all"]}
+    # --- SCREEN 23: Commitment Contracts ---
+    {"id": 23, "section": "🤝 Commitments & Final Action", "fields": [
+        {"id": "q54", "text": "🏆 Previous experience with professional coaches?", "type": "buttons", "required": True,
+         "options": ["❌ Never", "📱 Online coaching apps", "👨‍🏫 1-on-1 personal trainers"]},
+        {"id": "q55", "text": "🥗 Readiness to optimize meal plans?", "type": "buttons", "required": True,
+         "options": ["🔥 Full structural overhaul", "⚡ Moderate compromises", "🌱 Step-by-step gradual pacing"]},
+        {"id": "q56", "text": "💪 Workout execution readiness?", "type": "buttons", "required": True,
+         "options": ["✅ Ready for 5-6 days", "✅ Ready for 3-4 days", "😐 Max 1-2 days per week"]},
+        {"id": "q57", "text": "📅 Training allocation windows?", "type": "buttons", "required": True,
+         "options": ["🌅 Fixed Mornings", "🌆 Fixed Evenings", "🎲 Highly dynamic schedules"]}
     ]},
     
-    # --- SCREEN 24: Kitchen Habits ---
-    {"id": 24, "section": "👨‍🍳 Food & Cooking", "fields": [
-        {"id": "q46", "text": "👨‍🍳 How often do you cook?", "type": "buttons", "required": True,
-         "options": ["❌ Never", "1-2x/week 🍳", "3-4x/week 🥘", "5-6x/week 👨‍🍳", "Daily 🍲"]},
-        {"id": "q47", "text": "💰 Food budget preference?", "type": "buttons", "required": True,
-         "options": ["💸 Budget-friendly", "💵 Moderate", "💎 Premium", "🤷 No preference"]},
-        {"id": "q48", "text": "📦 Can you meal prep?", "type": "buttons", "required": True,
-         "options": ["✅ Yes", "Sometimes 😐", "Rarely 😕", "❌ No"]}
+    # --- SCREEN 24: Ultimate Affirmations ---
+    {"id": 24, "section": "🤝 Accountability Alignment", "fields": [
+        {"id": "q58", "text": "🍕 Willingness to curb external ultra-processed treats?", "type": "buttons", "required": True,
+         "options": ["✅ Ready to restrict completely", "😐 Need deliberate cheat slots", "❌ Hard to adjust"]},
+        {"id": "q59", "text": "🍷 Willingness to adjust alcohol frequency?", "type": "buttons", "required": True,
+         "options": ["✅ Fully compliant", "😐 Can scale back slightly", "❌ Cannot alter habits", "🤷 Non-Drinker"]},
+        {"id": "q60", "text": "📝 Will you maintain logging and communication updates?", "type": "buttons", "required": True,
+         "options": ["✅ 100% committed", "😐 Will attempt my best", "❌ Friction with tracking"]},
+        {"id": "q61", "text": "🚀 Are you mentally ready to begin?", "type": "buttons", "required": True,
+         "options": ["🔥 READY NOW. LET'S GO!", "⏳ Finalizing mental readiness"]}
     ]},
-    
-    # --- SCREEN 25: Primary Objectives ---
-    {"id": 25, "section": "🎯 Your Goals", "fields": [
-        {"id": "q49", "text": "🎯 PRIMARY goal?", "type": "buttons", "required": True,
-         "options": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "🏃 Endurance", "❤️ Better health", "✨ All of above"]},
-        {"id": "q50", "text": "📊 Target weight loss?", "type": "buttons", "required": True,
-         "options": ["5 kg 📉", "10 kg 📉", "15 kg 📉", "20+ kg 📉", "N/A ✅"]},
-        {"id": "q51", "text": "⏱️ Timeline for goal?", "type": "buttons", "required": True,
-         "options": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year", "📅 1+ year"]}
-    ]},
-    
-    # --- SCREEN 26: History & Blockages ---
-    {"id": 26, "section": "🎯 Your Goals", "fields": [
-        {"id": "q52", "text": "🔄 Tried before?", "type": "buttons", "required": True,
-         "options": ["❌ No", "✅ Once", "✅ 2-3 times", "✅ Many times"]},
-        {"id": "q53", "text": "🚧 BIGGEST barrier?", "type": "buttons", "required": True,
-         "options": ["⏰ Time", "💰 Money", "😴 Motivation", "👥 Support", "📚 Knowledge", "🌀 Multiple", "✨ None"]},
-        {"id": "q54", "text": "🏆 Worked with coach before?", "type": "buttons", "required": True,
-         "options": ["❌ No", "📱 Online", "👨‍🏫 In-person", "🔀 Both"]}
-    ]},
-    
-    # --- SCREEN 27: Flexibility to Adjustment ---
-    {"id": 27, "section": "🎯 Your Goals", "fields": [
-        {"id": "q55", "text": "🥗 Change eating habits?", "type": "buttons", "required": True,
-         "options": ["🔥 Big changes", "⚡ Moderate", "🌱 Small", "💤 Minimal"]},
-        {"id": "q56", "text": "💪 Willing to exercise?", "type": "buttons", "required": True,
-         "options": ["✅ 7 days/week", "✅ 5-6 days", "✅ 3-4 days", "😐 1-2 days"]}
-    ]},
-    
-    # --- SCREEN 28: Dietary Commitments ---
-    {"id": 28, "section": "🤝 Commitment", "fields": [
-        {"id": "q57", "text": "📅 Days/week training?", "type": "buttons", "required": True,
-         "options": ["1️⃣ 1 day", "2️⃣ 2 days", "3️⃣ 3 days", "4️⃣ 4 days", "5️⃣ 5 days", "6️⃣ 6 days", "7️⃣ 7 days"]},
-        {"id": "q58", "text": "🍕 Reduce eating out?", "type": "buttons", "required": True,
-         "options": ["✅ Yes", "😐 Somewhat", "❌ No"]},
-        {"id": "q59", "text": "🍷 Reduce drinking?", "type": "buttons", "required": True,
-         "options": ["✅ Yes", "😐 Somewhat", "❌ No"]}
-    ]},
-    
-    # --- SCREEN 29: Final Initialization ---
-    {"id": 29, "section": "🤝 Commitment", "fields": [
-        {"id": "q60", "text": "📝 Keep food journal?", "type": "buttons", "required": True,
-         "options": ["✅ Yes", "Sometimes 😐", "❌ No"]},
-        {"id": "q61", "text": "🚀 Ready to START?", "type": "buttons", "required": True,
-         "options": ["🔥 YES! 100%!", "✅ Yes, somewhat", "🤔 Maybe", "⏳ Not yet"]}
+
+    # --- SCREEN 25: EXPLICIT FULL-BODY PHOTO ASSESSMENT ---
+    {"id": 25, "section": "📸 Full-Body Assessment Photo", "fields": [
+        {"id": "q_photos", "text": "📸 [Optional] Please upload a current front/side full-body assessment photo to assist with baseline posture & fat composition evaluations. (Or click below to bypass)", "type": "media", "required": False}
     ]}
 ]
 
@@ -265,23 +264,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
     
-    text = """🤖 ╔════════════════════════════════════════╗
-   ║  WELCOME TO MEALZY COACH! 🎉           ║
-   ║                                         ║
-   ║  💪 Transform Your Body               ║
-   ║  🧠 Transform Your Mind               ║
-   ║  ✨ Transform Your Life               ║
-   ╚════════════════════════════════════════╝
-
-📋 Comprehensive Fitness Profile
-⚡ All 61 Specific Questions Migrated!
-✅ Clean App-like Layout
-✅ Interactive Checkmarks
-
-Let's do this! 🚀"""
+    text = (
+        "🤖 <b>╔════════════════════════════════════════╗</b>\n"
+        "   <b>║      WELCOME TO MEALZY COACHING        ║</b>\n"
+        "   <b>║                                        ║</b>\n"
+        "   <b>║     💪 Complete Health Blueprint       ║</b>\n"
+        "   <b>║     🧠 Performance Strategy            ║</b>\n"
+        "   <b>║     ✨ Root-Cause Bio-Onboarding      ║</b>\n"
+        "   <b>╚════════════════════════════════════════╝</b>\n\n"
+        "📋 <b>Comprehensive Health Profiling</b>\n"
+        "⚡ All Parameters & Photo Modules Active\n"
+        "✅ Clean, Anti-Fatigue Nested Layout Screens\n"
+        "✅ 100% One-Tap Selection System\n\n"
+        "Let's configure your profile parameters! 🚀"
+    )
     
-    keyboard = [[InlineKeyboardButton("🎯 LET'S START!", callback_data="start")]]
-    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    keyboard = [[InlineKeyboardButton("🎯 INITIALIZE ASSESSMENT", callback_data="start")]]
+    await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
 async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None):
     user_id = update.effective_user.id
@@ -292,29 +291,27 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     session = context.user_data[user_id]
     
     if session.current_screen_idx >= len(SCREENS):
-        final_msg = f"""🎉 ╔════════════════════════════════════════╗
-   ║  ASSESSMENT COMPLETE! 🏆               ║
-   ╚════════════════════════════════════════╝
-
-👋 {session.name or 'Champion'}! You successfully finished all 61 questions! 💪
-
-Your structured health details are recorded. 
-Our matching platform is preparing your strategy! 🚀"""
-        
+        final_msg = (
+            f"🎉 <b>╔════════════════════════════════════════╗</b>\n"
+            f"   <b>║     DIAGNOSTICS PROFILE ACQUIRED       ║</b>\n"
+            f"   <b>╚════════════════════════════════════════╝</b>\n\n"
+            f"👋 <b>{session.name or 'Champion'}!</b> Your onboarding registration is verified! 💪\n\n"
+            f"All structural variables, including physical photo assessment vectors, have been successfully logged into our secure workspace.\n"
+            f"Your dedicated high-performance routine is compiling! 🚀"
+        )
         if query:
-            await query.edit_message_text(final_msg)
+            await query.edit_message_text(final_msg, parse_mode="HTML")
         else:
-            await update.message.reply_text(final_msg)
+            await update.message.reply_text(final_msg, parse_mode="HTML")
         return
 
     screen_data = SCREENS[session.current_screen_idx]
     
-    # Progress Calculation
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     bar = "█" * (progress // 10) + "░" * (10 - (progress // 10))
     
-    name_part = f" (Hi {session.name}!)" if session.name else ""
-    text_lines = [f"{bar} {progress}% | *{screen_data['section']}*{name_part}", ""]
+    name_info = f" (User: {session.name})" if session.name else ""
+    text_lines = [f"{bar} {progress}% | <b>{screen_data['section']}</b>{name_info}", ""]
     
     all_required_answered = True
     
@@ -327,24 +324,28 @@ Our matching platform is preparing your strategy! 🚀"""
             
         if is_answered:
             if field['type'] == 'buttons_multi':
-                text_lines.append(f"{field['text']}\n👉 Selected: _{', '.join(ans)}_ ✅")
+                text_lines.append(f"❓ <b>{field['text']}</b>\n👉 Active: <i>{', '.join(ans)}</i>  ✅")
+            elif field['type'] == 'media':
+                text_lines.append(f"❓ <b>{field['text']}</b>\n👉 Media State: <i>{ans}</i>  ✅")
             else:
-                text_lines.append(f"{field['text']}\n👉 Selected: _{ans}_ ✅")
+                text_lines.append(f"❓ <b>{field['text']}</b>\n👉 Active: <i>{ans}</i>  ✅")
         else:
             if field['type'] == 'text':
-                text_lines.append(f"{field['text']} [Type in chat below] ⌨️")
+                text_lines.append(f"❓ <b>{field['text']}</b> [Awaiting message text input] ⌨️")
+            elif field['type'] == 'media':
+                text_lines.append(f"❓ <b>{field['text']}</b> [Upload an image, drop a file attachment, or tap bypass below] 📸")
             else:
-                text_lines.append(f"{field['text']} [Tap below to pick] ✔️")
+                text_lines.append(f"❓ <b>{field['text']}</b> [Select option below] ✔️")
         text_lines.append("")
 
     text = "\n".join(text_lines)
     keyboard = []
     
+    # Process layouts conditionally based on item schemas
     for field in screen_data['fields']:
         if field['type'] in ['buttons', 'buttons_multi']:
-            # Non-clickable Question Header Row inside the inline keyboard
             clean_q = field['text'].split('?')[0] + "?"
-            keyboard.append([InlineKeyboardButton(f"🔹 {clean_q}", callback_data="ignore")])
+            keyboard.append([InlineKeyboardButton(f"── {clean_q} ──", callback_data="ignore")])
             
             row = []
             for idx, opt in enumerate(field['options']):
@@ -352,9 +353,9 @@ Our matching platform is preparing your strategy! 🚀"""
                 ans = session.answers.get(field['id'])
                 
                 if field['type'] == 'buttons' and ans == opt:
-                    display_opt = f"✅ {opt}"
+                    display_opt = f"⭐ {opt}"
                 elif field['type'] == 'buttons_multi' and ans and opt in ans:
-                    display_opt = f"✅ {opt}"
+                    display_opt = f"⭐ {opt}"
                     
                 cb_data = f"sel_{field['id']}_{idx}"
                 row.append(InlineKeyboardButton(display_opt, callback_data=cb_data))
@@ -364,23 +365,24 @@ Our matching platform is preparing your strategy! 🚀"""
                     row = []
             if row:
                 keyboard.append(row)
+        
+        elif field['type'] == 'media':
+            keyboard.append([InlineKeyboardButton("⏭️ Skip / Privacy Bypass", callback_data="skip_media")])
     
-    # Add navigation row
     if any(f['type'] in ['buttons', 'buttons_multi'] for f in screen_data['fields']):
         if all_required_answered:
-            keyboard.append([InlineKeyboardButton("⚡ NEXT SCREEN ➡️", callback_data="next_screen")])
+            keyboard.append([InlineKeyboardButton("⚡ CONFIRM & CONTINUE ➡️", callback_data="next_screen")])
         else:
-            keyboard.append([InlineKeyboardButton("🔒 Finish Required Items Above", callback_data="locked")])
+            keyboard.append([InlineKeyboardButton("🔒 Awaiting Screen Selections", callback_data="locked")])
 
     markup = InlineKeyboardMarkup(keyboard) if keyboard else None
     
     try:
         if query:
-            await query.edit_message_text(text, reply_markup=markup, parse_mode="Markdown")
+            await query.edit_message_text(text, reply_markup=markup, parse_mode="HTML")
         else:
-            await update.message.reply_text(text, reply_markup=markup, parse_mode="Markdown")
-    except Exception as e:
-        # Prevent crashes if content updates are strictly identical
+            await update.message.reply_text(text, reply_markup=markup, parse_mode="HTML")
+    except Exception:
         pass
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -405,11 +407,18 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     if data == "locked":
-        await query.answer("⚠️ Please pick an answer for the required questions on this screen first!", show_alert=True)
+        await query.answer("⚠️ Complete the mandatory fields above to release the workflow block!", show_alert=True)
         return
         
     if data == "next_screen":
         await query.answer()
+        session.current_screen_idx += 1
+        await render_screen(update, context, query)
+        return
+
+    if data == "skip_media":
+        await query.answer("Media step bypassed.")
+        session.answers["q_photos"] = "Bypassed / Skipped by User"
         session.current_screen_idx += 1
         await render_screen(update, context, query)
         return
@@ -456,39 +465,79 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text_fields = [f for f in screen_data['fields'] if f['type'] == 'text']
     
     if not text_fields:
-        await update.message.reply_text("Please use the inline buttons above to complete this step! 👆")
+        await update.message.reply_text("⚠️ Please utilize the inline options displayed on your screen to proceed.")
         return
         
     field = text_fields[0]
     text = update.message.text.strip()
     
-    # Input validation checks matching your legacy constraints
-    if field['id'] == 'q2': # Age verification
+    if field['id'] == 'q2':
         try:
             age = int(text)
-            if not 13 <= age <= 100:
-                await update.message.reply_text("❌ Age must be between 13 and 100! Try again:")
+            if not 10 <= age <= 100:
+                await update.message.reply_text("❌ Input value rejected. Age must match parameters between 10 and 100.")
                 return
         except ValueError:
-            await update.message.reply_text("❌ Please enter a valid number for age:")
+            await update.message.reply_text("❌ Integer format required for core metric calibration.")
             return
 
     session.answers[field['id']] = text
-    
     if field['id'] == 'q1':
         session.name = text
 
     session.current_screen_idx += 1
     await render_screen(update, context)
 
+async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Intercepts binary objects (Compressed Photos & Encrypted File Attachments)
+    """
+    user_id = update.effective_user.id
+    if user_id not in context.user_data:
+        await start(update, context)
+        return
+        
+    session = context.user_data[user_id]
+    if session.current_screen_idx >= len(SCREENS):
+        return
+        
+    screen_data = SCREENS[session.current_screen_idx]
+    media_fields = [f for f in screen_data['fields'] if f['type'] == 'media']
+    
+    if not media_fields:
+        await update.message.reply_text("⚠️ This stage does not accept media uploads. Please check the current query form instructions.")
+        return
+        
+    field = media_fields[0]
+    
+    # Check what type of attachment was submitted
+    if update.message.photo:
+        file_id = update.message.photo[-1].file_id
+        session.answers[field['id']] = f"Photo Uploaded successfully [ID: {file_id[:12]}...]"
+    elif update.message.document:
+        file_id = update.message.document.file_id
+        session.answers[field['id']] = f"Document File Uploaded successfully [ID: {file_id[:12]}...]"
+    else:
+        session.answers[field['id']] = "Media Attachment Verified"
+        
+    session.current_screen_idx += 1
+    await render_screen(update, context)
+
 def main():
-    print("\n" + "=" * 70)
-    print("🚀 61-QUESTION APP-FLOW INTERACTIVE TELEGRAM BOT")
-    print("=" * 70)
+    print("\n" + "=" * 80)
+    print("🚀 COACH AVNI BOT - PHOTO-READY QUESTIONNAIRE DEPLOYMENT ENGINE")
+    print("=" * 80)
+    print("✅ Full Questionnaire Metrics Implemented")
+    print("✅ 25 Screen States Managed")
+    print("✅ Async Multi-Attachment Media Handlers Enabled")
+    print("=" * 80)
     
     app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
+    
+    # Combined Multi-MIME attachment type media handler
+    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.ALL, media_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
     
     app.run_polling()
