@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - PRODUCTION VERSION
-✅ Fun response → Next question (same message flow)
-✅ NO intermediate text
-✅ Clean button layouts
-✅ Zero syntax issues
+COACH AVNI BOT - SMOOTH FLOW VERSION
+✅ Fun response → Next question (same message)
+✅ NO intermediate "Next question..." text
+✅ Clean button questions in chat
+✅ Seamless experience
 """
 
 import os
@@ -19,12 +19,13 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN not found in environment variables.")
+    print("ERROR: TELEGRAM_TOKEN not found in .env")
     sys.exit(1)
 
 # ============================================================================
-# FUN RESPONSES (Categorized Dictionary)
+# FUN RESPONSES
 # ============================================================================
+
 FUN_RESPONSES = {
     "wake_time": [
         "🌅 Early bird or night owl? We know! 😄",
@@ -119,9 +120,6 @@ FUN_RESPONSES = {
     ]
 }
 
-# ============================================================================
-# QUESTIONS (61-Question Dictionary)
-# ============================================================================
 QUESTIONS = {
     1: {"type": "text", "text": "👤 What's your full name?", "section": "👤 About You", "fun_key": "general"},
     2: {"type": "text", "text": "🎂 What's your age?", "section": "👤 About You", "fun_key": "general"},
@@ -131,12 +129,14 @@ QUESTIONS = {
         "options": ["💻 Software Engineer", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business Owner", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]},
     6: {"type": "buttons", "text": "⚡ Biological sex?", "section": "👤 About You", "fun_key": "general",
         "options": ["👨 Male", "👩 Female", "🌈 Other"]},
+    
     7: {"type": "buttons", "text": "🍽️ Dietary preference?", "section": "🍽️ Diet & Food", "fun_key": "breakfast",
         "options": ["🍗 Non-Vegetarian", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]},
     8: {"type": "buttons_custom", "text": "🚫 Foods you HATE?", "section": "🍽️ Diet & Food", "fun_key": "snacks",
         "options": ["🥒 Bitter gourd", "🍆 Eggplant", "🍄 Mushroom", "🪴 Okra", "🌶️ Capsicum", "🧅 Onion", "🧄 Garlic", "🐟 Fish", "🥚 Egg", "🥛 Dairy"]},
     9: {"type": "buttons_custom", "text": "👨‍🍳 Cuisines you LOVE?", "section": "🍽️ Diet & Food", "fun_key": "lunch",
         "options": ["🇮🇳 North Indian", "🔥 South Indian", "🇧🇩 Bengali", "🥘 Gujarati", "🌶️ Continental", "🥡 Chinese", "🍝 Italian", "🌮 Mexican", "🍜 Thai"]},
+    
     10: {"type": "buttons", "text": "🌅 What time do you wake up?", "section": "☀️ Your Day", "fun_key": "wake_time",
         "options": ["⏰ 5:00 AM", "⏰ 5:30 AM", "⏰ 6:00 AM", "⏰ 6:30 AM", "⏰ 7:00 AM", "⏰ 7:30 AM", "⏰ 8:00 AM", "🛏️ 8:30 AM+"]},
     11: {"type": "buttons", "text": "☕ Breakfast time?", "section": "☀️ Your Day", "fun_key": "breakfast",
@@ -159,6 +159,7 @@ QUESTIONS = {
         "options": ["Same as weekday ⏰", "30 min later 😴", "1 hour later 💤", "1.5 hours later 🛌", "2+ hours later 🌙"]},
     20: {"type": "buttons", "text": "🛏️ Weekend sleep time?", "section": "☀️ Your Day", "fun_key": "sleep",
         "options": ["Same as weekday 🌙", "30 min later 😴", "1 hour later 💤", "1.5 hours later 🛌", "2+ hours later 🛏️"]},
+    
     21: {"type": "buttons_custom", "text": "⚕️ Medical conditions?", "section": "🏥 Health", "fun_key": "general",
         "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "⚠️ High Cholesterol", "🍗 Fatty Liver", "✅ None"]},
     22: {"type": "buttons", "text": "🤧 Any allergies?", "section": "🏥 Health", "fun_key": "general",
@@ -171,6 +172,7 @@ QUESTIONS = {
         "options": ["✅ No", "Old injury (healed) 🩹", "Current injury ⚠️"]},
     26: {"type": "buttons", "text": "📍 Injury location?", "section": "🏥 Health", "fun_key": "general",
         "options": ["🔴 Lower back", "🔴 Knee", "🔴 Shoulder", "🔴 Elbow", "🔴 Wrist", "🔴 Multiple", "✅ N/A"]},
+    
     27: {"type": "buttons", "text": "💊 Do you take supplements?", "section": "⚡ Supplements & Habits", "fun_key": "general",
         "options": ["❌ No", "✅ Yes, 1-2", "✅ Yes, 3-5", "✅ Yes, 5+"]},
     28: {"type": "buttons", "text": "🥛 Protein powder experience?", "section": "⚡ Supplements & Habits", "fun_key": "fitness",
@@ -181,6 +183,7 @@ QUESTIONS = {
         "options": ["✅ No", "🍻 Occasionally", "📅 Weekly", "🎉 Multiple times/week"]},
     31: {"type": "buttons", "text": "🍕 Eating out frequency?", "section": "⚡ Supplements & Habits", "fun_key": "lunch",
         "options": ["❌ Never", "1x/week 🍽️", "2-3x/week 🍜", "4-5x/week 🍛", "☀️ Daily"]},
+    
     32: {"type": "buttons", "text": "😰 Rate daily stress (1-5)", "section": "😴 Sleep & Stress", "fun_key": "stress",
         "options": ["😊 1 (Chill)", "🙂 2", "😐 3 (Neutral)", "😕 4", "😫 5 (Insane)"]},
     33: {"type": "buttons", "text": "💤 Rate sleep quality (1-5)", "section": "😴 Sleep & Stress", "fun_key": "sleep_quality",
@@ -193,6 +196,7 @@ QUESTIONS = {
         "options": ["❌ No", "🙏 Rarely", "🧘 Sometimes", "✅ Regularly"]},
     37: {"type": "buttons", "text": "🔥 What stresses you most?", "section": "😴 Sleep & Stress", "fun_key": "stress",
         "options": ["💼 Work", "❤️ Health", "💔 Relationships", "💰 Money", "⏰ Time", "🌪️ Multiple", "😊 Nothing"]},
+    
     38: {"type": "buttons", "text": "💪 Days/week physically active?", "section": "💪 Fitness", "fun_key": "fitness",
         "options": ["😴 0 (Lazy)", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7 (Daily)"]},
     39: {"type": "buttons", "text": "🏋️ Strength training exp?", "section": "💪 Fitness", "fun_key": "fitness",
@@ -209,12 +213,14 @@ QUESTIONS = {
         "options": ["🚶 0-2 hours", "😐 2-4 hours", "😴 4-6 hours", "😵 6-8 hours", "💀 8+ hours"]},
     45: {"type": "buttons", "text": "📍 Preferred workout spot?", "section": "💪 Fitness", "fun_key": "fitness",
         "options": ["🏢 Gym", "🏠 Home", "🌳 Outdoors", "🔀 Gym & Home", "🌍 Mix all"]},
+    
     46: {"type": "buttons", "text": "👨‍🍳 How often do you cook?", "section": "👨‍🍳 Food & Cooking", "fun_key": "lunch",
         "options": ["❌ Never", "1-2x/week 🍳", "3-4x/week 🥘", "5-6x/week 👨‍🍳", "Daily 🍲"]},
     47: {"type": "buttons", "text": "💰 Food budget preference?", "section": "👨‍🍳 Food & Cooking", "fun_key": "lunch",
         "options": ["💸 Budget-friendly", "💵 Moderate", "💎 Premium", "🤷 No preference"]},
     48: {"type": "buttons", "text": "📦 Can you meal prep?", "section": "👨‍🍳 Food & Cooking", "fun_key": "lunch",
         "options": ["✅ Yes", "Sometimes 😐", "Rarely 😕", "❌ No"]},
+    
     49: {"type": "buttons", "text": "🎯 PRIMARY goal?", "section": "🎯 Your Goals", "fun_key": "goals",
         "options": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "🏃 Endurance", "❤️ Better health", "✨ All of above"]},
     50: {"type": "buttons", "text": "📊 Target weight loss?", "section": "🎯 Your Goals", "fun_key": "goals",
@@ -231,6 +237,7 @@ QUESTIONS = {
         "options": ["🔥 Big changes", "⚡ Moderate", "🌱 Small", "💤 Minimal"]},
     56: {"type": "buttons", "text": "💪 Willing to exercise?", "section": "🎯 Your Goals", "fun_key": "fitness",
         "options": ["✅ 7 days/week", "✅ 5-6 days", "✅ 3-4 days", "😐 1-2 days"]},
+    
     57: {"type": "buttons", "text": "📅 Days/week training?", "section": "🤝 Commitment", "fun_key": "commitment",
         "options": ["1️⃣ 1 day", "2️⃣ 2 days", "3️⃣ 3 days", "4️⃣ 4 days", "5️⃣ 5 days", "6️⃣ 6 days", "7️⃣ 7 days"]},
     58: {"type": "buttons", "text": "🍕 Reduce eating out?", "section": "🤝 Commitment", "fun_key": "commitment",
@@ -265,8 +272,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📋 Complete Fitness Assessment
 ✅ 61 FUN Questions (Zero Boring!)
 ✅ ZERO Typing (Just Click!)
+✅ Specific Questions Only
 🎯 Your Personalized Plan
+⏱️ Takes 10-15 minutes
 
+💬 Pro Tip: We'll chat with you along the way!
 Let's make this FUN! 🚀"""
     
     keyboard = [[InlineKeyboardButton("🎯 LET'S GO! START NOW!", callback_data="start")]]
@@ -289,11 +299,18 @@ async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE, query
 
 👋 {session.name or 'Champion'}! You crushed it! 💪
 
-Your fitness profile is ready! Our coaches are on it."""
-        if query:
-            await query.edit_message_text(final_msg)
-        else:
-            await update.message.reply_text(final_msg)
+Your detailed fitness profile is ready! 
+Our coaches will create your personalized plan soon.
+
+📊 What happens next:
+✅ Your health score calculated
+✅ Barrier analysis complete
+✅ Personalized recommendations coming
+✅ Training plan built just for you!
+
+Thank you for the honesty & engagement! 🙏
+Ready to TRANSFORM? Let's go! 🚀"""
+        await update.message.reply_text(final_msg)
         return
     
     question = QUESTIONS[q_num]
@@ -311,18 +328,11 @@ Your fitness profile is ready! Our coaches are on it."""
             await update.message.reply_text(text)
         return
     
-    # Clean Grid Layout formatting (2 items per row max)
-    buttons = []
-    current_row = []
-    for i, opt in enumerate(question['options']):
-        button = InlineKeyboardButton(opt, callback_data=f"a_{q_num}_{i}")
-        current_row.append(button)
-        if len(current_row) == 2:
-            buttons.append(current_row)
-            current_row = []
-    if current_row:
-        buttons.append(current_row)
-        
+    buttons = [
+        [InlineKeyboardButton(opt, callback_data=f"a_{q_num}_{i}")]
+        for i, opt in enumerate(question['options'])
+    ]
+    
     if question['type'] == 'buttons_custom':
         buttons.append([InlineKeyboardButton("✏️ Custom Answer", callback_data=f"c_{q_num}")])
     
@@ -358,30 +368,40 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         question = QUESTIONS[q_num]
         answer = question['options'][ans_idx]
         session.answers[q_num] = answer
+        
         session.current_q = q_num + 1
         
+        # Get fun response
         fun_key = question.get("fun_key", "general")
         fun_responses = FUN_RESPONSES.get(fun_key, FUN_RESPONSES["general"])
         fun_msg = random.choice(fun_responses)
         
-        response_msg = f"✅ Thanks, {session.name}!\n{fun_msg}" if session.name else f"✅ {fun_msg}"
+        # FIXED: Explicitly display the selected option to the user
+        if session.name:
+            response_msg = f"📩 *Selected:* {answer}\n\n✅ Thanks, {session.name}!\n{fun_msg}"
+        else:
+            response_msg = f"📩 *Selected:* {answer}\n\n✅ {fun_msg}"
         
-        await query.edit_message_text(response_msg)
-        await asyncio.sleep(1.5)
+        # Show selection and fun response
+        await query.edit_message_text(response_msg, parse_mode="Markdown")
+        
+        # Wait then replace with next question
+        await asyncio.sleep(2)
         await ask_question(update, context, query)
         return
     
     if data.startswith("c_"):
         q_num = int(data.split("_")[1])
         session.waiting_custom = q_num
-        await query.edit_message_text("📝 Type your custom answer below:")
+        await query.edit_message_text("📝 Type your custom answer (be creative! 😄):")
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    
     if user_id not in context.user_data:
         await start(update, context)
         return
-        
+    
     session = context.user_data[user_id]
     text = update.message.text.strip()
     
@@ -391,44 +411,70 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         session.waiting_custom = None
         session.current_q = q_num + 1
         
-        fun_msg = random.choice(FUN_RESPONSES["general"])
-        response_msg = f"✅ Thanks, {session.name}!\n{fun_msg}\n\n📝 \"{text}\" - Noted!" if session.name else f"✅ {fun_msg}\n\n📝 \"{text}\" - Noted!"
+        fun_responses = FUN_RESPONSES["general"]
+        fun_msg = random.choice(fun_responses)
         
-        await update.message.reply_text(response_msg)
-        await asyncio.sleep(1.5)
+        # FIXED: Explicitly show custom answer selection
+        if session.name:
+            response_msg = f"📩 *Your Answer:* {text}\n\n✅ Thanks, {session.name}!\n{fun_msg}"
+        else:
+            response_msg = f"📩 *Your Answer:* {text}\n\n✅ {fun_msg}"
+        
+        await update.message.reply_text(response_msg, parse_mode="Markdown")
+        
+        await asyncio.sleep(2)
         await ask_question(update, context)
         return
     
     q_num = session.current_q
     
-    if q_num == 1:
-        session.name = text
-    elif q_num == 2:
+    if q_num == 2:
         try:
             age = int(text)
             if not 13 <= age <= 100:
-                await update.message.reply_text("❌ Age should be between 13 and 100! Try again:")
+                await update.message.reply_text("❌ Age should be 13-100! Try again:")
                 return
-        except ValueError:
-            await update.message.reply_text("❌ That's not a valid number! 🤔 Try again:")
+        except:
+            await update.message.reply_text("❌ That's not a number! 🤔 Try again:")
             return
-            
+    
+    if q_num == 1:
+        session.name = text
+    
     session.answers[q_num] = text
     session.current_q += 1
     
-    fun_msg = random.choice(FUN_RESPONSES["general"])
-    response_msg = f"✅ Thanks, {session.name}!\n{fun_msg}" if session.name else f"✅ {fun_msg}"
+    fun_responses = FUN_RESPONSES["general"]
+    fun_msg = random.choice(fun_responses)
     
-    await update.message.reply_text(response_msg)
-    await asyncio.sleep(1.5)
+    # FIXED: Explicitly show standard entered text answer
+    if session.name:
+        response_msg = f"📩 *Your Answer:* {text}\n\n✅ Thanks, {session.name}!\n{fun_msg}"
+    else:
+        response_msg = f"📩 *Your Answer:* {text}\n\n✅ {fun_msg}"
+    
+    await update.message.reply_text(response_msg, parse_mode="Markdown")
+    
+    await asyncio.sleep(2)
     await ask_question(update, context)
 
 def main():
+    print("\n" + "=" * 70)
+    print("🎉 SMOOTH FLOW MEALZY BOT")
+    print("=" * 70)
+    print("✅ Fun response → Next question (same flow)")
+    print("✅ NO intermediate messages")
+    print("✅ Clean button questions in chat")
+    print("✅ Seamless experience")
+    print("=" * 70)
+    
     app = Application.builder().token(TOKEN).build()
+    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
-    print("🚀 BOT PRODUCTION INSTANCE RUNNING...")
+    
+    print("🚀 BOT RUNNING WITH SMOOTH FLOW!\n")
     app.run_polling()
 
 if __name__ == "__main__":
