@@ -1,34 +1,24 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - THE 100% COMPLETE ULTIMATE MASTER EDITION 🚀
-Features:
-- Complete 61-Question Physiological Assessment Matrix Grouped Across 18 Interactive Screen Windows
-- Strict 64-Byte Compressed Hex Payload Memory Engine (Zero Telegram String Breakage)
-- Persistent 2-Way Navigation Hierarchy (⬅️ BACK / CONTINUE ➡️)
-- Interactive Web-Style "Review & Submit" Dashboard with Deep-Linked Modifiers
-- Real-Time Adaptive Health/Readiness Scoring Loop (Dynamic Metrics calculation)
-- Contextual Automated Chat Commentary/Banter 
-- Drop-off Cart Abandonment Recovery Daemon (30-Minute Nudge Protocol)
-- Pure Local Software-Driven Confirmation Hub (Zero External Gateway Token Requirements)
+COACH AVNI BOT - RAILWAY PRODUCTION EDITION 🚀
 """
 
 import os
 import sys
-from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, MessageHandler, 
     filters, ContextTypes
 )
 
-load_dotenv()
+# Read directly from environment variables (Railway handles this natively)
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN missing from environment configuration.")
+    print("ERROR: TELEGRAM_TOKEN environment variable is missing.")
     sys.exit(1)
 
-# Compressed Field Map to completely bypass Telegram's 64-Byte inline payload constraints
+# Compressed Field Map to bypass Telegram's 64-Byte inline payload constraints
 ID_MAP = {
     "q1": "n", "q2": "ag", "q3": "ht", "q4": "wt", "q5": "pf", "q6": "sx",
     "q7": "dp", "q8": "fh", "q9": "cl", "q10": "wu", "q11": "bt", "q12": "wst",
@@ -45,7 +35,7 @@ ID_MAP = {
 }
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
-# Core 61-Question Comprehensive Structural Architecture
+# Core 61-Question Structural Architecture
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "What is your full name?", "type": "text", "required": True},
@@ -176,7 +166,7 @@ class UserSession:
         self.awaiting_custom_field_id = None
         self.last_commentary = ""
         self.nudge_job = None
-        self.is_submitted = False  # Handles review toggle states
+        self.is_submitted = False
         
     def calculate_readiness_score(self):
         score = 80
@@ -218,7 +208,6 @@ def check_screen_satisfied(session, screen_data) -> bool:
             return False
     return True
 
-# Cart Abandonment Timer Functions
 def reset_nudge_timer(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int):
     session = context.user_data.get(user_id)
     if not session: return
@@ -234,9 +223,6 @@ async def send_abandonment_nudge(context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("⚡ RESUME INTAKE FLOW", callback_data="resume_flow")]]
     await context.bot.send_message(chat_id=job.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
-# ==========================================
-# MASTER LAYOUT CONTROL & RENDERING MODULE
-# ==========================================
 async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None, chat_id=None):
     user_id = update.effective_user.id
     if not chat_id: chat_id = update.effective_chat.id
@@ -244,7 +230,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     
     reset_nudge_timer(context, user_id, chat_id)
     
-    # WORKFLOW A: USER ATReview LAYOUT PANEL
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
         if session.nudge_job: session.nudge_job.schedule_removal()
         
@@ -281,7 +266,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         else: await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # WORKFLOW B: SYSTEM FINAL CLOSURE PROTOCOL
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         goal = session.answers.get("q49", "Dynamic Wellness Plan")
@@ -310,7 +294,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         else: await context.bot.send_message(chat_id, text=final_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # WORKFLOW C: QUESTION INPUT SEQUENCE MODE
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     score = session.calculate_readiness_score()
@@ -368,9 +351,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         else: await context.bot.send_message(chat_id, text=text, reply_markup=markup, parse_mode="HTML")
     except Exception: pass
 
-# ==========================================
-# EVENT HANDLERS & CALLBACK OVERRIDES
-# ==========================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
@@ -468,7 +448,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
         is_multi_question = len(screen_data['fields']) > 1
         
-        # Fast single button tracking instantly progresses screen index safely
         if not has_multi and not is_multi_question: 
             session.current_screen_idx += 1
             session.last_commentary = ""
@@ -493,7 +472,6 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt_fields = [f for f in screen_data['fields'] if f['type'] == 'text']
     if not txt_fields: return
     
-    # Process sequentially for clustered multiple text parameters per view window
     for field in txt_fields:
         if not session.answers.get(field['id']):
             session.answers[field['id']] = text
@@ -516,7 +494,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI FULL 61-QUESTION SYSTEM STANDING STABLE")
+    print("🚀 BOT ENGINE STARTING ON RAILWAY HOOK")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
