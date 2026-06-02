@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - FINAL VERSION
-✅ Multiple questions per screen
-✅ Buttons DIRECTLY below each question
-✅ Clear grouping
-✅ Chat history
+COACH AVNI BOT - WITH HORIZONTAL DIVIDERS
+✅ Question text
+✅ Its buttons
+✅ ━━━━━━━━ DIVIDER LINE
+✅ Next question
+✅ Its buttons
+✅ ━━━━━━━━ DIVIDER LINE
 """
 
 import os
@@ -175,7 +177,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 📋 Quick Assessment
 ✅ 8 Screens
-✅ Questions with buttons below
+✅ Clear horizontal dividers
 ✅ 7 minutes
 
 Let's go! 🚀"""
@@ -215,15 +217,18 @@ Ready to TRANSFORM? 🚀"""
     unanswered_text = [k for k in text_fields if k not in session.inputs]
     session.pending_text = unanswered_text
     
-    # Build message
+    # Build message with DIVIDERS
     text = f"{bar} {prog}%\n\n{screen['title']}\n\n"
     
     buttons = []
+    question_count = 0
     
     for fkey, qdata in screen['questions'].items():
         # Skip answered text
         if qdata['type'] == 'text' and fkey in session.inputs:
             continue
+        
+        question_count += 1
         
         # Question
         text += f"{qdata['q']}\n"
@@ -237,9 +242,14 @@ Ready to TRANSFORM? 🚀"""
                 else:
                     buttons[-1].append(btn)
             
-            text += "\n"  # Space between questions
+            # DIVIDER LINE after question
+            text += "━" * 40 + "\n\n"
         elif qdata['type'] == 'text':
-            text += "*(Type in chat)*\n\n"
+            text += "*(Type in chat)*\n"
+            text += "━" * 40 + "\n\n"
+    
+    # Remove last divider
+    text = text.rstrip()
     
     buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"nx_{sn}")])
     
@@ -338,12 +348,13 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     print("\n" + "=" * 70)
-    print("✅ FINAL BOT - OPTION 2")
+    print("✅ FINAL BOT - WITH DIVIDERS")
     print("=" * 70)
-    print("✅ Multiple questions per screen")
-    print("✅ Buttons DIRECTLY below each question")
-    print("✅ Clear grouping")
-    print("✅ Chat history")
+    print("✅ Question text")
+    print("✅ Buttons below")
+    print("✅ ━━━━━ DIVIDER LINE")
+    print("✅ Next question")
+    print("✅ CRYSTAL CLEAR!")
     print("=" * 70)
     
     app = Application.builder().token(TOKEN).build()
