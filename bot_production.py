@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - WITH HORIZONTAL DIVIDERS
-✅ Question text
-✅ Its buttons
-✅ ━━━━━━━━ DIVIDER LINE
-✅ Next question
-✅ Its buttons
-✅ ━━━━━━━━ DIVIDER LINE
+COACH AVNI BOT - PRODUCTION VERSION
+✅ Shows answered questions with ✅
+✅ Divider line after each
+✅ Next unanswered question [Tap below]
+✅ "Select [Question]" header
+✅ Professional UI
 """
 
 import os
@@ -177,7 +176,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 📋 Quick Assessment
 ✅ 8 Screens
-✅ Clear horizontal dividers
+✅ Professional UI
 ✅ 7 minutes
 
 Let's go! 🚀"""
@@ -217,23 +216,34 @@ Ready to TRANSFORM? 🚀"""
     unanswered_text = [k for k in text_fields if k not in session.inputs]
     session.pending_text = unanswered_text
     
-    # Build message with DIVIDERS
+    # Build message
     text = f"{bar} {prog}%\n\n{screen['title']}\n\n"
     
     buttons = []
-    question_count = 0
+    first_unanswered = None
     
+    # Show answered questions with checkmark
     for fkey, qdata in screen['questions'].items():
-        # Skip answered text
         if qdata['type'] == 'text' and fkey in session.inputs:
+            text += f"{qdata['q']} ✅\n"
+            text += "━" * 50 + "\n\n"
             continue
         
-        question_count += 1
+        if fkey not in session.inputs:
+            if first_unanswered is None:
+                first_unanswered = (fkey, qdata)
+    
+    # Show first unanswered question
+    if first_unanswered:
+        fkey, qdata = first_unanswered
+        text += f"{qdata['q']} [Tap below]\n"
+        text += "━" * 50 + "\n\n"
         
-        # Question
-        text += f"{qdata['q']}\n"
+        # Add section header
+        q_name = qdata['q'].split('?')[0].strip()
+        text += f"Select {q_name}\n\n"
         
-        # Buttons directly below question
+        # Buttons for this question
         if qdata['type'] in ['buttons', 'buttons_multi']:
             for i, opt in enumerate(qdata['opts']):
                 btn = InlineKeyboardButton(opt, callback_data=f"a_{sn}_{fkey}_{i}")
@@ -241,15 +251,12 @@ Ready to TRANSFORM? 🚀"""
                     buttons.append([btn])
                 else:
                     buttons[-1].append(btn)
-            
-            # DIVIDER LINE after question
-            text += "━" * 40 + "\n\n"
-        elif qdata['type'] == 'text':
-            text += "*(Type in chat)*\n"
-            text += "━" * 40 + "\n\n"
     
-    # Remove last divider
-    text = text.rstrip()
+    # Handle text inputs
+    for fkey, qdata in screen['questions'].items():
+        if qdata['type'] == 'text' and fkey not in session.inputs:
+            text += f"{qdata['q']}\n"
+            text += "*(Type in chat)*\n\n"
     
     buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"nx_{sn}")])
     
@@ -348,13 +355,13 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     print("\n" + "=" * 70)
-    print("✅ FINAL BOT - WITH DIVIDERS")
+    print("✅ PRODUCTION BOT - FINAL VERSION")
     print("=" * 70)
-    print("✅ Question text")
-    print("✅ Buttons below")
-    print("✅ ━━━━━ DIVIDER LINE")
-    print("✅ Next question")
-    print("✅ CRYSTAL CLEAR!")
+    print("✅ Shows answered questions with ✅")
+    print("✅ Dividers between questions")
+    print("✅ Unanswered question [Tap below]")
+    print("✅ 'Select [Question]' header")
+    print("✅ Professional UI")
     print("=" * 70)
     
     app = Application.builder().token(TOKEN).build()
