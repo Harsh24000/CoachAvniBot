@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI BOT - PRODUCTION VERSION
-✅ Shows answered questions with ✅
-✅ Divider line after each
-✅ Next unanswered question [Tap below]
-✅ "Select [Question]" header
-✅ Professional UI
+COACH AVNI BOT - CLEAN VERSION
+✅ NO horizontal divider lines
+✅ Chat history
+✅ Answers in chat
+✅ Custom answers
 """
 
 import os
@@ -43,13 +42,15 @@ SCREENS = {
                 "q": "💼 Profession?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["💻 Software Eng", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales", "➕ Other"]
+                "opts": ["💻 Software Eng", "👨‍⚕️ Doctor", "📚 Student", "🏫 Teacher", "👔 Business", "🤵 Consultant", "🏥 Healthcare", "📊 Finance", "🎯 Sales"],
+                "custom": True
             },
             "sex": {
                 "q": "⚡ Biological sex?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["👨 Male", "👩 Female", "🌈 Other"]
+                "opts": ["👨 Male", "👩 Female", "🌈 Other"],
+                "custom": False
             },
         }
     },
@@ -61,13 +62,8 @@ SCREENS = {
                 "q": "🍽️ Dietary preference?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["🍗 Non-Veg", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"]
-            },
-            "disliked_foods": {
-                "q": "🚫 Dislike any foods?",
-                "type": "buttons_multi",
-                "req": False,
-                "opts": ["🥒 Bitter gourd", "🍆 Eggplant", "🍄 Mushroom", "🧅 Onion", "🧄 Garlic"]
+                "opts": ["🍗 Non-Veg", "🥕 Vegetarian", "🥚 Eggetarian", "🌱 Vegan", "☪️ Jain"],
+                "custom": True
             },
         }
     },
@@ -79,13 +75,15 @@ SCREENS = {
                 "q": "🌅 Wake time?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["⏰ 5:00", "⏰ 6:00", "⏰ 7:00", "⏰ 8:00", "🛏️ 8:30+"]
+                "opts": ["⏰ 5:00", "⏰ 6:00", "⏰ 7:00", "⏰ 8:00", "🛏️ 8:30+"],
+                "custom": True
             },
             "sleep_time": {
                 "q": "😴 Sleep time?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["🌙 9:00", "🌙 10:00", "🌙 11:00", "🌙 12:00", "🌙 12:30+"]
+                "opts": ["🌙 9:00", "🌙 10:00", "🌙 11:00", "🌙 12:00", "🌙 12:30+"],
+                "custom": True
             },
         }
     },
@@ -97,13 +95,15 @@ SCREENS = {
                 "q": "🤧 Allergies?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["✅ No", "🍔 Food", "🌫️ Environmental", "🔀 Both"]
+                "opts": ["✅ No", "🍔 Food", "🌫️ Environmental", "🔀 Both"],
+                "custom": False
             },
             "injuries": {
                 "q": "🤕 Injuries?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["✅ No", "Old (healed)", "Current"]
+                "opts": ["✅ No", "Old (healed)", "Current"],
+                "custom": False
             },
         }
     },
@@ -115,13 +115,15 @@ SCREENS = {
                 "q": "💪 Active days/week?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["😴 0", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7"]
+                "opts": ["😴 0", "🚶 1-2", "🏃 3-4", "🏋️ 5-6", "⚡ 7"],
+                "custom": False
             },
             "strength_exp": {
                 "q": "🏋️ Strength training?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"]
+                "opts": ["👶 None", "🌱 Beginner", "💪 Intermediate", "🦾 Advanced"],
+                "custom": False
             },
         }
     },
@@ -133,13 +135,15 @@ SCREENS = {
                 "q": "🎯 Main goal?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "❤️ Better health"]
+                "opts": ["📉 Lose weight", "💪 Build muscle", "⚡ Get stronger", "❤️ Better health"],
+                "custom": True
             },
             "timeline": {
                 "q": "⏱️ Timeline?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year"]
+                "opts": ["🚀 1 month", "📅 3 months", "📅 6 months", "📅 1 year"],
+                "custom": False
             },
         }
     },
@@ -151,7 +155,8 @@ SCREENS = {
                 "q": "🚀 Ready to START?",
                 "type": "buttons",
                 "req": True,
-                "opts": ["🔥 YES! 100%!", "✅ Yes", "🤔 Maybe", "⏳ Not yet"]
+                "opts": ["🔥 YES! 100%!", "✅ Yes", "🤔 Maybe", "⏳ Not yet"],
+                "custom": False
             },
         }
     },
@@ -163,7 +168,7 @@ class UserSession:
         self.inputs = {}
         self.answers = {}
         self.name = None
-        self.pending_text = []
+        self.waiting_custom = None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -174,11 +179,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 💪 Transform Your Body
 ✨ Transform Your Life
 
-📋 Quick Assessment
-✅ 8 Screens
-✅ Professional UI
-✅ 7 minutes
-
+📋 Quick Assessment - 7 min
 Let's go! 🚀"""
     
     keyboard = [[InlineKeyboardButton("🎯 START", callback_data="start")]]
@@ -199,65 +200,56 @@ async def show_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=
 
 👋 {session.name or 'Champion'}!
 
-Your profile is READY!
-Coaches creating plan NOW!
+Your profile READY!
+Coaches creating plan!
 
-Thank you! 🙏
-Ready to TRANSFORM? 🚀"""
-        await update.message.reply_text(msg)
+Thank you! 🙏"""
+        if query:
+            await query.edit_message_text(msg)
+        else:
+            await update.message.reply_text(msg)
         return
     
     screen = SCREENS[sn]
     prog = int((sn / 8) * 100)
     bar = "█" * (prog // 5) + "░" * (20 - (prog // 5))
     
-    # Get text fields
-    text_fields = [k for k, v in screen['questions'].items() if v['type'] == 'text']
-    unanswered_text = [k for k in text_fields if k not in session.inputs]
-    session.pending_text = unanswered_text
-    
-    # Build message
+    # Build message text
     text = f"{bar} {prog}%\n\n{screen['title']}\n\n"
     
+    # Show ALL answered questions with checkmarks
+    for fkey, qdata in screen['questions'].items():
+        if fkey in session.inputs:
+            text += f"{qdata['q']} ✅\n"
+    
+    # Show first unanswered question
     buttons = []
     first_unanswered = None
     
-    # Show answered questions with checkmark
     for fkey, qdata in screen['questions'].items():
-        if qdata['type'] == 'text' and fkey in session.inputs:
-            text += f"{qdata['q']} ✅\n"
-            text += "━" * 50 + "\n\n"
-            continue
-        
         if fkey not in session.inputs:
             if first_unanswered is None:
                 first_unanswered = (fkey, qdata)
     
-    # Show first unanswered question
+    # Display unanswered question
     if first_unanswered:
         fkey, qdata = first_unanswered
-        text += f"{qdata['q']} [Tap below]\n"
-        text += "━" * 50 + "\n\n"
+        text += f"\n{qdata['q']} [Tap below]\n\n"
+        text += f"Select {qdata['q'].split('?')[0].strip()}\n\n"
         
-        # Add section header
-        q_name = qdata['q'].split('?')[0].strip()
-        text += f"Select {q_name}\n\n"
+        # Create buttons
+        for i, opt in enumerate(qdata['opts']):
+            btn = InlineKeyboardButton(opt, callback_data=f"a_{sn}_{fkey}_{i}")
+            if not buttons or len(buttons[-1]) >= 2:
+                buttons.append([btn])
+            else:
+                buttons[-1].append(btn)
         
-        # Buttons for this question
-        if qdata['type'] in ['buttons', 'buttons_multi']:
-            for i, opt in enumerate(qdata['opts']):
-                btn = InlineKeyboardButton(opt, callback_data=f"a_{sn}_{fkey}_{i}")
-                if not buttons or len(buttons[-1]) >= 2:
-                    buttons.append([btn])
-                else:
-                    buttons[-1].append(btn)
+        # Add custom button if allowed
+        if qdata.get('custom'):
+            buttons.append([InlineKeyboardButton("📝 Custom", callback_data=f"c_{sn}_{fkey}")])
     
-    # Handle text inputs
-    for fkey, qdata in screen['questions'].items():
-        if qdata['type'] == 'text' and fkey not in session.inputs:
-            text += f"{qdata['q']}\n"
-            text += "*(Type in chat)*\n\n"
-    
+    # Next button
     buttons.append([InlineKeyboardButton("✅ NEXT →", callback_data=f"nx_{sn}")])
     
     markup = InlineKeyboardMarkup(buttons)
@@ -297,15 +289,26 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         sess.inputs[fkey] = ans
         sess.answers[fkey] = ans
         
-        fun = random.choice(FUN_RESPONSES)
-        await query.answer(fun, show_alert=False)
-        
-        # Show in chat
+        # SHOW ANSWER IN CHAT
         qtxt = qdata['q'].replace("?", "").strip()
         await update.callback_query.message.reply_text(f"✅ {qtxt}\n→ {ans}")
         
         await asyncio.sleep(0.5)
         await show_screen(update, context, query)
+    
+    # Custom answer button
+    if data.startswith("c_"):
+        parts = data.split("_")
+        sn = int(parts[1])
+        fkey = parts[2]
+        
+        sess.waiting_custom = (sn, fkey)
+        
+        screen = SCREENS[sn]
+        qdata = screen['questions'][fkey]
+        qtxt = qdata['q'].replace("?", "").strip()
+        
+        await update.callback_query.message.reply_text(f"📝 Type your answer for:\n{qtxt}")
         
     if data.startswith("nx_"):
         sn = int(data.split("_")[1])
@@ -319,7 +322,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         sess.screen += 1
         sess.inputs = {}
-        sess.pending_text = []
         await show_screen(update, context, query)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -330,14 +332,37 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     sess = context.user_data[uid]
-    sn = sess.screen
-    screen = SCREENS[sn]
     txt = update.message.text.strip()
     
-    if not sess.pending_text:
+    # Handle custom answer
+    if sess.waiting_custom:
+        sn, fkey = sess.waiting_custom
+        screen = SCREENS[sn]
+        qdata = screen['questions'][fkey]
+        
+        sess.inputs[fkey] = txt
+        sess.answers[fkey] = txt
+        sess.waiting_custom = None
+        
+        # SHOW ANSWER IN CHAT
+        qtxt = qdata['q'].replace("?", "").strip()
+        await update.message.reply_text(f"✅ {qtxt}\n→ {txt}")
+        
+        await asyncio.sleep(1)
+        await show_screen(update, context)
         return
     
-    fkey = sess.pending_text[0]
+    # Handle regular text input
+    sn = sess.screen
+    screen = SCREENS[sn]
+    
+    # Find first unanswered text field
+    text_fields = [k for k, v in screen['questions'].items() if v['type'] == 'text' and k not in sess.inputs]
+    
+    if not text_fields:
+        return
+    
+    fkey = text_fields[0]
     qdata = screen['questions'][fkey]
     
     sess.inputs[fkey] = txt
@@ -347,21 +372,20 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if fkey == 'name':
         sess.name = txt
     
+    # SHOW ANSWER IN CHAT
     await update.message.reply_text(f"✅ {qtxt}\n→ {txt}")
-    sess.pending_text.pop(0)
     
     await asyncio.sleep(1)
     await show_screen(update, context)
 
 def main():
     print("\n" + "=" * 70)
-    print("✅ PRODUCTION BOT - FINAL VERSION")
+    print("✅ CLEAN BOT - NO DIVIDER LINES")
     print("=" * 70)
-    print("✅ Shows answered questions with ✅")
-    print("✅ Dividers between questions")
-    print("✅ Unanswered question [Tap below]")
-    print("✅ 'Select [Question]' header")
-    print("✅ Professional UI")
+    print("✅ Chat history")
+    print("✅ Answers in chat")
+    print("✅ Custom answers")
+    print("✅ NO divider lines")
     print("=" * 70)
     
     app = Application.builder().token(TOKEN).build()
