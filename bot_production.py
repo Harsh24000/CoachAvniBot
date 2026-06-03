@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PREMIUM CONVERSATION ENGINE (SMART SCREEN-FLOW EDITION)
-Fixes: Multi-question screens update silently until completely satisfied.
-Standalone witty remarks only drop into permanent chat history when a screen is fully answered.
+COACH AVNI - PREMIUM CONVERSATION ENGINE (CLEAN CONVERSATION EDITION)
+Upgrades:
+- Completely removes the generic 'Configured standard profile log' spam.
+- Only posts a permanent chat message if a tailored, funny response actually exists.
+- Smooths out multi-question screen logic for cleaner progression.
 """
 
 import os
@@ -164,6 +166,10 @@ class UserSession:
         return max(10, min(100, score))
 
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
+    """
+    Returns a string ONLY if there is a tailored high-value comment.
+    Otherwise returns None so we don't spam the chat with standard logs.
+    """
     v = str(value)
     reactions = {
         "q2": "Age is just a baseline number. We are about to optimize your cellular age anyway! 🧬",
@@ -223,7 +229,7 @@ def get_funny_instant_reaction(field_id: str, value: str) -> str:
                 if key in v: return f"🎙️ <b>Coach Avni:</b> {msg}"
         else:
             return f"🎙️ <b>Coach Avni:</b> {reactions[field_id]}"
-    return f"🎙️ <b>Coach Avni:</b> Configured standard profile log for {field_id.upper()}."
+    return None
 
 def check_screen_satisfied(session, screen_data) -> bool:
     for field in screen_data['fields']:
@@ -237,7 +243,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
-    # Summary Review Phase
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
         review_text = f"📋 <b>Alright {session.name}, here is your full profile board. Review before locking it down:</b>\n\n"
         processed_sections = []
@@ -266,7 +271,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
         await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # Call Booking Phase
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         success_text = (
@@ -278,7 +282,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
         await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # Active Questionnaire Presentation
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     
@@ -327,7 +330,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
             nav_row.append(InlineKeyboardButton("🔒 Finish all answers above", callback_data="locked"))
     if nav_row: keyboard.append(nav_row)
 
-    # SMART INTERFACE ENGINE: Update current message if on a multi-question screen, else push forward freshly
     if message_id:
         try:
             await context.bot.edit_message_text(text, chat_id=chat_id, message_id=message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
@@ -374,15 +376,17 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     if data == "next_screen":
         await query.answer()
-        # SCREEN ADVANCEMENT: Drop reactions permanently into historical text layout
         screen_data = SCREENS[session.current_screen_idx]
         try: await query.message.delete()
         except Exception: pass
         
+        # User explicitly hits "CONTINUE" -> Only post reactions that actually have meaningful text
         for field in screen_data['fields']:
             ans = session.answers.get(field['id'])
             if ans and field['type'] == 'buttons':
-                await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(field['id'], ans), parse_mode="HTML")
+                msg = get_funny_instant_reaction(field['id'], ans)
+                if msg:  # Only send if it's not None! No more logs!
+                    await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
                 
         session.current_screen_idx += 1
         await render_screen(update, context, chat_id=query.message.chat_id)
@@ -403,7 +407,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception: pass
         session.is_submitted = True
         
-        # Safe execution of dynamic PDF rendering engine
         try:
             from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -491,26 +494,22 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
         is_multi_question = len(screen_data['fields']) > 1
         
-        # SMART LAYER FLOW CHECK
         if not has_multi and not is_multi_question:
-            # Single question screen: Clean old message, output witty chat commentary, advance cleanly
+            # Single question screen: Process immediately, delete the form card, send reaction, proceed
             try: await query.message.delete()
             except Exception: pass
-            await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(field_id, selected), parse_mode="HTML")
+            
+            msg = get_funny_instant_reaction(field_id, selected)
+            if msg:
+                await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
+                
             session.current_screen_idx += 1
             await render_screen(update, context, chat_id=query.message.chat_id)
         else:
-            # Multi-question screen: Edit current message layout quietly so user can tap remaining choices
+            # Multi-question screen: Allow toggling options freely. No chat drops until they press CONTINUE.
             if check_screen_satisfied(session, screen_data):
-                try: await query.message.delete()
-                except Exception: pass
-                # Dump reactions for all questions on this completed screen into chat history blocks
-                for f in screen_data['fields']:
-                    ans = session.answers.get(f['id'])
-                    if ans and f['type'] == 'buttons':
-                        await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(f['id'], ans), parse_mode="HTML")
-                session.current_screen_idx += 1
-                await render_screen(update, context, chat_id=query.message.chat_id)
+                # We update the screen to reveal the un-locked 'CONTINUE ➡️' button
+                await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
             else:
                 await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
 
@@ -524,7 +523,11 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if session.awaiting_custom_field_id:
         session.answers[session.awaiting_custom_field_id] = text
         session.awaiting_custom_field_id = None
-        await context.bot.send_message(chat_id=chat_id, text=get_funny_instant_reaction(session.awaiting_custom_field_id, text), parse_mode="HTML")
+        
+        msg = get_funny_instant_reaction(session.awaiting_custom_field_id, text)
+        if msg:
+            await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="HTML")
+            
         if check_screen_satisfied(session, SCREENS[session.current_screen_idx]): 
             session.current_screen_idx += 1
         await render_screen(update, context, chat_id=chat_id)
@@ -538,7 +541,10 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not session.answers.get(field['id']):
             session.answers[field['id']] = text
             if field['id'] == 'q1': session.name = text
-            await context.bot.send_message(chat_id=chat_id, text=get_funny_instant_reaction(field['id'], text), parse_mode="HTML")
+            
+            msg = get_funny_instant_reaction(field['id'], text)
+            if msg:
+                await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="HTML")
             break
             
     if check_screen_satisfied(session, screen_data):
@@ -556,7 +562,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI ONLINE — SCREEN INTERACTION PIPELINE ACTIVE")
+    print("🚀 COACH AVNI ONLINE — CLEAN HISTORY PIPELINE INITIALIZED")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
