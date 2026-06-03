@@ -4,8 +4,8 @@ COACH AVNI - PERSONALITY ENGINE (VOICE INPUT HARDENED EDITION)
 100% of your 61 baseline questions, logic flows, and layout variables are preserved.
 
 Fixes Deployed:
-- Added safe voice note transcription via OpenAI Whisper API inside custom inputs.
-- Hardened file download and API processing streams against unexpected connection drops.
+- Decoupled handle_text_or_transcription from update.message.text to avoid AttributeError on Voice notes.
+- Hardened double-click callback exceptions against 'Message is not modified' Telegram interruptions.
 - Maintained voiceless text replies (Coach Avni answers back purely with high-performance text).
 """
 
@@ -674,12 +674,15 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             session.current_screen_idx += 1
             await render_screen(update, context, target_chat_id=query.message.chat_id)
         else:
-            await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+            try:
+                await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+            except Exception as double_click_err:
+                if "Message is not modified" in str(double_click_err):
+                    pass
 
-async def handle_text_or_transcription(text: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_text_or_transcription(text: str, update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id: int):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
-    chat_id = update.message.chat_id
     
     if session.awaiting_custom_field_id:
         f_id = session.awaiting_custom_field_id
@@ -731,7 +734,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
     if not session or (session.current_screen_idx >= len(SCREENS) and not session.current_branch_field): return
-    await handle_text_or_transcription(update.message.text.strip(), update, context)
+    await handle_text_or_transcription(update.message.text.strip(), update, context, update.message.chat_id)
 
 async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -760,7 +763,7 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         await context.bot.delete_message(chat_id=chat_id, message_id=status_msg.message_id)
         if parsed_text:
-            await handle_text_or_transcription(parsed_text, update, context)
+            await handle_text_or_transcription(parsed_text, update, context, chat_id)
         else:
             await context.bot.send_message(chat_id=chat_id, text="⚠️ Audio file detected, but no clear text was extracted. Please try speaking closer to your device.")
     except Exception as e:
@@ -779,7 +782,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, target_chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 HARDENED DUAL VOICE/TEXT SELECTION ENGINE RUNNING PINNED CHANNELS")
+    print("🚀 HARDENED DUAL VOICE/TEXT ENGINE DEPLOYED — HOTPATCH ACTIVE")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
