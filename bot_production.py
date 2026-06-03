@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (ULTIMATE COMPLETE EDITION)
+COACH AVNI - PRODUCTION ENGINE (DYNAMIC IDENTITY RECTIFIED)
 Features:
-- Dynamic {name} interpolation across all questions & headers.
-- Full 62-question script with complex multi-select fields.
-- Automated progress bars and state verification mapping rules.
-- Pre-built obfuscated Callback Data mapping to bypass Telegram limits.
-- Contextual occupation and engineering roasts/triggers built-in.
-- Background drop-off safety trackers and auto-compiled ReportLab PDF summary briefs.
+- Fixed Screen-1 Initialization bug (No default preview name leakage)
+- Contextual placeholders: uses "there" dynamically until Q1 is populated
+- Full 62-Question Matrix with conditional branch scripts
+- Compressed callback keys avoiding Telegram's 64-byte overflow payload limit
+- Fully unified background drop-off safety trackers & ReportLab PDF compiler
 """
 
 import os
@@ -35,7 +34,7 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
-    print("CRITICAL: TELEGRAM_TOKEN missing.")
+    print("CRITICAL: TELEGRAM_TOKEN missing from environment configurations.")
     sys.exit(1)
 
 # Compressed state mapping to guarantee payloads fit into Telegram's 64-byte callbacks safely
@@ -156,7 +155,7 @@ class UserSession:
     def __init__(self):
         self.current_screen_idx = 0
         self.answers = {}
-        self.name = "Harsh"  # Default fallback state baseline name
+        self.name = ""  # Fixed: Intentionally blank at launch to prevent fallback leak
         self.awaiting_custom_field_id = None
         self.is_submitted = False
         self.last_activity = datetime.now()
@@ -291,10 +290,11 @@ async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
     if not session or session.is_submitted:
         return
 
+    display_name = session.name if session.name else "there"
     if job.data["type"] == "nudge":
-        text = f"🎙️ <b>Coach Avni:</b> Hey {session.name}, don't leave your metabolic blueprint sitting on the table. We're only a few steps away from finishing your profile. Let's get it locked down! 🔥"
+        text = f"🎙️ <b>Coach Avni:</b> Hey {display_name}, don't leave your metabolic blueprint sitting on the table. We're only a few steps away from finishing your profile. Let's get it locked down! 🔥"
     else:
-        text = f"🚨 <b>Coach Avni [FINAL WARNING]:</b> Hey {session.name}, your custom bio-metric strategy sheet calculation is currently on hold. Tap below to jump straight back into your assessment matrix."
+        text = f"🚨 <b>Coach Avni [FINAL WARNING]:</b> Hey {display_name}, your custom bio-metric strategy sheet calculation is currently on hold. Tap below to jump straight back into your assessment matrix."
         
     keyboard = [[InlineKeyboardButton("⚡ RESUME ASSESSMENT", callback_data="resume_onboarding")]]
     await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
@@ -310,10 +310,11 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
             job.schedule_removal()
         
     score = session.calculate_readiness_score()
+    display_name = session.name if session.name else "Client"
     
     success_text = (
         f"🧠 <b>BIO-METRIC ONBOARDING REGISTERED SUCCESSFULLY</b>\n\n"
-        f"👤 <b>Client:</b> {session.name}\n"
+        f"👤 <b>Client:</b> {display_name}\n"
         f"📊 <b>Metabolic Score Metric:</b> {score}/100\n"
         f"✅ <b>Status:</b> Completely Configured.\n\n"
         f"Your tailored onboarding protocol file brief has been generated.\n"
@@ -341,7 +342,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
         
         story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
-        story.append(Paragraph(f"<b>Client Target:</b> {session.name}", body_style))
+        story.append(Paragraph(f"<b>Client Target:</b> {display_name}", body_style))
         story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {score}/100", body_style))
         story.append(Spacer(1, 15))
         
@@ -351,7 +352,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
                 ans = session.answers.get(field['id'])
                 if ans:
                     val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                    clean_text = field['text'].replace("{name}", session.name)
+                    clean_text = field['text'].replace("{name}", display_name)
                     table_data.append([Paragraph(clean_text, body_style), Paragraph(val_str, body_style)])
                     
         t = Table(table_data, colWidths=[270, 230])
@@ -369,7 +370,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         await context.bot.send_document(
             chat_id=target_chat_id,
             document=buffer,
-            filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Profile.pdf",
+            filename=f"Coach_Avni_{display_name.replace(' ', '_')}_Profile.pdf",
             caption="📄 Your Complete Strategic Profile Report",
             parse_mode="HTML"
         )
@@ -393,15 +394,18 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     
     text = f"📝 <b>Phase: {screen_data['section']}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
+    # Check if the name has been set via Q1, otherwise safely fall back to "there"
+    current_display_name = str(session.answers.get("q1")) if session.answers.get("q1") else "there"
+
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
-        orig_text = field['text'].replace("{name}", session.name)
+        orig_text = field['text'].replace("{name}", current_display_name)
         
         if field['id'] == "q14" and session.answers.get("q5"):
             job = str(session.answers.get("q5")).split()[-1]
-            orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work, {session.name}?"
+            orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work, {current_display_name}?"
         elif field['id'] == "q50" and "Engineer" in str(session.answers.get("q5")):
-            orig_text = f"Be honest {session.name}: how many hours is your back glued to that coding desk chair every day?"
+            orig_text = f"Be honest {current_display_name}: how many hours is your back glued to that coding desk chair every day?"
             
         if session.awaiting_custom_field_id == field['id']:
             text += f"❓ <b>{orig_text}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
@@ -417,7 +421,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     
     for field in screen_data['fields']:
         if field['type'] in ['buttons', 'buttons_multi']:
-            clean_hdr = field['text'].replace("{name}", session.name).split('?')[0].split(':')[0].strip()
+            clean_hdr = field['text'].replace("{name}", current_display_name).split('?')[0].split(':')[0].strip()
             keyboard.append([InlineKeyboardButton(f"⬇️ {clean_hdr} ⬇️", callback_data="ignore")])
             row, short_id = [], ID_MAP[field['id']]
             for idx, opt in enumerate(field['options']):
@@ -585,7 +589,7 @@ async def inbound_message_handler(update: Update, context: ContextTypes.DEFAULT_
 
     session.answers[target_field_id] = user_input_value
     
-    # Capture name live to dynamically modify the experience instantly!
+    # Dynamically capture identity straight out of text stream pipeline
     if target_field_id == "q1":
         session.name = user_input_value
 
