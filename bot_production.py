@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PREMIUM CONVERSATION ENGINE (CLEAN CONVERSATION EDITION)
+COACH AVNI - PREMIUM CONVERSATION ENGINE (LAYOUT MATCH EDITION)
 Upgrades:
-- Completely removes the generic 'Configured standard profile log' spam.
-- Only posts a permanent chat message if a tailored, funny response actually exists.
-- Smooths out multi-question screen logic for cleaner progression.
+- Matches the exact UI output shown in the user's historical screenshot.
+- Triggers custom file compilation and unified menu design cleanly.
+- Preserves all upgraded roasting and humor responses.
 """
 
 import os
@@ -151,7 +151,7 @@ class UserSession:
     def __init__(self):
         self.current_screen_idx = 0
         self.answers = {}
-        self.name = "there"
+        self.name = "Harsh"
         self.awaiting_custom_field_id = None
         self.is_submitted = False
         
@@ -165,61 +165,92 @@ class UserSession:
         if "Fragmented" in sleep: score -= 10
         return max(10, min(100, score))
 
+    def calculate_bmr_tdee(self):
+        try:
+            age = float(self.answers.get("q2", 30))
+            height = float(self.answers.get("q3", 170))
+            weight = float(self.answers.get("q4", 70))
+            is_male = "Male" in str(self.answers.get("q6", "Male"))
+            
+            if is_male:
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
+            else:
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161
+                
+            tdee = bmr * 1.375 
+            return int(bmr), int(tdee)
+        except Exception:
+            return 1600, 2200
+
+def generate_progress_bar(pct: int) -> str:
+    total_blocks = 10
+    filled_blocks = int(pct / 10)
+    empty_blocks = total_blocks - filled_blocks
+    bar_str = "█" * filled_blocks + "░" * empty_blocks
+    return f"<code>[{bar_str}] {pct}%</code>"
+
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
-    """
-    Returns a string ONLY if there is a tailored high-value comment.
-    Otherwise returns None so we don't spam the chat with standard logs.
-    """
     v = str(value)
     reactions = {
-        "q2": "Age is just a baseline number. We are about to optimize your cellular age anyway! 🧬",
+        "q2": "Age is just a software parameter. We are about to optimize your cellular biology split anyway! 🧬",
         "q5": {
-            "💻 Engineer": "An Engineer! Prepare to analyze your macros like code. Just don't over-engineer the workout. 😉",
-            "👨‍⚕️ Doctor": "A Doctor! Respect for the brutal shifts. Let's make sure you aren't ignoring your own charts.",
-            "📊 Corporate": "Corporate life! High status, higher sitting hours. Time to optimize your corporate engine."
+            "💻 Engineer": "An Engineer! Excellent. Prepare to treat your macronutrients like clean lines of production code. Just don't spend three weeks refactoring your breakfast setup. 😉",
+            "👨‍⚕️ Doctor": "A Doctor! Absolute respect for those continuous shifts. But let's make sure you aren't ignoring your own metabolic warning lights while managing everyone else's.",
+            "📊 Corporate": "Ah, corporate life! High status, higher sitting hours. Let's make sure your performance targets apply to your health markers too.",
+            "📚 Student": "Student life! Powered entirely by cheap noodles, bad posture, and cramming sessions. Time to upgrade the baseline fuel profile."
         },
         "q6": {
-            "👨 Male": "Got it, optimizing hormones and training split for male biology profile. 💪",
-            "👩 Female": "Got it, designing meal structures matching female endocrine optimization profiles. ✨"
+            "👨 Male": "Understood. Tailoring hormone calibration and heavy load training patterns for male endocrine baselines. 💪",
+            "👩 Female": "Understood. Adjusting micronutrient structures matching female bio-rhythm and system demands. ✨"
         },
         "q7": {
-            "🍗 Non-Veg": "Non-veg makes hitting our daily complete protein targets much easier. Perfect.",
-            "🥕 Veg": "Vegetarian it is. Don't worry, I won't just dump paneer and cucumbers on your plate.",
-            "🌱 Vegan": "Vegan! Plant-powered engine. We will need to be tactical with amino-acid pairing."
+            "🍗 Non-Veg": "Non-veg targets locked down. Hitting our continuous daily complete protein profile just got 10x easier.",
+            "🥕 Veg": "Vegetarian it is! Don't worry, my protocols don't involve dumping endless bowls of raw spinach and tofu on your desk.",
+            "🌱 Vegan": "Vegan! Plant-powered engine. We will need to be surgically tactical with your essential amino-acid pairing, but we'll smash it."
         },
         "q10": {
-            "☕ Yes, regularly": "Regular caffeine dependency? Let's make sure it's not masking deep system fatigue. ☕",
-            "🚫 Total Abstinence": "Zero caffeine? Wow, running on pure natural ATP. Love to see it! 🙌"
+            "☕ Yes, regularly": "Regular caffeine dependency? Let's check if that coffee is actually a tactical pre-workout or just a structural crutch holding up your sleep deficit. ☕",
+            "🚫 Total Abstinence": "Zero caffeine? Wow, clean energy matrix running on pure biological ATP. Mad respect! 🙌"
         },
         "q11": {
-            "⏰ 5:00 AM": "5 AM club! Early bird efficiency. Your circadian rhythms are already in prime position.",
-            "⏰ 8:00 AM+": "Waking up past 8 AM? Night owl tendencies or corporate recovery mode? We will adapt."
+            "⏰ 5:00 AM": "5 AM club! Early bird advantage. Your biological circadian clock is already primed for high-performance structure.",
+            "⏰ 8:00 AM+": "Waking past 8 AM? Night-owl patterns or corporate burnout recovery? We will calibrate the routine to match your schedule."
         },
         "q17": {
-            "🦉 1:00 AM+": "Past 1 AM? Ouch. Those blue screens are actively tricking your brain into thinking it's noon. 🦉"
+            "🦉 1:00 AM+": "Going down past 1 AM?! Ouch. Those late-night blue screens are completely rewriting your cortisol signals. Let's work on fixing that sleep window. 🦉"
+        },
+        "q18": {
+            "🍪 Constant": "Constant snacking? Remember: every random cookie run triggers an instant digestive spike, meaning your body never actually gets a chance to look at its fat storage units! 🛑"
         },
         "q19": {
-            "🥛 < 1 Litre": "Wait... less than 1L of water?! Your blood is practically running on thick sludge right now. Drink up! 🚰",
-            "🌊 3+ Litres": "Over 3 Litres? Hydro-homie status unlocked! Your metabolic processes thank you. 🌊"
+            "🥛 < 1 Litre": "Wait... less than 1L of water?! Your cellular matrix is practically wading through thick sludge right now. Drop the phone and drink a glass immediately! 🚰",
+            "🌊 3+ Litres": "Over 3 Litres? Hydro-champion status unlocked! Your kidney clearance and metabolic pathways thank you. 🌊"
         },
         "q20": {
-            "🍔 Daily": "Daily takeout?! Safe to say your body is swimming in industrial seed oils. Time for an intervention! 🚨"
+            "🍔 Daily": "Daily takeout?! Your poor liver is practically fighting a daily tactical war against hidden restaurant fats and processed oils. Time for a hard reset! 🚨",
+            "🍕 2-3x / Week": "2-3 restaurant meals a week is exactly where hidden sodium blocks sneak up on you. We will optimize this balance."
+        },
+        "q21": {
+            "🍺 High Volume": "High-volume alcohol? That's an instant system pause on fat oxidation. Your liver will drop everything to clear that out first. We need to negotiate this down! 📉"
         },
         "q28": {
-            "🍩 Intense daily": "Intense daily sugar cravings? Remember: that's your gut microbiome screaming for bad fuel, not a lack of willpower."
+            "🍩 Intense daily": "Intense sugar cravings aren't a character defect or lack of willpower; it's your gut microbiome yelling for fast energy because your glucose baseline is bouncing around."
         },
         "q29": {
-            "🥱 Severe 3 PM crash": "Ah, the classic 3 PM energy flatline. That's your glucose spiking up and crashing hard. We'll end that rollercoaster. 📉"
+            "🥱 Severe 3 PM crash": "Ah, the legendary 3 PM mid-day wall. That's your high-carb lunch crashing down hard. We will replace that energy rollercoaster with steady performance fuel. 📉"
         },
         "q40": {
-            "😫 4-5 (High)": "High stress overload. Cortisol is the ultimate enemy of fat loss. We are heavily prioritizing recovery protocols for you. 🧘‍♂️"
+            "😫 4-5 (High)": "High stress limits. Chronic cortisol is a major roadblock to lean body targets. We are placing heavy emphasis on recovery protocols for you. 🧘‍♂️"
         },
         "q50": {
-            "💀 8+ Hours": "8+ hours glued to a desk chair is the absolute kryptonite for active posture. We will introduce micro-movements. 🛋️"
+            "💀 8+ Hours": "8+ hours locked into a desk chair is absolute kryptonite for glute activation and posture alignment. We will introduce micro-movement protocols to counter this. 🛋️"
+        },
+        "q53": {
+            "🔥 Uncontrollable/Bingeing": "Appetite all over the place? That's usually just your leptin and ghrelin signaling getting confused by irregular meal patterns. Easy fix."
         },
         "q55": {
-            "📉 Aggressive Fat Loss": "Aggressive fat loss! Bold goal. It requires absolute operational compliance. Let's build the engine.",
-            "💪 Hypertrophy Lean Muscle": "Lean muscle hypertrophy! Time to trigger progressive overload and optimize your amino synthesis."
+            "📉 Aggressive Fat Loss": "Aggressive fat loss! Bold approach. It requires high operational focus, but we are building a metabolic engine to handle it cleanly.",
+            "💪 Hypertrophy Lean Muscle": "Lean muscle hypertrophy! Excellent. Time to set up consistent progressive overload structures and track your protein synthesis."
         }
     }
     
@@ -238,64 +269,120 @@ def check_screen_satisfied(session, screen_data) -> bool:
             return False
     return True
 
+async def trigger_final_onboarding_success_view(update: Update, context: ContextTypes.DEFAULT_TYPE, chat_id):
+    """
+    MATCHES PERFECTLY WITH SCREENSHOT 2026-06-03 AT 10.26.36.JPG layout frames:
+    Outputs unified success header state, active inline button menus, and auto-dispatches report document profiles.
+    """
+    user_id = update.effective_user.id
+    session = context.user_data[user_id]
+    session.is_submitted = True
+    
+    score = session.calculate_readiness_score()
+    
+    success_text = (
+        f"🧠 <b>BIO-METRIC ONBOARDING REGISTERED SUCCESSFULLY</b>\n\n"
+        f"📊 <b>Metabolic Score Metric:</b> <code>{score}/100</code>\n"
+        f"✅ <b>Status:</b> Completely Configured.\n\n"
+        f"Your tailored onboarding protocol file brief has been generated.\n"
+        f"<b>Next Step:</b> Book your strategy kickoff call directly via Calendly below."
+    )
+    
+    keyboard = [
+        [InlineKeyboardButton("📅 BOOK KICKOFF CALL VIA CALENDLY", url=CALENDLY_LINK)],
+        [InlineKeyboardButton("🔄 REVIEW/OPEN DATA ENTRIES", callback_data="review_board_fallback")]
+    ]
+    
+    # 1. Send the clean execution card layout interface frame matching exactly your image references
+    await context.bot.send_message(
+        chat_id=chat_id, 
+        text=success_text, 
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode="HTML"
+    )
+    
+    # 2. Build and pipeline the document summary configuration binary payload
+    try:
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+        story = []
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#1A365D"), spaceAfter=12)
+        body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
+        
+        story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
+        story.append(Paragraph(f"<b>Client Target:</b> {session.name}", body_style))
+        story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {score}/100", body_style))
+        story.append(Spacer(1, 15))
+        
+        table_data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
+        for screen in SCREENS:
+            for field in screen['fields']:
+                ans = session.answers.get(field['id'])
+                if ans:
+                    val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                    table_data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
+                    
+        t = Table(table_data, colWidths=[270, 230])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
+            ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+        ]))
+        story.append(t)
+        doc.build(story)
+        buffer.seek(0)
+        
+        # 3. Deliver document profile directly to the chat context matching configuration lines
+        await context.bot.send_document(
+            chat_id=chat_id,
+            document=buffer,
+            filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Profile.pdf",
+            caption="📄 <b>Your Complete Strategic Profile Report</b>",
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        print(f"ReportLab Compilation Error: {e}")
+
 async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id=None, chat_id=None):
     user_id = update.effective_user.id
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
-    if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
-        review_text = f"📋 <b>Alright {session.name}, here is your full profile board. Review before locking it down:</b>\n\n"
-        processed_sections = []
-        for screen in SCREENS:
-            sec_name = screen['section']
-            if sec_name in processed_sections: continue
-            processed_sections.append(sec_name)
-            review_text += f"🔸 <b>{sec_name.upper()}</b>\n"
-            sec_fields = [f for s in SCREENS if s['section'] == sec_name for f in s['fields']]
-            for field in sec_fields:
-                ans = session.answers.get(field['id'], "—")
-                val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                review_text += f" • {field['text']}: <code>{val_str}</code>\n"
-            review_text += "\n"
-            
-        keyboard = []
-        row = []
-        for sec in processed_sections:
-            row.append(InlineKeyboardButton(f"✏️ Fix {sec.split()[-1]}", callback_data=f"edit_sec_{sec}"))
-            if len(row) == 2:
-                keyboard.append(row)
-                row = []
-        if row: keyboard.append(row)
-        keyboard.append([InlineKeyboardButton("🚀 LOOKS PERFECT, SUBMIT PROFILE", callback_data="final_submit")])
-        
-        await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-        return
-
-    if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
-        score = session.calculate_readiness_score()
-        success_text = (
-            f"🎯 <b>DATA LOGGED IN SAFELY.</b>\n\n"
-            f"📈 <b>Metabolic Readiness Score: {score}/100</b>\n\n"
-            f"<b>Final Move:</b> Use the active scheduler link below right now to lock in your live Strategy Kickoff Call!"
-        )
-        keyboard = [[InlineKeyboardButton("📅 BOOK STRATEGY KICKOFF CALL HERE", url=CALENDLY_LINK)]]
-        await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+    # Out of array bounds check -> instantly finalize profile output views cleanly
+    if session.current_screen_idx >= len(SCREENS):
+        await trigger_final_onboarding_success_view(update, context, chat_id)
         return
 
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
+    progress_bar = generate_progress_bar(progress)
     
-    text = f"📝 <b>Phase: {screen_data['section']}</b> (Progress: `{progress}%`)\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    text = f"📝 <b>Phase: {screen_data['section']}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
+        orig_text = field['text']
+        
+        if field['id'] == "q14" and session.answers.get("q5"):
+            job = str(session.answers.get("q5")).split()[-1]
+            orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work?"
+        elif field['id'] == "q50" and "Engineer" in str(session.answers.get("q5")):
+            orig_text = "Be honest: how many hours is your back glued to that coding desk chair every day?"
+            
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Type custom input directly into chat box...]</i>\n\n"
+            text += f"❓ <b>{orig_text}</b>\n✍️ <i>[Type custom input directly into chat box...]</i>\n\n"
         elif ans:
             display = ", ".join(ans) if isinstance(ans, list) else str(ans)
-            text += f"✅ <b>{field['text']}</b>\n👉 <code>{display}</code>\n\n"
+            text += f"✅ <b>{orig_text}</b>\n👉 <code>{display}</code>\n\n"
         else:
-            text += f"👉 <b>{field['text']}</b>\n\n"
+            text += f"👉 <b>{orig_text}</b>\n\n"
 
     keyboard = []
     has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
@@ -318,7 +405,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
             if row: keyboard.append(row)
             keyboard.append([InlineKeyboardButton("✍️ Type Custom Answer", callback_data=f"c_{short_id}")])
         elif field['type'] == 'media':
-            keyboard.append([InlineKeyboardButton("⏭️ Skip Upload", callback_data="skip_media")])
+            keyboard.append([InlineKeyboardButton("⏭️ Skip Upload (Can do this later)", callback_data="skip_media")])
 
     nav_row = []
     if session.current_screen_idx > 0:
@@ -327,7 +414,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, mess
         if check_screen_satisfied(session, screen_data): 
             nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
         else: 
-            nav_row.append(InlineKeyboardButton("🔒 Finish all answers above", callback_data="locked"))
+            nav_row.append(InlineKeyboardButton("🔒 Finish answers to un-lock", callback_data="locked"))
     if nav_row: keyboard.append(nav_row)
 
     if message_id:
@@ -380,80 +467,32 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try: await query.message.delete()
         except Exception: pass
         
-        # User explicitly hits "CONTINUE" -> Only post reactions that actually have meaningful text
         for field in screen_data['fields']:
             ans = session.answers.get(field['id'])
             if ans and field['type'] == 'buttons':
                 msg = get_funny_instant_reaction(field['id'], ans)
-                if msg:  # Only send if it's not None! No more logs!
+                if msg: 
                     await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
                 
         session.current_screen_idx += 1
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
-    if data.startswith("edit_sec_"):
-        await query.answer()
-        try: await query.message.delete()
-        except Exception: pass
-        target_section = data.replace("edit_sec_", "")
-        session.current_screen_idx = next((i for i, s in enumerate(SCREENS) if s['section'] == target_section), 0)
-        await render_screen(update, context, chat_id=query.message.chat_id)
-        return
-        
-    if data == "final_submit":
-        await query.answer("💾 Finalizing profile dossier...", show_alert=True)
-        try: await query.message.delete()
-        except Exception: pass
-        session.is_submitted = True
-        
-        try:
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib import colors
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-            story = []
-            styles = getSampleStyleSheet()
-            title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#1A365D"), spaceAfter=12)
-            body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
-            
-            story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
-            story.append(Paragraph(f"<b>Client Target:</b> {session.name}", body_style))
-            story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {session.calculate_readiness_score()}/100", body_style))
-            story.append(Spacer(1, 15))
-            
-            table_data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
-            for screen in SCREENS:
-                for field in screen['fields']:
-                    ans = session.answers.get(field['id'])
-                    if ans:
-                        val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                        table_data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
-                        
-            t = Table(table_data, colWidths=[270, 230])
-            t.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
-                ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
-                ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
-                ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
-            ]))
-            story.append(t)
-            doc.build(story)
-            buffer.seek(0)
-            await context.bot.send_document(
-                chat_id=query.message.chat_id,
-                document=buffer,
-                filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Brief.pdf",
-                caption="📄 <b>Here is your strategic diagnostic summary asset. Keep this close.</b>",
-                parse_mode="HTML"
-            )
-        except Exception: pass
-        
-        await render_screen(update, context, chat_id=query.message.chat_id)
+    if data == "review_board_fallback":
+        # Interactive fallback panel allowing profile tracking checks if requested by client buttons
+        await query.answer("📋 Fetching configured database records...", show_alert=True)
+        review_text = f"📋 <b>Onboarding Database Entries Profile:</b>\n\n"
+        for screen in SCREENS:
+            review_text += f"🔸 <b>{screen['section'].upper()}</b>\n"
+            for field in screen['fields']:
+                ans = session.answers.get(field['id'], "—")
+                val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                review_text += f" • {field['text']}: <code>{val_str}</code>\n"
+            review_text += "\n"
+        await context.bot.send_message(chat_id=query.message.chat_id, text=review_text, parse_mode="HTML")
         return
 
+    # FIXED HANDOFF EXECUTION FRAME
     if data == "skip_media":
         await query.answer()
         try: await query.message.delete()
@@ -495,7 +534,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         is_multi_question = len(screen_data['fields']) > 1
         
         if not has_multi and not is_multi_question:
-            # Single question screen: Process immediately, delete the form card, send reaction, proceed
             try: await query.message.delete()
             except Exception: pass
             
@@ -506,12 +544,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             session.current_screen_idx += 1
             await render_screen(update, context, chat_id=query.message.chat_id)
         else:
-            # Multi-question screen: Allow toggling options freely. No chat drops until they press CONTINUE.
-            if check_screen_satisfied(session, screen_data):
-                # We update the screen to reveal the un-locked 'CONTINUE ➡️' button
-                await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
-            else:
-                await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
+            await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -562,7 +595,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI ONLINE — CLEAN HISTORY PIPELINE INITIALIZED")
+    print("🚀 COACH AVNI STABLE LAYOUT CONFIGURATION LOADED")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
