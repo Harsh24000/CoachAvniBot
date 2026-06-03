@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PRODUCTION ENGINE (DYNAMIC IDENTITY RECTIFIED)
+COACH AVNI - PRODUCTION ENGINE (WITH REVIEW & SUBMIT MATRIX)
 Features:
-- Fixed Screen-1 Initialization bug (No default preview name leakage)
-- Contextual placeholders: uses "there" dynamically until Q1 is populated
-- Full 62-Question Matrix with conditional branch scripts
-- Compressed callback keys avoiding Telegram's 64-byte overflow payload limit
-- Fully unified background drop-off safety trackers & ReportLab PDF compiler
+- Custom Screen-1 Initialization bug fix (hides preview names).
+- Explicit "Review Board" screen generated before final lockdown.
+- Full 62-Question Matrix with conditional branch scripts.
+- Compressed callback keys avoiding Telegram's 64-byte overflow payload limit.
+- Unified background drop-off safety trackers & ReportLab PDF compiler.
 """
 
 import os
@@ -155,7 +155,7 @@ class UserSession:
     def __init__(self):
         self.current_screen_idx = 0
         self.answers = {}
-        self.name = ""  # Fixed: Intentionally blank at launch to prevent fallback leak
+        self.name = ""  
         self.awaiting_custom_field_id = None
         self.is_submitted = False
         self.last_activity = datetime.now()
@@ -299,6 +299,43 @@ async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("⚡ RESUME ASSESSMENT", callback_data="resume_onboarding")]]
     await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
+async def render_review_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, target_message_id=None, target_chat_id=None):
+    """Generates a structured review board of all logged answers before final submission."""
+    user_id = update.effective_user.id
+    if not target_chat_id: target_chat_id = update.effective_chat.id
+    session = context.user_data[user_id]
+    
+    display_name = session.name if session.name else "Harsh"
+    
+    text = (
+        f"📋 <b>Review Your Assessment Profile ({display_name})</b>\n"
+        f"Please verify your logs before submitting to Coach Avni's analyzer.\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    )
+    
+    for screen in SCREENS:
+        for field in screen['fields']:
+            ans = session.answers.get(field['id'])
+            if ans:
+                clean_q = field['text'].replace("{name}", display_name)
+                val_display = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                # Truncate clean string preview if length is messy
+                if len(val_display) > 40: val_display = val_display[:37] + "..."
+                text += f"🔹 <b>{clean_q}</b>\n👉 <code>{val_display}</code>\n\n"
+
+    keyboard = [
+        [InlineKeyboardButton("✏️ EDIT / CHANGE ANSWERS", callback_data="back_from_review")],
+        [InlineKeyboardButton("🚀 FINAL SUBMIT PROFILE", callback_data="final_commit_submit")]
+    ]
+    
+    if target_message_id:
+        try:
+            await context.bot.edit_message_text(text, chat_id=target_chat_id, message_id=target_message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+            return
+        except Exception: pass
+
+    await context.bot.send_message(chat_id=target_chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+
 async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT_TYPE, target_chat_id):
     user_id = update.effective_user.id
     session = context.user_data[user_id]
@@ -384,8 +421,9 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     session.last_activity = datetime.now()
     reset_dropoff_tracker(context, user_id, target_chat_id)
     
+    # NEW logic: Route directly to explicit Review & Submit panel instead of auto-locking
     if session.current_screen_idx >= len(SCREENS):
-        await deliver_final_success_ui(update, context, target_chat_id)
+        await render_review_screen(update, context, target_message_id=target_message_id, target_chat_id=target_chat_id)
         return
 
     screen_data = SCREENS[session.current_screen_idx]
@@ -394,7 +432,6 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     
     text = f"📝 <b>Phase: {screen_data['section']}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
-    # Check if the name has been set via Q1, otherwise safely fall back to "there"
     current_display_name = str(session.answers.get("q1")) if session.answers.get("q1") else "there"
 
     for field in screen_data['fields']:
@@ -483,6 +520,20 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await render_screen(update, context, target_chat_id=query.message.chat_id)
         return
 
+    # NEW: Navigation buttons on the Review Matrix panel
+    if data == "back_from_review":
+        await query.answer()
+        session.current_screen_idx = len(SCREENS) - 1
+        await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+        return
+
+    if data == "final_commit_submit":
+        await query.answer("Profile Locked and Sent!")
+        try: await query.message.delete()
+        except Exception: pass
+        await deliver_final_success_ui(update, context, target_chat_id=query.message.chat_id)
+        return
+
     if data == "back_screen":
         await query.answer()
         if session.current_screen_idx > 0:
@@ -564,6 +615,10 @@ async def inbound_message_handler(update: Update, context: ContextTypes.DEFAULT_
     if not session or session.is_submitted:
         return
 
+    # Fail-safe: ignore incoming text messages if they are currently on the final Review Board
+    if session.current_screen_idx >= len(SCREENS):
+        return
+
     screen_data = SCREENS[session.current_screen_idx]
     target_field_id = session.awaiting_custom_field_id
     
@@ -589,7 +644,6 @@ async def inbound_message_handler(update: Update, context: ContextTypes.DEFAULT_
 
     session.answers[target_field_id] = user_input_value
     
-    # Dynamically capture identity straight out of text stream pipeline
     if target_field_id == "q1":
         session.name = user_input_value
 
