@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (VOICELESS, HARDENED EDITION)
+COACH AVNI - PERSONALITY ENGINE (VOICE INPUT HARDENED EDITION)
 100% of your 61 baseline questions, logic flows, and layout variables are preserved.
 
 Fixes Deployed:
-- Completely ripped out Coach Avni OpenAI Voice/TTS synthesis generation blocks.
-- Swapped background audio generation references into clean, stable text logic blocks.
-- Added explicit try/except suppression for Telegram 'Message is not modified' double-click errors.
-- Retained first-name insulation and dual HTML sanitization safety layers.
+- Added safe voice note transcription via OpenAI Whisper API inside custom inputs.
+- Hardened file download and API processing streams against unexpected connection drops.
+- Maintained voiceless text replies (Coach Avni answers back purely with high-performance text).
 """
 
 import os
@@ -17,6 +16,7 @@ import logging
 from io import BytesIO
 from datetime import datetime
 from dotenv import load_dotenv
+from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, MessageHandler, 
@@ -40,11 +40,19 @@ except ImportError:
 
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
     print("CRITICAL CRASH PREVENTED: TELEGRAM_TOKEN missing inside environment variables.")
     sys.exit(1)
+
+openai_client = None
+if OPENAI_KEY:
+    try:
+        openai_client = OpenAI(api_key=OPENAI_KEY)
+    except Exception as e:
+        print(f"Warning: Could not initialize OpenAI Engine Client: {e}")
 
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 BRANCH_MAP = {"q23_diabetes": "vdia", "q23_thyroid": "vthy", "q23_pcos": "vpco"}
@@ -433,7 +441,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
             p_text = get_personalized_text(field, session)
             
             if session.awaiting_custom_field_id == field['id']:
-                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type custom text...]</i>\n\n"
+                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type custom text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
             elif ans:
                 text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(str(ans))}</code>\n\n"
             else:
@@ -474,7 +482,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
             p_text = get_personalized_text(field, session)
                 
             if session.awaiting_custom_field_id == field['id']:
-                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type text response below...]</i>\n\n"
+                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
             elif ans:
                 display = ", ".join(ans) if isinstance(ans, list) else str(ans)
                 text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(display)}</code>\n\n"
@@ -501,7 +509,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
                         keyboard.append(row)
                         row = []
                 if row: keyboard.append(row)
-                keyboard.append([InlineKeyboardButton("✍️ Type Custom Answer Instead", callback_data=f"c_{short_id}")])
+                keyboard.append([InlineKeyboardButton("🎙️ Speak / Type Custom Answer", callback_data=f"c_{short_id}")])
             elif field['type'] == 'media':
                 keyboard.append([InlineKeyboardButton("⏭️ Skip Upload (Can do this later)", callback_data="skip_media")])
 
@@ -725,6 +733,42 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not session or (session.current_screen_idx >= len(SCREENS) and not session.current_branch_field): return
     await handle_text_or_transcription(update.message.text.strip(), update, context)
 
+async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    session = context.user_data.get(user_id)
+    if not session or (session.current_screen_idx >= len(SCREENS) and not session.current_branch_field): return
+    
+    if not openai_client:
+        await update.message.reply_text("❌ Voice parsing engine is currently not active on this backend.")
+        return
+
+    chat_id = update.message.chat_id
+    status_msg = await context.bot.send_message(chat_id=chat_id, text="🎙️ <i>Coach Avni is transcribing your voice answer...</i>", parse_mode="HTML")
+    
+    try:
+        voice_file = await context.bot.get_file(update.message.voice.file_id)
+        voice_buffer = BytesIO()
+        await voice_file.download_to_memory(out=voice_buffer)
+        voice_buffer.seek(0)
+        voice_buffer.name = "voice.ogg"
+
+        transcript = openai_client.audio.transcriptions.create(
+            model="whisper-1",
+            file=voice_buffer
+        )
+        parsed_text = transcript.text.strip()
+        
+        await context.bot.delete_message(chat_id=chat_id, message_id=status_msg.message_id)
+        if parsed_text:
+            await handle_text_or_transcription(parsed_text, update, context)
+        else:
+            await context.bot.send_message(chat_id=chat_id, text="⚠️ Audio file detected, but no clear text was extracted. Please try speaking closer to your device.")
+    except Exception as e:
+        logger.error(f"Voice transcription sequence failed safely: {e}")
+        try:
+            await context.bot.edit_message_text("❌ Transcription network timeout. Please type your custom answer or check your connection status.", chat_id=chat_id, message_id=status_msg.message_id)
+        except Exception: pass
+
 async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
@@ -735,11 +779,12 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, target_chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 HARDENED VOICELESS ENGINE INITIALIZED SUCCESSFULLY — RUNTIME ACTIVE")
+    print("🚀 HARDENED DUAL VOICE/TEXT SELECTION ENGINE RUNNING PINNED CHANNELS")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
+    app.add_handler(MessageHandler(filters.VOICE, voice_handler))
     app.add_handler(MessageHandler(filters.PHOTO | filters.Document.ALL, media_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
     
