@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - ULTIMATE LOCALIZED 62-QUESTION ONBOARDING CORE WITH WEASYPRINT PDF ENGINE
+COACH AVNI - LOCALIZED 62-QUESTION CORE WITH HIGH ENERGY & REACTIVE WIT
 Features:
-- Complete 62-Question Onboarding Matrix (English & Hindi Localized).
-- Automated Mifflin-St Jeor TDEE & Metabolic Macro Split Calculator.
-- Smart In-Line Review Board Panel (Direct Target Hot-Fix Editing).
-- Modern HTML-to-PDF Engine using WeasyPrint to output high-end, elegant dossiers.
-- Wire-safe compressed callback parameters to prevent Telegram 64-byte payload crashes.
+- Infused with Avni's authentic personality, empathy, and direct humor.
+- Dynamic commentary responses based on client inputs.
+- Modern HTML-to-PDF Engine using WeasyPrint.
 """
 
 import os
@@ -36,13 +34,12 @@ if not TOKEN:
     print("CRITICAL: TELEGRAM_TOKEN missing from environment configurations.")
     sys.exit(1)
 
-# Dynamic wire-compression dictionary to guarantee deep multi-character variables never crash Telegram
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 63)}
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
 LOCALIZATION = {
     "en": {
-        "welcome": "🔥 <b>Welcome to Coach Avni's Strategic Onboarding Funnel.</b>\n\nPlease choose your preferred language to begin:",
+        "welcome": "🔥 <b>Welcome to Coach Avni's Strategic Onboarding Funnel.</b>\n\nNo BS. No cookie-cutter generic protocols. Just raw science, zero judgment, and a plan built for your actual life. Let's start by picking your language:",
         "phase": "Phase",
         "progress": "Progress",
         "speak_type": "🎙️ Speak / Type Custom Answer",
@@ -62,7 +59,7 @@ LOCALIZATION = {
         "pdf_log_hdr": "Complete Assessment Log"
     },
     "hi": {
-        "welcome": "🔥 <b>कोच अवनी के स्ट्रेटेजिक ऑनबोर्डिंग फनल में आपका स्वागत है।</b>\n\nशुरू करने के लिए कृपया अपनी पसंदीदा भाषा चुनें:",
+        "welcome": "🔥 <b>कोच अवनी के स्ट्रेटेजिक ऑनबोर्डिंग फनल में आपका स्वागत है।</b>\n\nकोई बकवास नहीं, कोई दिखावा नहीं। सिर्फ शुद्ध विज्ञान और एक ऐसा प्लान जो आपकी असली लाइफस्टाइल के लिए बना है। शुरू करने के लिए भाषा चुनें:",
         "phase": "चरण",
         "progress": "प्रगति",
         "speak_type": "🎙️ बोलें / कस्टम उत्तर टाइप करें",
@@ -83,28 +80,27 @@ LOCALIZATION = {
     }
 }
 
-# FULL 62-QUESTION SEGMENTED ARCHITECTURE MATRIX
 SCREENS = [
     # PHASE 1: ABOUT YOU
     {"id": 1, "section": {"en": "👤 About You", "hi": "👤 आपके बारे में"}, "fields": [
         {"id": "q1", "text": {"en": "First things first, what's your full name?", "hi": "सबसे पहले, आपका पूरा नाम क्या है?"}, "type": "text", "required": True},
-        {"id": "q2", "text": {"en": "Awesome {name}. How many years young are you?", "hi": "बहुत बढ़िया {name}। आपकी उम्र कितने साल है?"}, "type": "text", "required": True},
+        {"id": "q2", "text": {"en": "Awesome {name}. How many years young are you? (Be honest!)", "hi": "बहुत बढ़िया {name}। आपकी उम्र कितने साल है? (सच बताना!)"}, "type": "text", "required": True},
         {"id": "q3", "text": {"en": "What's your height in cm, {name}?", "hi": "{name}, सेंटीमीटर (cm) में आपकी ऊंचाई कितनी है?"}, "type": "text", "required": True},
         {"id": "q4", "text": {"en": "And where is your current weight sitting at in kg?", "hi": "और आपका वर्तमान वजन कितने किलोग्राम (kg) है?"}, "type": "text", "required": True}
     ]},
     {"id": 2, "section": {"en": "👤 About You", "hi": "👤 आपके बारे में"}, "fields": [
-        {"id": "q5", "text": {"en": "What do you do for work, {name}?", "hi": "{name}, आप काम क्या करते हैं? अपना कार्यक्षेत्र चुनें:"}, "type": "buttons", "required": True, "options": {"en": ["💻 Engineer", "👨‍⚕️ Doctor", "📚 Student", "👔 Business", "🤵 Consultant", "📊 Corporate"], "hi": ["💻 इंजीनियर", "👨‍⚕️ डॉक्टर", "📚 छात्र", "👔 व्यापार", "🤵 सलाहकार", "📊 कॉर्पोरेट"]}},
+        {"id": "q5", "text": {"en": "What do you do for work? Let me see how much sitting you do:", "hi": "आप काम क्या करते हैं? जरा देखें कितनी देर बैठे रहते हो:"}, "type": "buttons", "required": True, "options": {"en": ["💻 Engineer", "👨‍⚕️ Doctor", "📚 Student", "👔 Business", "🤵 Consultant", "📊 Corporate"], "hi": ["💻 इंजीनियर", "👨‍⚕️ डॉक्टर", "📚 छात्र", "👔 व्यापार", "🤵 सलाहकार", "📊 कॉर्पोरेट"]}},
         {"id": "q6", "text": {"en": "And what is your biological sex?", "hi": "और आपका जैविक लिंग (Sex) क्या है?"}, "type": "buttons", "required": True, "options": {"en": ["👨 Male", "👩 Female"], "hi": ["👨 पुरुष", "👩 महिला"]}}
     ]},
 
     # PHASE 2: DIET & KITCHEN PROTOCOLS
     {"id": 3, "section": {"en": "🍏 Diet & Food", "hi": "🍏 आहार और भोजन"}, "fields": [
         {"id": "q7", "text": {"en": "What's your primary dietary style, {name}?", "hi": "आपकी मुख्य आहार शैली क्या है, {name}?"}, "type": "buttons", "required": True, "options": {"en": ["🍗 Non-Veg", "🥕 Veg", "🥚 Eggitarian", "🌱 Vegan", "☪️ Jain Vegetarian"], "hi": ["🍗 मांसाहारी", "🥕 शाकाहारी", "🥚 अंडाहारी", "🌱 वीगन", "☪️ जैन शाकाहारी"]}},
-        {"id": "q8", "text": {"en": "Any foods you absolutely can't stand or refuse to eat? (Pick all that apply)", "hi": "कोई ऐसा भोजन जो आपको बिल्कुल पसंद नहीं है? (जो भी लागू हो चुनें)"}, "type": "buttons_multi", "required": False, "options": {"en": ["🥒 Bitter Gourd", "🍆 Eggplant", "🍄 Mushroom", "🐟 Fish", "🥛 Dairy", "🧅 No Onion/Garlic"], "hi": ["🥒 करेला", "🍆 बैंगन", "🍄 मशरूम", "🐟 मछली", "🥛 डेयरी", "🧅 बिना प्याज/लहसुन"]}}
+        {"id": "q8", "text": {"en": "Any foods you absolutely can't stand or refuse to eat? (No judgment, pick your enemies)", "hi": "कोई ऐसा भोजन जो आपको बिल्कुल पसंद नहीं है? (बिना शर्माए अपनी नापसंद चुनें)"}, "type": "buttons_multi", "required": False, "options": {"en": ["🥒 Bitter Gourd", "🍆 Eggplant", "🍄 Mushroom", "🐟 Fish", "🥛 Dairy", "🧅 No Onion/Garlic"], "hi": ["🥒 करेला", "🍆 बैंगन", "🍄 मशरूम", "🐟 मछली", "🥛 डेयरी", "🧅 बिना प्याज/लहसुन"]}}
     ]},
     {"id": 4, "section": {"en": "🍏 Diet & Food", "hi": "🍏 आहार और भोजन"}, "fields": [
-        {"id": "q9", "text": {"en": "Which cuisine makes your soul happy, {name}?", "hi": "{name}, आपको कौन सा खाना सबसे ज्यादा पसंद है?"}, "type": "buttons", "required": True, "options": {"en": ["🍛 North Indian", "🫓 South Indian", "🥗 Continental", "🥢 Asian Mix"], "hi": ["🍛 उत्तर भारतीय", "🫓 दक्षिण भारतीय", "🥗 कॉन्टिनेंटल", "🥢 एशियन मिक्स"]}},
-        {"id": "q10", "text": {"en": "Be honest: how dependent are you on tea or coffee?", "hi": "सच बताइएगा: आप चाय या कॉफी पर कितने निर्भर हैं?"}, "type": "buttons", "required": True, "options": {"en": ["☕ Yes, regularly", "🍵 Occasionally", "🚫 Total Abstinence"], "hi": ["☕ हाँ, नियमित रूप से", "🍵 कभी-कभी", "🚫 बिल्कुल नहीं"]}}
+        {"id": "q9", "text": {"en": "Which cuisine makes your soul happy, {name}?", "hi": "{name}, आपको कौन सा खाना सबसे ज्यादा खुश करता है?"}, "type": "buttons", "required": True, "options": {"en": ["🍛 North Indian", "🫓 South Indian", "🥗 Continental", "🥢 Asian Mix"], "hi": ["🍛 उत्तर भारतीय", "🫓 दक्षिण भारतीय", "🥗 कॉन्टिनेंटल", "🥢 एशियन मिक्स"]}},
+        {"id": "q10", "text": {"en": "Be honest: how dependent are you on tea or coffee to function like a human?", "hi": "सच बताइएगा: एक सामान्य इंसान की तरह काम करने के लिए चाय या कॉफी पर कितने निर्भर हैं?"}, "type": "buttons", "required": True, "options": {"en": ["☕ Yes, regularly", "🍵 Occasionally", "🚫 Total Abstinence"], "hi": ["☕ हाँ, नियमित रूप से", "🍵 कभी-कभी", "🚫 बिल्कुल नहीं"]}}
     ]},
 
     # PHASE 3: LIFESTYLE TIMINGS & CHRONOBIOLOGY
@@ -114,14 +110,14 @@ SCREENS = [
         {"id": "q13", "text": {"en": "When do you step into the work mindset?", "hi": "आप अपने काम की शुरुआत किस समय करते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["💼 8:00 AM", "💼 9:00 AM", "💼 10:00 AM", "⌛ Shift Rotation"], "hi": ["💼 सुबह 8:00 बजे", "💼 सुबह 9:00 बजे", "💼 सुबह 10:00 बजे", "⌛ शिफ्ट बदलती है"]}}
     ]},
     {"id": 6, "section": {"en": "🌅 Your Day", "hi": "🌅 आपका दिन"}, "fields": [
-        {"id": "q14", "text": {"en": "What time do you usually finish work?", "hi": "आप आमतौर पर अपना काम कितने बजे खत्म करते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["⏰ 5:00 PM", "⏰ 6:00 PM", "⏰ 7:00 PM", "🌙 9:00 PM+"], "hi": ["⏰ शाम 5:00 बजे", "⏰ शाम 6:00 बजे", "⏰ शाम 7:00 बजे", "🌙 रात 9:00+ बाद"]}},
+        {"id": "q14", "text": {"en": "What time do you log off and escape from work?", "hi": "आप आमतौर पर अपने काम से कब आज़ाद होते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["⏰ 5:00 PM", "⏰ 6:00 PM", "⏰ 7:00 PM", "🌙 9:00 PM+"], "hi": ["⏰ शाम 5:00 बजे", "⏰ शाम 6:00 बजे", "⏰ शाम 7:00 बजे", "🌙 रात 9:00+ बाद"]}},
         {"id": "q15", "text": {"en": "What's the standard window for your lunch, {name}?", "hi": "{name}, आपके दोपहर के भोजन का समय क्या है?"}, "type": "buttons", "required": True, "options": {"en": ["🍱 12:30 PM", "🍱 1:30 PM", "🍱 2:30 PM", "⏳ Unfixed/Variable"], "hi": ["🍱 दोपहर 12:30 बजे", "🍱 दोपहर 1:30 बजे", "🍱 दोपहर 2:30 बजे", "⏳ कोई तय समय नहीं"]}},
         {"id": "q16", "text": {"en": "When are you having your Dinner?", "hi": "आप रात का खाना आमतौर पर किस समय खाते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🍽️ 7:00 PM", "🍽️ 8:00 PM", "🍽️ 9:00 PM", "🌙 10:00 PM+"], "hi": ["🍽️ शाम 7:00 बजे", "🍽️ रात 8:00 बजे", "🍽️ रात 9:00 बजे", "🌙 रात 10:00+ बाद"]}}
     ]},
     {"id": 7, "section": {"en": "🌅 Your Day", "hi": "🌅 आपका दिन"}, "fields": [
-        {"id": "q17", "text": {"en": "What time are your lights completely out, {name}?", "hi": "{name}, आप रात को कितने बजे सोते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🦉 1:00 AM+"], "hi": ["🌙 रात 10:00 बजे", "🌙 रात 11:00 बजे", "🌙 रात 12:00 बजे", "🦉 रात 1:00+ बाद"]}},
+        {"id": "q17", "text": {"en": "What time are your lights completely out, {name}? (Be honest, scrolling reels counts as awake!)", "hi": "{name}, आप रात को कितने बजे सोते हैं? (रील्स देखना भी जागने में आता है!)"}, "type": "buttons", "required": True, "options": {"en": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🦉 1:00 AM+"], "hi": ["🌙 रात 10:00 बजे", "🌙 रात 11:00 बजे", "🌙 रात 12:00 बजे", "🦉 रात 1:00+ बाद"]}},
         {"id": "q18", "text": {"en": "How often are you visiting the snack cabinet between meals?", "hi": "आप भोजन के बीच में कितनी बार स्नैक्स का चक्कर लगाते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🍪 Constant", "🍏 Occasional", "🚫 No Snacking"], "hi": ["🍪 लगातार/बहुत बार", "🍏 कभी-कभी", "🚫 बिल्कुल नहीं"]}},
-        {"id": "q19", "text": {"en": "How much water are you actually drinking every day?", "hi": "आप रोजाना असल में कितना पानी पीते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🥛 < 1 Litre", "💧 1-2 Litres", "🚰 2-3 Litres", "🌊 3+ Litres"], "hi": ["🥛 1 लीटर से कम", "💧 1-2 या 2-3 लीटर", "🚰 2-3 लीटर", "🌊 3 लीटर से ज्यादा"]}}
+        {"id": "q19", "text": {"en": "How much water are you actually drinking every day?", "hi": "आप रोजाना असल में कितना पानी पीते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🥛 < 1 Litre", "💧 1-2 Litres", "🚰 2-3 Litres", "🌊 3+ Litres"], "hi": ["🥛 1 लीटर से कम", "💧 1-2 या 2-3 लीटर", "🚰 2-3延ीट", "🌊 3 लीटर से ज्यादा"]}}
     ]},
     {"id": 8, "section": {"en": "🌅 Your Day", "hi": "🌅 आपका दिन"}, "fields": [
         {"id": "q20", "text": {"en": "How often is restaurant food landing on your plate, {name}?", "hi": "{name}, आप बाहर का खाना कितनी बार खाते हैं?"}, "type": "buttons", "required": True, "options": {"en": ["🍔 Daily", "🍕 2-3x / Week", "🥗 Rarely", "✅ Never"], "hi": ["🍔 रोज़ाना", "🍕 हफ्ते में 2-3 बार", "🥗 बहुत कम", "✅ कभी नहीं"]}},
@@ -132,7 +128,7 @@ SCREENS = [
     # PHASE 4: CLINICAL HEALTH & MEDICAL SYMPTOMS
     {"id": 9, "section": {"en": "🏥 Health & Vitals", "hi": "🏥 स्वास्थ्य और वाइटल्स"}, "fields": [
         {"id": "q23", "text": {"en": "Have you been diagnosed with any metabolic conditions, {name}?", "hi": "{name}, क्या आपको इनमें से कोई स्वास्थ्य समस्या है?"}, "type": "buttons_multi", "required": False, "options": {"en": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "🍗 Fatty Liver", "✅ None"], "hi": ["🔬 डायबिटीज", "🧬 थायराइड", "🔴 पीसीओएस", "❤️ हाई बीपी", "🍗 फैटी लिवर", "✅ कोई नहीं"]}},
-        {"id": "q24", "text": {"en": "Any old or current injuries I need to protect?", "hi": "कोई पुरानी या वर्तमान चोट जिसके बारे में मुझे पता होना चाहिए?"}, "type": "text", "required": False},
+        {"id": "q24", "text": {"en": "Any old or current injuries I need to protect while building your workout?", "hi": "कोई पुरानी या वर्तमान चोट जिसके बारे में मुझे पता होना चाहिए?"}, "type": "text", "required": False},
         {"id": "q25", "text": {"en": "Do you fight any nasty allergies?", "hi": "क्या आपको किसी प्रकार की एलर्जी है?"}, "type": "buttons", "required": True, "options": {"en": ["✅ None", "🍔 Food Specific", "💊 Pharmaceutical", "🌫️ Environmental"], "hi": ["✅ कोई नहीं", "🍔 भोजन से", "💊 दवाओं से", "🌫️ धूल/मौसम से"]}}
     ]},
     {"id": 10, "section": {"en": "🏥 Health & Vitals", "hi": "🏥 स्वास्थ्य और वाइटल्स"}, "fields": [
@@ -209,6 +205,28 @@ SCREENS = [
         {"id": "q61", "text": {"en": "Drop a clear posture body photo here so I can evaluate structural frames, {name}.", "hi": "{name}, अपनी सामने की एक साफ बॉडी फोटो भेजें ताकि मैं आपके पोस्चर का मूल्यांकन कर सकूँ।"}, "type": "media", "required": False}
     ]}
 ]
+
+# AVNI'S INTUITION & WITTY REACTION ENGINE
+def get_avni_commentary(field_id, val, lang):
+    comments = {
+        "q5": {
+            "💻 Engineer": {"en": "An Engineer! Translation: A lot of desk sitting and posture-ruining code marathons. Let's fix that stance.", "hi": "इंजीनियर! यानी कुर्सी से चिपके रहना और कोडिंग मैराथन। तुम्हारी रीढ़ की हड्डी को वापस सीधा करना पड़ेगा।"},
+            "👨‍⚕️ Doctor": {"en": "A Doctor! Saving lives but skipping meals, huh? Time to write you a metabolic prescription.", "hi": "डॉक्टर साहब! दुनिया की जान बचा रहे हो और खुद के खाने का ठिकाना नहीं है? अब तुम्हारा खुद का इलाज करना पड़ेगा।"}
+        },
+        "q10": {
+            "☕ Yes, regularly": {"en": "Ah, running on liquid adrenaline. We'll need to sort your deep baseline sleep energy out.", "hi": "यानी लिक्विड एड्रेनालाईन पर चल रहे हो। तुम्हारी गहरी नींद और असली एनर्जी को वापस लाना होगा।"}
+        },
+        "q17": {
+            "🦉 1:00 AM+": {"en": "1 AM?! Your cortisol levels must be having a party. Late nights are the silent killer of body fat loss goals.", "hi": "रात के 1 बजे?! तुम्हारा कोर्टिसोल लेवल तो रॉकेट हो रखा होगा। देर रात तक जागना फैट लॉस का सबसे बड़ा दुश्मन है।"}
+        },
+        "q18": {
+            "🍪 Constant": {"en": "Constant snacking? Your insulin levels are on a rollercoaster ride. Let's steady that down.", "hi": "लगातार स्नैकिंग? तुम्हारा इंसुलिन लेवल झूला झूल रहा है। इसे शांत करना बेहद ज़रूरी है।"}
+        },
+        "q20": {
+            "🍔 Daily": {"en": "Daily restaurant food? Oof, your sodium intake is screaming for help. Let's fix the kitchen game.", "hi": "रोज़ बाहर का खाना? भाई, तुम्हारी बॉडी का सोडियम लेवल मदद की भीख मांग रहा है। घर का खाना ज़िंदाबाद करना पड़ेगा।"}
+        }
+    }
+    return comments.get(field_id, {}).get(val, {}).get(lang, "")
 
 class UserSession:
     def __init__(self):
@@ -309,12 +327,11 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         f"• 🌾 Carbs: <code>{macros['carbs']}g</code>\n"
         f"• 🥑 Fats: <code>{macros['fats']}g</code>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"Your fully formatted strategy brief PDF is generating. Book your Strategy Call below!"
+        f"Coach Avni is running numbers on your files. Book your strategy session down below!"
     )
     keyboard = [[InlineKeyboardButton("📅 BOOK CALL VIA CALENDLY", url=CALENDLY_LINK)]]
     await context.bot.send_message(chat_id=target_chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
     
-    # WEASYPRINT PREMIUM MULTI-PAGE DOSSIER COMPILER ENGINE
     if HAS_WEASYPRINT:
         try:
             html_content = f"""
@@ -323,183 +340,49 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
             <head>
                 <meta charset="utf-8">
                 <style>
-                    @page {{
-                        size: A4;
-                        margin: 20mm 15mm;
-                        @bottom-right {{
-                            content: counter(page);
-                            font-family: Arial, sans-serif;
-                            font-size: 9pt;
-                            color: #718096;
-                        }}
-                    }}
-                    body {{
-                        font-family: Arial, sans-serif;
-                        color: #2D3748;
-                        margin: 0;
-                        padding: 0;
-                        line-height: 1.5;
-                        background-color: #ffffff;
-                    }}
-                    .header-banner {{
-                        background-color: #1A365D;
-                        color: #ffffff;
-                        margin: -20mm -15mm 25px -15mm;
-                        padding: 30px 20px;
-                        text-align: center;
-                    }}
-                    .header-banner h1 {{
-                        margin: 0;
-                        font-size: 22pt;
-                        text-transform: uppercase;
-                        letter-spacing: 1px;
-                    }}
-                    .header-banner p {{
-                        margin: 5px 0 0 0;
-                        font-size: 11pt;
-                        color: #E2E8F0;
-                    }}
-                    h2 {{
-                        color: #1A365D;
-                        font-size: 14pt;
-                        border-left: 4px solid #3182CE;
-                        padding-left: 10px;
-                        margin-top: 25px;
-                        margin-bottom: 15px;
-                    }}
-                    .metric-box {{
-                        background-color: #F7FAFC;
-                        border: 1px solid #E2E8F0;
-                        border-radius: 6px;
-                        padding: 15px;
-                        margin-bottom: 20px;
-                    }}
-                    .metric-grid {{
-                        display: block;
-                    }}
-                    .metric-item {{
-                        width: 48%;
-                        display: inline-block;
-                        margin-bottom: 10px;
-                        vertical-align: top;
-                    }}
-                    .metric-label {{
-                        font-size: 9pt;
-                        color: #4A5568;
-                        text-transform: uppercase;
-                        font-weight: bold;
-                    }}
-                    .metric-value {{
-                        font-size: 12pt;
-                        color: #1A365D;
-                        font-weight: bold;
-                    }}
-                    table {{
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 15px;
-                    }}
-                    th {{
-                        background-color: #2B6CB0;
-                        color: white;
-                        text-align: left;
-                        font-size: 10pt;
-                        padding: 10px;
-                        text-transform: uppercase;
-                    }}
-                    td {{
-                        padding: 9px 10px;
-                        border-bottom: 1px solid #E2E8F0;
-                        font-size: 10pt;
-                    }}
-                    tr:nth-child(even) td {{
-                        background-color: #F7FAFC;
-                    }}
+                    @page {{ size: A4; margin: 20mm 15mm; }}
+                    body {{ font-family: Arial, sans-serif; color: #2D3748; line-height: 1.5; }}
+                    .header {{ background-color: #1A365D; color: white; padding: 25px; text-align: center; margin-bottom: 20px; }}
+                    .metric-box {{ background-color: #F7FAFC; border: 1px solid #E2E8F0; padding: 15px; border-radius: 6px; }}
+                    table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
+                    th {{ background-color: #2B6CB0; color: white; padding: 10px; text-align: left; }}
+                    td {{ padding: 10px; border-bottom: 1px solid #E2E8F0; }}
                 </style>
             </head>
             <body>
-                <div class="header-banner">
-                    <h1>COACH AVNI — {LOCALIZATION[ln]["pdf_title"]}</h1>
-                    <p>{LOCALIZATION[ln]["pdf_subtitle"]}</p>
+                <div class="header">
+                    <h1>COACH AVNI STRATEGIC PROFILE</h1>
+                    <p>Client: {display_name}</p>
                 </div>
-                
-                <h2>{LOCALIZATION[ln]["pdf_summary_hdr"]}</h2>
+                <h2>Metabolic Analysis</h2>
                 <div class="metric-box">
-                    <div class="metric-item">
-                        <div class="metric-label">Client Name</div>
-                        <div class="metric-value">{display_name}</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Basal Metabolic Rate (BMR)</div>
-                        <div class="metric-value">{macros['bmr']} kcal</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Estimated Daily TDEE</div>
-                        <div class="metric-value">{macros['tdee']} kcal</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Target Protein synthesized</div>
-                        <div class="metric-value">{macros['protein']}g</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Target Carbohydrates</div>
-                        <div class="metric-value">{macros['carbs']}g</div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-label">Target Essential Fats</div>
-                        <div class="metric-value">{macros['fats']}g</div>
-                    </div>
+                    <p><b>BMR:</b> {macros['bmr']} kcal | <b>TDEE:</b> {macros['tdee']} kcal</p>
+                    <p><b>Macros:</b> Protein: {macros['protein']}g | Carbs: {macros['carbs']}g | Fats: {macros['fats']}g</p>
                 </div>
-
-                <h2>{LOCALIZATION[ln]["pdf_log_hdr"]}</h2>
+                <h2>Full Question Log</h2>
                 <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 55%;">Assessment Parameter Pillar</th>
-                            <th style="width: 45%;">Client Log Value</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Question</th><th>Response</th></tr></thead>
                     <tbody>
             """
-            
             for screen in SCREENS:
                 for field in screen['fields']:
                     ans = session.answers.get(field['id'])
                     if ans:
                         clean_q = field['text'][ln].replace("{name}", display_name)
                         val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                        html_content += f"""
-                        <tr>
-                            <td><b>{clean_q}</b></td>
-                            <td><code>{val_str}</code></td>
-                        </tr>
-                        """
-                        
-            html_content += """
-                    </tbody>
-                </table>
-            </body>
-            </html>
-            """
+                        html_content += f"<tr><td><b>{clean_q}</b></td><td>{val_str}</td></tr>"
+            html_content += "</tbody></table></body></html>"
             
             with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp_pdf:
                 HTML(string=html_content).write_pdf(tmp_pdf.name)
                 tmp_pdf.seek(0)
-                
                 with open(tmp_pdf.name, "rb") as f:
-                    await context.bot.send_document(
-                        chat_id=target_chat_id,
-                        document=BytesIO(f.read()),
-                        filename=f"Coach_Avni_{display_name.replace(' ', '_')}_Profile.pdf",
-                        caption="📄 Your Premium Strategic Dossier Blueprint File",
-                        parse_mode="HTML"
-                    )
+                    await context.bot.send_document(chat_id=target_chat_id, document=BytesIO(f.read()), filename=f"Coach_Avni_{display_name}_Dossier.pdf")
             os.unlink(tmp_pdf.name)
         except Exception as e:
-            print(f"WeasyPrint Runtime Error Exception Trace: {e}")
-            await context.bot.send_message(chat_id=target_chat_id, text="⚠️ PDF generation failed on host backend container dependencies.")
+            print(f"PDF Error: {e}")
 
-async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, target_message_id=None, target_chat_id=None):
+async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, target_message_id=None, target_chat_id=None, avni_push=""):
     user_id = update.effective_user.id
     if not target_chat_id: target_chat_id = update.effective_chat.id
     session = context.user_data[user_id]
@@ -513,7 +396,11 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     progress_bar = generate_progress_bar(progress)
     
-    text = f"📝 <b>{LOCALIZATION[ln]['phase']}: {screen_data['section'][ln]}</b>\n{LOCALIZATION[ln]['progress']}: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    text = ""
+    if avni_push:
+        text += f"{LOCALIZATION[ln]['coach_reply']}<i>\"{avni_push}\"</i>\n\n━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        
+    text += f"📝 <b>{LOCALIZATION[ln]['phase']}: {screen_data['section'][ln]}</b>\n{LOCALIZATION[ln]['progress']}: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     current_display_name = str(session.answers.get("q1")) if session.answers.get("q1") else LOCALIZATION[ln]["fallback_name"]
 
     for field in screen_data['fields']:
@@ -651,6 +538,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if action == "s":
             opt_idx = int(parts[2])
             chosen_option = target_field['options'][session.lang][opt_idx]
+            avni_wit = get_avni_commentary(field_id, target_field['options']['en'][opt_idx], session.lang)
             
             if target_field['type'] == 'buttons_multi':
                 current_ans = session.answers.get(field_id, [])
@@ -664,7 +552,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if len(screen_data['fields']) == 1:
                     session.current_screen_idx = len(SCREENS) if session.review_editing_mode else session.current_screen_idx + 1
 
-            await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+            await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id, avni_push=avni_wit)
 
 async def inbound_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -690,7 +578,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
     app.add_handler(MessageHandler(filters.TEXT | filters.VOICE | filters.PHOTO, inbound_message_handler))
-    print("🚀 Localized 62-Question Macro System Core with WeasyPrint Engine Online.")
+    print("🚀 Coach Avni Personality Engine Active and Polling.")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
