@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PREMIUM CONVERSATION ENGINE
-Fixes: Wrapped ReportLab dependency inside dynamic import blocks to prevent container boot crash.
-Maintains the complete humanized 61-question stack with zero data dropouts.
+COACH AVNI - PREMIUM CONVERSATION ENGINE (PERMANENT REACTION EDITION)
+Upgrades: Coach reactions are sent as standalone permanent messages, keeping the chat 
+alive with humor, real-time intelligence, and sharp guidance.
 """
 
 import os
@@ -15,7 +15,7 @@ from telegram.ext import (
     filters, ContextTypes
 )
 
-# Safe ReportLab Isolation Layer to guard container initialization loops
+# Safe ReportLab Isolation Layer
 try:
     from reportlab.lib.pagesizes import letter
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -30,14 +30,13 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
-    print("CRITICAL: TELEGRAM_TOKEN environment variable is missing from system runtime configuration.")
+    print("CRITICAL: TELEGRAM_TOKEN missing.")
     sys.exit(1)
 
-# Dynamic 64-Byte Bypass Translation Layout Matrix
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
-# Master Assessment Content Data Matrix (Questions 1 to 61)
+# All 61 Questions Mapped Cleanly
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "First things first, what's your full name?", "type": "text", "required": True},
@@ -166,35 +165,79 @@ class UserSession:
         if "Fragmented" in sleep: score -= 10
         return max(10, min(100, score))
 
-def check_metabolic_indicators(session) -> str:
-    commentary = []
-    name = session.name if session.name != "there" else "My friend"
-    job = str(session.answers.get("q5", ""))
-    water = str(session.answers.get("q19", ""))
-    cravings = str(session.answers.get("q28", ""))
-    crash = str(session.answers.get("q29", ""))
-    sitting = str(session.answers.get("q50", ""))
+def get_funny_instant_reaction(field_id: str, value: str) -> str:
+    """
+    HUMAN INSTANT CHAT HISTORY COMMENTS
+    Returns a funny, supportive, or sharp coach comment based on the selected answer.
+    """
+    v = str(value)
+    reactions = {
+        "q2": "Age is just a baseline number. We are about to optimize your cellular age anyway! 🧬",
+        "q5": {
+            "💻 Engineer": "An Engineer! Prepare to analyze your macros like code. Just don't over-engineer the workout. 😉",
+            "👨‍⚕️ Doctor": "A Doctor! Respect for the brutal shifts. Let's make sure you aren't ignoring your own charts while saving everyone else.",
+            "📊 Corporate": "Corporate life! High status, higher sitting hours. Time to optimize your corporate engine."
+        },
+        "q7": {
+            "🍗 Non-Veg": "Non-veg makes hitting our daily complete protein targets much easier. Perfect.",
+            "🥕 Veg": "Vegetarian it is. Don't worry, I won't just dump paneer and cucumbers on your plate.",
+            "🌱 Vegan": "Vegan! Plant-powered engine. We will need to be tactical with amino-acid pairing."
+        },
+        "q10": {
+            "☕ Yes, regularly": "Regular caffeine dependency? Classic dynamic. Let's make sure it's not masking system fatigue. ☕",
+            "🚫 Total Abstinence": "Zero caffeine? Wow, running on pure natural ATP. Love to see it! 🙌"
+        },
+        "q11": {
+            "⏰ 5:00 AM": "5 AM club! Early bird efficiency. Your circadian rhythms are already in prime position.",
+            "⏰ 8:00 AM+": "Waking up past 8 AM? Night owl tendencies or corporate recovery mode? No judgment, we'll adapt."
+        },
+        "q12": {
+            "⏭️ Skip Breakfast": "Skipping breakfast? Intermittent fasting by choice or just rushed mornings? I'll check your cortisol later."
+        },
+        "q17": {
+            "🦉 1:00 AM+": "Past 1 AM? Ouch. Those blue screens are actively tricking your brain into thinking it's noon. 🦉"
+        },
+        "q19": {
+            "🥛 < 1 Litre": "Wait... less than 1L of water?! Your blood is practically running on thick sludge right now. Drink a glass immediately! 🚰",
+            "🌊 3+ Litres": "Over 3 Litres? Hydro-homie status unlocked! Your metabolic processes thank you. 🌊"
+        },
+        "q20": {
+            "🍔 Daily": "Daily takeout?! Safe to say your body is swimming in industrial seed oils. Time for an emergency intervention! 🚨",
+            "🍕 2-3x / Week": "2-3x outside food? Understandable with a busy schedule, but those hidden sugars are adding up."
+        },
+        "q28": {
+            "🍩 Intense daily": "Intense daily sugar cravings? Remember: that's your gut microbiome screaming for bad fuel, not a willpower failure. Let's change the gut team."
+        },
+        "q29": {
+            "🥱 Severe 3 PM crash": "Ah, the classic 3 PM energy flatline. That's your glucose spiking up and crashing hard. We'll end that rollercoaster. 📉"
+        },
+        "q40": {
+            "😫 4-5 (High)": "High stress overload. Cortisol is the ultimate enemy of fat loss. We are heavily prioritizing recovery protocols for you. 🧘‍♂️"
+        },
+        "q41": {
+            "🥱 Fragmented/Wakeful": "Tossing and turning? Your brain isn't dropping into deep REM repair phase. Fixable."
+        },
+        "q50": {
+            "💀 8+ Hours": "8+ hours glued to a desk chair is the absolute kryptonite for active posture. We will introduce micro-movements. 🛋️"
+        },
+        "q55": {
+            "📉 Aggressive Fat Loss": "Aggressive fat loss! Bold goal. It requires absolute operational compliance. Let's build the engine.",
+            "💪 Hypertrophy Lean Muscle": "Lean muscle hypertrophy! Time to trigger progressive overload and optimize your amino synthesis."
+        }
+    }
     
-    if session.current_screen_idx == 0:
-        return f"👋 <b>Welcome!</b> Let's look under your metabolic hood. Ready?"
-    if "💻" in job or "📊" in job or "🤵" in job:
-        commentary.append(f"👨‍💻 <i>Coach Note:</i> Ah, desk warrior life. We'll be keeping a close eye on your hip flexor posture, {name}.")
-    if "< 1" in water:
-        commentary.append("🚰 <i>Hold up:</i> Less than 1L of water? Your fat adaptation engine is stalling out on dehydration. Let's fix that.")
-    if "Intense daily" in cravings:
-        commentary.append("🍩 <i>Reality Check:</i> Those regular sugar crashes aren't a lack of discipline; your gut ecosystem is sending false signals.")
-    if "Severe 3 PM crash" in crash:
-        commentary.append("🥱 That 3 PM energy flatline means your blood glucose is on a wild rollercoaster right now.")
-    if "8+" in sitting:
-        commentary.append("🛋️ Sitting 8+ hours locks down key metabolic pathways. We'll deploy tiny structural movement routines.")
-        
-    if not commentary:
-        return f"✨ <b>Looking good, {name}.</b> Biometrics are tracking smoothly. Let's push on!"
-    return commentary[-1]
+    if field_id in reactions:
+        if isinstance(reactions[field_id], dict):
+            for key, msg in reactions[field_id].items():
+                if key in v: return f"🎙️ <b>Coach Avni:</b> {msg}"
+        else:
+            return f"🎙️ <b>Coach Avni:</b> {reactions[field_id]}"
+            
+    # Funny default reactions based on sections
+    return f"🎙️ <b>Coach Avni:</b> Got it. Response captured cleanly. Let's keep going!"
 
 def generate_onboarding_pdf(session) -> BytesIO:
-    if not HAS_REPORTLAB:
-        return None
+    if not HAS_REPORTLAB: return None
     try:
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
@@ -228,8 +271,7 @@ def generate_onboarding_pdf(session) -> BytesIO:
         doc.build(story)
         buffer.seek(0)
         return buffer
-    except Exception:
-        return None
+    except Exception: return None
 
 def check_screen_satisfied(session, screen_data) -> bool:
     for field in screen_data['fields']:
@@ -243,8 +285,9 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
+    # Review Board Phase
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
-        review_text = f"📋 <b>Alright {session.name}, let's look at your summary board before locking it down:</b>\n\n"
+        review_text = f"📋 <b>Alright {session.name}, here is your full metabolic profile board:</b>\n\n"
         processed_sections = []
         for screen in SCREENS:
             sec_name = screen['section']
@@ -266,43 +309,33 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                 keyboard.append(row)
                 row = []
         if row: keyboard.append(row)
-        keyboard.append([InlineKeyboardButton("🚀 LOOKS PERFECT, SUBMIT", callback_data="final_submit")])
+        keyboard.append([InlineKeyboardButton("🚀 LOOKS SOLID - SUBMIT PROFILE", callback_data="final_submit")])
         
-        if query: await query.edit_message_text(review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-        else: await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+        await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
+    # Success / Finish Booking Call Phase
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         success_text = (
-            f"🎯 <b>BOOM! PROTOCOL DATA LOCKED IN.</b>\n\n"
-            f"📈 <b>Your Metabolic Readiness Score: {score}/100</b>\n"
-            f"Your comprehensive dynamic profile has been compiled.\n\n"
-            f"<b>Final Move:</b> Jump onto the scheduling node below right now so we can lock in your live Strategy Kickoff Call!"
+            f"🎯 <b>PROTOCOL SUBMITTED AND INSTALLED successfully!</b>\n\n"
+            f"📈 <b>Metabolic Readiness Health Score: {score}/100</b>\n\n"
+            f"<b>Final Move:</b> Hit the link below right now to claim your time window so we can hop on our Kickoff Call!"
         )
-        keyboard = [
-            [InlineKeyboardButton("📅 SCHEDULE STRATEGY KICKOFF CALL HERE", url=CALENDLY_LINK)],
-            [InlineKeyboardButton("🔄 Reopen and adjust responses", callback_data="reopen_form")]
-        ]
-        if query: await query.edit_message_text(success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-        else: await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+        keyboard = [[InlineKeyboardButton("📅 BOOK STRATEGY KICKOFF CALL", url=CALENDLY_LINK)]]
+        await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
+    # Standard Questionnaire Presentation
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
-    live_coach_commentary = check_metabolic_indicators(session)
     
-    text = (
-        f"📈 <b>Progress: {progress}% deep</b> | Phase: <i>{screen_data['section']}</i>\n"
-        f"💬 -----------------------------------------\n"
-        f"{live_coach_commentary}\n"
-        f"--------------------------------------------\n\n"
-    )
+    text = f"📝 <b>Phase: {screen_data['section']}</b> (Progress: `{progress}%`)\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Go ahead, type your honest answer into the chat box...]</i>\n\n"
+            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Type your custom answer below...]</i>\n\n"
         elif ans:
             display = ", ".join(ans) if isinstance(ans, list) else str(ans)
             text += f"✅ <b>{field['text']}</b>\n👉 <code>{display}</code>\n\n"
@@ -315,7 +348,8 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     
     for field in screen_data['fields']:
         if field['type'] in ['buttons', 'buttons_multi']:
-            keyboard.append([InlineKeyboardButton(f"⬇️ {field['text'].split('?')[0]} ⬇️", callback_data="ignore")])
+            clean_hdr = field['text'].split('?')[0].split(':')[0].strip()
+            keyboard.append([InlineKeyboardButton(f"⬇️ {clean_hdr} ⬇️", callback_data="ignore")])
             row, short_id = [], ID_MAP[field['id']]
             for idx, opt in enumerate(field['options']):
                 lbl = opt
@@ -327,34 +361,29 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                     keyboard.append(row)
                     row = []
             if row: keyboard.append(row)
-            keyboard.append([InlineKeyboardButton("✍️ Give Custom Answer", callback_data=f"c_{short_id}")])
+            keyboard.append([InlineKeyboardButton("✍️ Type Custom Answer", callback_data=f"c_{short_id}")])
         elif field['type'] == 'media':
-            keyboard.append([InlineKeyboardButton("⏭️ Skip Upload (Can do this later)", callback_data="skip_media")])
+            keyboard.append([InlineKeyboardButton("⏭️ Skip Upload", callback_data="skip_media")])
 
     nav_row = []
     if session.current_screen_idx > 0:
         nav_row.append(InlineKeyboardButton("⬅️ BACK", callback_data="back_screen"))
     if has_multi or is_multi_question:
         if check_screen_satisfied(session, screen_data): 
-            nav_row.append(InlineKeyboardButton("MOVE ON ➡️", callback_data="next_screen"))
+            nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
         else: 
-            nav_row.append(InlineKeyboardButton("🔒 Finish questions above", callback_data="locked"))
-    if nav_row: 
-        keyboard.append(nav_row)
+            nav_row.append(InlineKeyboardButton("🔒 Answer above to continue", callback_data="locked"))
+    if nav_row: keyboard.append(nav_row)
 
-    try:
-        if query: await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-        else: await context.bot.send_message(chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-    except Exception: pass
+    await context.bot.send_message(chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
     text = (
-        "🔥 <b>Welcome to your Coach Avni Strategic Architecture Funnel.</b>\n\n"
-        "We are going to map out your specific lifestyle biomechanics "
-        "so we can unlock consistent high energy and permanent fat adaptation.\n\n"
-        "Let's see what's going on under your hood 👇"
+        "🔥 <b>Welcome to Coach Avni's Strategic Onboarding Funnel.</b>\n\n"
+        "We are mapping your specific lifestyle baseline metrics. No cookie-cutter files here.\n\n"
+        "Let's check out what's going on under your hood 👇"
     )
     keyboard = [[InlineKeyboardButton("⚡ INITIALIZE ASSESSMENT PROTOCOL", callback_data="start")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
@@ -363,42 +392,43 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     session = context.user_data.get(user_id)
-    if not session: return await query.answer("Session timed out! Tap /start to begin fresh.", show_alert=True)
+    if not session: return await query.answer("Session timed out! Tap /start.", show_alert=True)
     
     data = query.data
     if data in ["ignore", "locked"]: return await query.answer()
     
+    # Clean/delete current keyboard to prevent multi-clicking old forms
+    try: await query.message.edit_reply_markup(reply_markup=None)
+    except Exception: pass
+    
     if data == "start":
-        session.current_screen_idx = 0
         await query.answer()
-        await render_screen(update, context, query)
+        session.current_screen_idx = 0
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data == "back_screen":
         await query.answer()
-        if session.current_screen_idx > 0: 
-            session.current_screen_idx -= 1
-            session.awaiting_custom_field_id = None
-        await render_screen(update, context, query)
+        if session.current_screen_idx > 0: session.current_screen_idx -= 1
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
         
     if data == "next_screen":
         await query.answer()
         session.current_screen_idx += 1
-        await render_screen(update, context, query)
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data.startswith("edit_sec_"):
         await query.answer()
         target_section = data.replace("edit_sec_", "")
         session.current_screen_idx = get_section_start_index(target_section)
-        await render_screen(update, context, query)
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
         
     if data == "final_submit":
-        await query.answer("💾 Processing onboarding metrics...", show_alert=True)
+        await query.answer("💾 Compiling Assessment PDF...", show_alert=True)
         session.is_submitted = True
-        await render_screen(update, context, query)
         
         pdf_file = generate_onboarding_pdf(session)
         if pdf_file:
@@ -406,32 +436,28 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chat_id=query.message.chat_id,
                 document=pdf_file,
                 filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Brief.pdf",
-                caption="📄 <b>Here is your strategic diagnostic summary asset. Keep this close.</b>",
+                caption="📄 <b>Here is your strategic diagnostic summary dossier.</b>",
                 parse_mode="HTML"
             )
-        return
-        
-    if data == "reopen_form":
-        await query.answer()
-        session.is_submitted = False
-        await render_screen(update, context, query)
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data == "skip_media":
         await query.answer()
-        session.answers["q61"] = "Skipped / Bypassed"
+        session.answers["q61"] = "Skipped"
         session.current_screen_idx += 1
-        await render_screen(update, context, query)
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data.startswith("c_"):
+        await query.answer()
         field_id = REV_MAP[data.split("_")[1]]
         session.awaiting_custom_field_id = field_id
-        await query.answer("⌨️ Enter your custom text below.")
-        await render_screen(update, context, query)
+        await render_screen(update, context, chat_id=query.message.chat_id)
         return
         
     if data.startswith("s_"):
+        await query.answer()
         parts = data.split("_")
         field_id = REV_MAP[parts[1]]
         opt_idx = int(parts[2])
@@ -444,6 +470,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if field['type'] == 'buttons':
             session.answers[field_id] = selected
+            # DROPS THE INTERJECTION REMARK DIRECTLY TO THE PERMANENT CHAT STREAM
+            reaction_msg = get_funny_instant_reaction(field_id, selected)
+            await context.bot.send_message(chat_id=query.message.chat_id, text=reaction_msg, parse_mode="HTML")
         elif field['type'] == 'buttons_multi':
             curr = session.answers.get(field_id, [])
             if not isinstance(curr, list): curr = []
@@ -451,26 +480,31 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else: curr.append(selected)
             session.answers[field_id] = curr
             
-        await query.answer()
         has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
         is_multi_question = len(screen_data['fields']) > 1
         
         if not has_multi and not is_multi_question: 
             session.current_screen_idx += 1
-        await render_screen(update, context, query)
+            
+        await render_screen(update, context, chat_id=query.message.chat_id)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
     if not session or session.current_screen_idx >= len(SCREENS): return
     text = update.message.text.strip()
+    chat_id = update.message.chat_id
     
     if session.awaiting_custom_field_id:
         session.answers[session.awaiting_custom_field_id] = text
         session.awaiting_custom_field_id = None
+        
+        reaction_msg = get_funny_instant_reaction(session.awaiting_custom_field_id, text)
+        await context.bot.send_message(chat_id=chat_id, text=reaction_msg, parse_mode="HTML")
+        
         if check_screen_satisfied(session, SCREENS[session.current_screen_idx]): 
             session.current_screen_idx += 1
-        await render_screen(update, context, chat_id=update.message.chat_id)
+        await render_screen(update, context, chat_id=chat_id)
         return
 
     screen_data = SCREENS[session.current_screen_idx]
@@ -481,23 +515,38 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not session.answers.get(field['id']):
             session.answers[field['id']] = text
             if field['id'] == 'q1': session.name = text
+            
+            reaction_msg = get_funny_instant_reaction(field['id'], text)
+            await context.bot.send_message(chat_id=chat_id, text=reaction_msg, parse_mode="HTML")
             break
             
     if check_screen_satisfied(session, screen_data):
         session.current_screen_idx += 1
         
-    await render_screen(update, context, chat_id=update.message.chat_id)
+    await render_screen(update, context, chat_id=chat_id)
 
 async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
     if not session or session.current_screen_idx >= len(SCREENS): return
-    session.answers["q61"] = "Biometric Reference Images Cached Confidentially ✓"
+    session.answers["q61"] = "Biometric Photo Stored Confidentially ✓"
+    
+    await context.bot.send_message(
+        chat_id=update.message.chat_id, 
+        text="🎙️ <b>Coach Avni:</b> Photo locked in. I'll analyze your kinetic posture from this before our call.", 
+        parse_mode="HTML"
+    )
+    
     session.current_screen_idx += 1
     await render_screen(update, context, chat_id=update.message.chat_id)
 
+def get_section_start_index(section_name: str) -> int:
+    for idx, screen in enumerate(SCREENS):
+        if screen['section'] == section_name: return idx
+    return 0
+
 def main():
-    print("🚀 COACH AVNI IS CONFIGURED AND LIVE-POLLING")
+    print("🚀 COACH AVNI ONLINE — PERMANENT CONVERSATIONAL HISTORY LAYER INITIALIZED")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
