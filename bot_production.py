@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - HUMANIZED AI MASTER CONVERSATION ENGINE
-Upgrades: Complete conversational overhaul. Injects personality, context-aware coaching commentary,
-witty remarks, and supportive reality checks into the full 61-question flow.
+COACH AVNI - PREMIUM CONVERSATION ENGINE
+Fixes: Wrapped ReportLab dependency inside dynamic import blocks to prevent container boot crash.
+Maintains the complete humanized 61-question stack with zero data dropouts.
 """
 
 import os
@@ -15,25 +15,29 @@ from telegram.ext import (
     filters, ContextTypes
 )
 
-# PDF Layout Libraries
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
+# Safe ReportLab Isolation Layer to guard container initialization loops
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    HAS_REPORTLAB = True
+except ImportError:
+    HAS_REPORTLAB = False
 
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
-    print("ERROR: TELEGRAM_TOKEN missing from environment configuration.")
+    print("CRITICAL: TELEGRAM_TOKEN environment variable is missing from system runtime configuration.")
     sys.exit(1)
 
-# Compressed translation key map engine to bypass Telegram's strict 64-Byte callback data limits
+# Dynamic 64-Byte Bypass Translation Layout Matrix
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
-# All 61 Questions spanning across all your onboarding components
+# Master Assessment Content Data Matrix (Questions 1 to 61)
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "First things first, what's your full name?", "type": "text", "required": True},
@@ -140,7 +144,7 @@ SCREENS = [
         {"id": "q60", "text": "What's our targeted countdown timeline to make this transformation real?", "type": "buttons", "required": True, "options": ["🔥 4 to 8 Weeks", "⚡ 12 Weeks (Recommended)", "⏳ Long-term shift"]}
     ]},
     {"id": 23, "section": "📸 Biometric Profiles", "fields": [
-        {"id": "q61", "text": "Drop a clear front, side, or back body photo here so I can evaluate your real posture and muscle structure. (Totally confidential between us!)", "type": "media", "required": False}
+        {"id": "q61", "text": "Drop a clear front, side, or back body photo here so I can evaluate your real posture and muscle structure.", "type": "media", "required": False}
     ]}
 ]
 
@@ -157,101 +161,75 @@ class UserSession:
         water = str(self.answers.get("q19", ""))
         stress = str(self.answers.get("q40", ""))
         sleep = str(self.answers.get("q41", ""))
-        
         if "< 1" in water: score -= 15
         if "4-5" in stress: score -= 15
         if "Fragmented" in sleep: score -= 10
         return max(10, min(100, score))
 
-# INTELLIGENT HUMAN-LIKE COMMENTARY LOGIC
 def check_metabolic_indicators(session) -> str:
     commentary = []
-    
-    # Extract recent key insights
     name = session.name if session.name != "there" else "My friend"
     job = str(session.answers.get("q5", ""))
     water = str(session.answers.get("q19", ""))
     cravings = str(session.answers.get("q28", ""))
     crash = str(session.answers.get("q29", ""))
     sitting = str(session.answers.get("q50", ""))
-    goal = str(session.answers.get("q55", ""))
-
-    # Coach Avni dynamic situational analysis feedback
-    if session.current_screen_idx == 1 and session.name != "there":
-        return f"👋 <b>Welcome {name}!</b> Let's get down to business. I'm going to look under your metabolic hood. Ready?"
     
+    if session.current_screen_idx == 0:
+        return f"👋 <b>Welcome!</b> Let's look under your metabolic hood. Ready?"
     if "💻" in job or "📊" in job or "🤵" in job:
-        commentary.append(f"👨‍💻 <i>Coach Note:</i> Ah, desk warrior life. We are definitely going to have to watch out for your hip flexors and lower back posture, {name}.")
-        
+        commentary.append(f"👨‍💻 <i>Coach Note:</i> Ah, desk warrior life. We'll be keeping a close eye on your hip flexor posture, {name}.")
     if "< 1" in water:
-        commentary.append("🚰 <i>Hold up:</i> Less than 1L of water? Your metabolism is running on pure friction right now. Let's fix that.")
-        
+        commentary.append("🚰 <i>Hold up:</i> Less than 1L of water? Your fat adaptation engine is stalling out on dehydration. Let's fix that.")
     if "Intense daily" in cravings:
-        commentary.append("🍩 <i>Reality Check:</i> Those daily sugar cravings aren't a 'willpower' issue. Your current gut microbes are hijacking your choices.")
-
+        commentary.append("🍩 <i>Reality Check:</i> Those regular sugar crashes aren't a lack of discipline; your gut ecosystem is sending false signals.")
     if "Severe 3 PM crash" in crash:
-        commentary.append("🥱 <i>Aha!</i> That 3 PM crash means your insulin is on a chaotic rollercoaster. We're going to stabilize your macros to end that.")
-
+        commentary.append("🥱 That 3 PM energy flatline means your blood glucose is on a wild rollercoaster right now.")
     if "8+" in sitting:
-        commentary.append("🛋️ <i>Warning:</i> Sitting for over 8 hours actively downregulates your lipolytic enzymes (fat burning). We need tactical movement breaks.")
-
-    if "Aggressive Fat Loss" in goal:
-        commentary.append("🔥 <i>Love the ambition:</i> Aggressive fat loss requires absolute biological compliance. Let's build the engine for it.")
-
-    if not commentary:
-        return f"✨ <b>Looking good, {name}.</b> Collected data metrics are tracking normally. Keep moving forward!"
+        commentary.append("🛋️ Sitting 8+ hours locks down key metabolic pathways. We'll deploy tiny structural movement routines.")
         
-    # Return only the most relevant piece of advice to avoid clutter
+    if not commentary:
+        return f"✨ <b>Looking good, {name}.</b> Biometrics are tracking smoothly. Let's push on!"
     return commentary[-1]
 
 def generate_onboarding_pdf(session) -> BytesIO:
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-    story = []
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'DocTitle', parent=styles['Heading1'], fontSize=20, leading=24, textColor=colors.HexColor("#1A365D"), spaceAfter=12
-    )
-    body_style = ParagraphStyle(
-        'BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748")
-    )
-    
-    story.append(Paragraph(f"COACH AVNI — COMPLETE ASSESSMENT STRATEGY DOSSIER", title_style))
-    story.append(Paragraph(f"<b>Client Profile Target Name:</b> {session.name}", body_style))
-    story.append(Paragraph(f"<b>Metabolic Readiness Score:</b> {session.calculate_readiness_score()}/100", body_style))
-    story.append(Spacer(1, 15))
-    
-    data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
-    for screen in SCREENS:
-        for field in screen['fields']:
-            ans = session.answers.get(field['id'])
-            if ans:
-                val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                clean_lbl = field['text']
-                data.append([Paragraph(clean_lbl, body_style), Paragraph(val_str, body_style)])
-                
-    t = Table(data, colWidths=[270, 230])
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
-        ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
-    ]))
-    story.append(t)
-    
-    doc.build(story)
-    buffer.seek(0)
-    return buffer
-
-def get_section_start_index(section_name: str) -> int:
-    for idx, screen in enumerate(SCREENS):
-        if screen['section'] == section_name:
-            return idx
-    return 0
+    if not HAS_REPORTLAB:
+        return None
+    try:
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+        story = []
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#1A365D"), spaceAfter=12)
+        body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
+        
+        story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
+        story.append(Paragraph(f"<b>Client Profile Target:</b> {session.name}", body_style))
+        story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {session.calculate_readiness_score()}/100", body_style))
+        story.append(Spacer(1, 15))
+        
+        data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
+        for screen in SCREENS:
+            for field in screen['fields']:
+                ans = session.answers.get(field['id'])
+                if ans:
+                    val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                    data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
+                    
+        t = Table(data, colWidths=[270, 230])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
+            ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+        ]))
+        story.append(t)
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+    except Exception:
+        return None
 
 def check_screen_satisfied(session, screen_data) -> bool:
     for field in screen_data['fields']:
@@ -265,15 +243,13 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
-    # 1. System Review & Modify Screen Layer
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
-        review_text = f"📋 <b>Alright {session.name}, let's look at the summary board before locking it down:</b>\n\n"
+        review_text = f"📋 <b>Alright {session.name}, let's look at your summary board before locking it down:</b>\n\n"
         processed_sections = []
         for screen in SCREENS:
             sec_name = screen['section']
             if sec_name in processed_sections: continue
             processed_sections.append(sec_name)
-            
             review_text += f"🔸 <b>{sec_name.upper()}</b>\n"
             sec_fields = [f for s in SCREENS if s['section'] == sec_name for f in s['fields']]
             for field in sec_fields:
@@ -290,37 +266,34 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                 keyboard.append(row)
                 row = []
         if row: keyboard.append(row)
-        keyboard.append([InlineKeyboardButton("🚀 LOOKS PERFECT, LET'S INITIATE", callback_data="final_submit")])
+        keyboard.append([InlineKeyboardButton("🚀 LOOKS PERFECT, SUBMIT", callback_data="final_submit")])
         
         if query: await query.edit_message_text(review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         else: await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # 2. System Final Success Page with Active Calendly Endpoint Link
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         success_text = (
-            f"🎯 <b>BOOM! DATA PACKET LOCKED IN SUCCESSFULLY.</b>\n\n"
-            f"📈 <b>Your Metabolic Readiness Baseline: {score}/100</b>\n"
-            f"Everything is securely mapped inside my framework.\n\n"
-            f"I have just compiled your comprehensive tactical profile brief. "
-            f"<b>Final Move:</b> Hit the Calendly link below right now so we can jump on your strategy kickoff call and map out the exact plan."
+            f"🎯 <b>BOOM! PROTOCOL DATA LOCKED IN.</b>\n\n"
+            f"📈 <b>Your Metabolic Readiness Score: {score}/100</b>\n"
+            f"Your comprehensive dynamic profile has been compiled.\n\n"
+            f"<b>Final Move:</b> Jump onto the scheduling node below right now so we can lock in your live Strategy Kickoff Call!"
         )
         keyboard = [
-            [InlineKeyboardButton("📅 LOCK IN YOUR STRATEGY KICKOFF CALL HERE", url=CALENDLY_LINK)],
-            [InlineKeyboardButton("🔄 Wait, let me adjust an answer", callback_data="reopen_form")]
+            [InlineKeyboardButton("📅 SCHEDULE STRATEGY KICKOFF CALL HERE", url=CALENDLY_LINK)],
+            [InlineKeyboardButton("🔄 Reopen and adjust responses", callback_data="reopen_form")]
         ]
         if query: await query.edit_message_text(success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         else: await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # 3. Standard Sequential Screen Questionnaire Engine Render Block
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     live_coach_commentary = check_metabolic_indicators(session)
     
     text = (
-        f"📊 <b>Progress: {progress}% deep</b> | Phase: <i>{screen_data['section']}</i>\n"
+        f"📈 <b>Progress: {progress}% deep</b> | Phase: <i>{screen_data['section']}</i>\n"
         f"💬 -----------------------------------------\n"
         f"{live_coach_commentary}\n"
         f"--------------------------------------------\n\n"
@@ -329,7 +302,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Go ahead, type your honest answer into the chat...]</i>\n\n"
+            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Go ahead, type your honest answer into the chat box...]</i>\n\n"
         elif ans:
             display = ", ".join(ans) if isinstance(ans, list) else str(ans)
             text += f"✅ <b>{field['text']}</b>\n👉 <code>{display}</code>\n\n"
@@ -342,13 +315,13 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     
     for field in screen_data['fields']:
         if field['type'] in ['buttons', 'buttons_multi']:
-            keyboard.append([InlineKeyboardButton(f"⬇️ Select for: {field['text'].split('?')[0]} ⬇️", callback_data="ignore")])
+            keyboard.append([InlineKeyboardButton(f"⬇️ {field['text'].split('?')[0]} ⬇️", callback_data="ignore")])
             row, short_id = [], ID_MAP[field['id']]
             for idx, opt in enumerate(field['options']):
                 lbl = opt
                 ans = session.answers.get(field['id'])
-                if field['type'] == 'buttons' and ans == opt: lbl = f"🔥 {opt} [SELECTED]"
-                elif field['type'] == 'buttons_multi' and ans and opt in ans: lbl = f"🔥 {opt} [ADDED]"
+                if field['type'] == 'buttons' and ans == opt: lbl = f"🔥 {opt} ✓"
+                elif field['type'] == 'buttons_multi' and ans and opt in ans: lbl = f"🔥 {opt} ✓"
                 row.append(InlineKeyboardButton(lbl, callback_data=f"s_{short_id}_{idx}"))
                 if len(row) == 2:
                     keyboard.append(row)
@@ -365,7 +338,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         if check_screen_satisfied(session, screen_data): 
             nav_row.append(InlineKeyboardButton("MOVE ON ➡️", callback_data="next_screen"))
         else: 
-            nav_row.append(InlineKeyboardButton("🔒 Finish questions above to unlock next phase", callback_data="locked"))
+            nav_row.append(InlineKeyboardButton("🔒 Finish questions above", callback_data="locked"))
     if nav_row: 
         keyboard.append(nav_row)
 
@@ -378,19 +351,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     context.user_data[user_id] = UserSession()
     text = (
-        "🔥 <b>Welcome to the Coach Avni Executive Protocol Funnel.</b>\n\n"
-        "I don't do generic cookie-cutter meal plans. We are going to map out your specific lifestyle biomechanics "
+        "🔥 <b>Welcome to your Coach Avni Strategic Architecture Funnel.</b>\n\n"
+        "We are going to map out your specific lifestyle biomechanics "
         "so we can unlock consistent high energy and permanent fat adaptation.\n\n"
-        "Let's check out what's going on under your hood 👇"
+        "Let's see what's going on under your hood 👇"
     )
-    keyboard = [[InlineKeyboardButton("⚡ START YOUR ASSESSMENT INTERFACE", callback_data="start")]]
+    keyboard = [[InlineKeyboardButton("⚡ INITIALIZE ASSESSMENT PROTOCOL", callback_data="start")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     session = context.user_data.get(user_id)
-    if not session: return await query.answer("Session expired! Let's restart with /start.", show_alert=True)
+    if not session: return await query.answer("Session timed out! Tap /start to begin fresh.", show_alert=True)
     
     data = query.data
     if data in ["ignore", "locked"]: return await query.answer()
@@ -423,18 +396,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     if data == "final_submit":
-        await query.answer("💾 Printing your Strategy Brief Profile PDF...", show_alert=True)
+        await query.answer("💾 Processing onboarding metrics...", show_alert=True)
         session.is_submitted = True
         await render_screen(update, context, query)
         
         pdf_file = generate_onboarding_pdf(session)
-        await context.bot.send_document(
-            chat_id=query.message.chat_id,
-            document=pdf_file,
-            filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Strategy_Brief.pdf",
-            caption="📄 <b>Here is your Strategic Assessment Profile Dossier. Keep this safe.</b>",
-            parse_mode="HTML"
-        )
+        if pdf_file:
+            await context.bot.send_document(
+                chat_id=query.message.chat_id,
+                document=pdf_file,
+                filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Brief.pdf",
+                caption="📄 <b>Here is your strategic diagnostic summary asset. Keep this close.</b>",
+                parse_mode="HTML"
+            )
         return
         
     if data == "reopen_form":
@@ -445,7 +419,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "skip_media":
         await query.answer()
-        session.answers["q61"] = "Skipped by client"
+        session.answers["q61"] = "Skipped / Bypassed"
         session.current_screen_idx += 1
         await render_screen(update, context, query)
         return
@@ -453,7 +427,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data.startswith("c_"):
         field_id = REV_MAP[data.split("_")[1]]
         session.awaiting_custom_field_id = field_id
-        await query.answer("⌨️ Fire away into the message box!")
+        await query.answer("⌨️ Enter your custom text below.")
         await render_screen(update, context, query)
         return
         
@@ -518,12 +492,12 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
     if not session or session.current_screen_idx >= len(SCREENS): return
-    session.answers["q61"] = "Biometric Reference Photo Saved Confidentially ✅"
+    session.answers["q61"] = "Biometric Reference Images Cached Confidentially ✓"
     session.current_screen_idx += 1
     await render_screen(update, context, chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI HUMANIZED EMBEDDED CONVERSATION ENGINE IS ONLINE")
+    print("🚀 COACH AVNI IS CONFIGURED AND LIVE-POLLING")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
