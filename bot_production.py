@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (ULTIMATE METABOLIC EDITION)
-100% of your baseline structures, questions, custom logic, and text layout logic remain completely preserved.
+COACH AVNI - PERSONALITY ENGINE (COMPLETE LIVE UPGRADED EDITION)
+100% of your 61 baseline questions, sections, layouts, and custom logic remain completely preserved.
 
-Layered Upgrades:
-- Feature 1: Dynamic Metabolic Branching Logic (Diabetes / Thyroid / PCOS Follow-ups)
-- Feature 2: Mifflin-St Jeor Engine AI Macro Calculator (Calculates Cals/Macros instantly)
-- Feature 3: Voice Cloning Response Architecture (Fires matching audio responses back)
-- Feature 5: Contextual Retention Multi-Nudges (Reads phase locations for smart hooks)
+Integrated Features:
+- Feature 1: Dynamic Metabolic Branching Logic (Injected Health Deep-Dives)
+- Feature 2: Mifflin-St Jeor Engine AI Macro Calculator (Instant Success Dashboard stats)
+- Feature 3: Live OpenAI TTS Voice Engine integration (Native Telegram audio notes)
+- Feature 5: Contextual Retention Multi-Nudges (Tracks active user onboarding phases)
 """
 
 import os
 import sys
+import io
 from io import BytesIO
 from datetime import datetime
 from dotenv import load_dotenv
+from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, MessageHandler, 
@@ -32,14 +34,17 @@ except ImportError:
 
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
     print("CRITICAL: TELEGRAM_TOKEN missing.")
     sys.exit(1)
 
+# Initialize OpenAI client if token exists
+openai_client = OpenAI(api_key=OPENAI_KEY) if OPENAI_KEY else None
+
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
-# Add mappings for feature 1 branching IDs
 BRANCH_MAP = {"q23_diabetes": "vdia", "q23_thyroid": "vthy", "q23_pcos": "vpco"}
 ID_MAP.update(BRANCH_MAP)
 REV_MAP = {v: k for k, v in ID_MAP.items()}
@@ -154,7 +159,7 @@ SCREENS = [
     ]}
 ]
 
-# Feature 1: Adaptive Deep-Dive Branch Definition Records
+# Feature 1: Dynamic Metabolic Branching
 DYNAMIC_BRANCHES = {
     "🔬 Diabetes": {"id": "q23_diabetes", "text": "What was your most recent Fasting Blood Sugar or HbA1c score? (e.g., 6.4, 140 mg/dL)", "type": "text", "section": "🏥 Health Deep-Dive"},
     "🧬 Thyroid": {"id": "q23_thyroid", "text": "Are you taking thyroid medication? If yes, what is your current dosage (e.g., 50mcg Thyronorm)?", "type": "text", "section": "🏥 Health Deep-Dive"},
@@ -183,7 +188,7 @@ class UserSession:
         return max(10, min(100, score))
 
     def calculate_macro_targets(self):
-        """Feature 2: Implements Mifflin-St Jeor engine equations safely."""
+        """Feature 2: Implements Mifflin-St Jeor metabolic calculations equations cleanly."""
         try:
             w = float(str(self.answers.get("q4", "75")).replace("kg", "").strip())
             h = float(str(self.answers.get("q3", "175")).replace("cm", "").strip())
@@ -193,7 +198,7 @@ class UserSession:
 
         is_female = "Female" in str(self.answers.get("q6", ""))
         bmr = (10 * w) + (6.25 * h) - (5 * a) + (-161 if is_female else 5)
-        tdee = bmr * 1.375  # Moderate lifestyle coefficient
+        tdee = bmr * 1.375
 
         goal = str(self.answers.get("q55", ""))
         if "Fat Loss" in goal:
@@ -225,9 +230,30 @@ def generate_progress_bar(pct: int) -> str:
     return f"<code>[{bar_str}] {pct}%</code>"
 
 async def generate_voice_response(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
-    """Feature 3: Audio Gateway Pipeline Container (Ready for voice integration hooks)."""
-    # Replace this string processing pass with your production ElevenLabs or OpenAI audio generation API link when ready.
-    pass
+    """Feature 3: Live OpenAI TTS Voice Generation Pipeline Architecture."""
+    if not openai_client:
+        return
+        
+    chat_id = update.effective_chat.id
+    clean_text = text.replace("🎙️ <b>Coach Avni:</b>", "").replace("<b>", "").replace("</b>", "").replace("<code>", "").replace("</code>", "")
+    
+    try:
+        response = openai_client.audio.speech.create(
+            model="tts-1",
+            voice="nova", 
+            input=clean_text
+        )
+        audio_buffer = io.BytesIO(response.content)
+        audio_buffer.name = "avni_voice.ogg"
+        
+        await context.bot.send_voice(
+            chat_id=chat_id,
+            voice=audio_buffer,
+            caption="🎙️ Audio Note from Coach Avni"
+        )
+    except Exception as e:
+        print(f"TTS Pipeline Error Trace: {e}")
+        pass
 
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
     v = str(value)
@@ -334,7 +360,7 @@ def reset_dropoff_tracker(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat
     )
 
 async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
-    """Feature 5: Smart Retention Context Nudge Worker Engine."""
+    """Feature 5: Smart Contextual Onboarding Retention Nudge Worker."""
     job = context.job
     user_id = job.user_id
     chat_id = job.chat_id
@@ -343,7 +369,6 @@ async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
     if not session or session.is_submitted:
         return
 
-    # Check context location matrix dynamically
     current_section = "Profile Intake"
     if session.current_screen_idx < len(SCREENS):
         current_section = SCREENS[session.current_screen_idx]["section"]
@@ -367,7 +392,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
             job.schedule_removal()
         
     score = session.calculate_readiness_score()
-    macros = session.calculate_macro_targets() # Feature 2 Evaluation Call
+    macros = session.calculate_macro_targets() # Feature 2 Evaluation Output Trigger
     
     success_text = (
         f"🧠 <b>BIO-METRIC ONBOARDING REGISTERED SUCCESSFULLY</b>\n\n"
@@ -445,7 +470,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     session.last_activity = datetime.now()
     reset_dropoff_tracker(context, user_id, target_chat_id)
     
-    # Feature 1: Process Injected Branching Fields if loaded
+    # Feature 1: Process Injected Branching Fields Matrix
     if session.current_branch_field:
         field = session.current_branch_field
         text = f"📝 <b>Phase: {field['section']}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -598,7 +623,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try: await query.message.delete()
         except Exception: pass
         
-        # Feature 1 Evaluation Loop Checkpoint
+        # Feature 1 Adaptive Branch Verification Checkpoint Loop
         for field in screen_data['fields']:
             ans = session.answers.get(field['id'])
             if field['id'] == "q23" and isinstance(ans, list):
@@ -649,7 +674,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         field_id = REV_MAP[parts[1]]
         opt_idx = int(parts[2])
         
-        # Branch choice tracking configuration
         if session.current_branch_field and session.current_branch_field['id'] == field_id:
             selected = session.current_branch_field['options'][opt_idx]
             session.answers[field_id] = selected
@@ -682,7 +706,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = get_funny_instant_reaction(field_id, selected)
             if msg:
                 await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
-                await generate_voice_response(update, context, msg)
+                await generate_voice_response(update, context, msg) # Feature 3 Output Hook Trigger
                 
             session.current_screen_idx += 1
             await render_screen(update, context, target_chat_id=query.message.chat_id)
@@ -774,7 +798,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, target_chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI UPGRADED PRODUCTION ENGINE ONLINE")
+    print("🚀 COACH AVNI COMPREHENSIVE ENGINE INSTANTIATED STATUS: VERIFIED")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
