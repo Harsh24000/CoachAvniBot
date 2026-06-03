@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (DYNAMIC PERSONALIZATION EDITION)
+COACH AVNI - PERSONALITY ENGINE (CRASH-PROOF PERSONALIZATION EDITION)
 100% of your 61 baseline questions, logic flows, and custom layout variables are preserved.
 
 Fixes Deployed:
-- Dynamic Name Injection: Addresses and asks questions using the client's submitted name post-Q1.
-- Added explicit try/except safety catching for 'Message is not modified' Telegram API quirks.
-- Deep string verification and HTML escaping updates.
-- Wrapped OpenAI client initialization inside a rigorous try/except safety check.
+- Isolated first-name splitting with deep HTML escaping to eliminate entity parsing crashes.
+- Hardened inline keyboard dynamic header generation blocks.
+- Added top-level try/except safety net around render_screen to prevent terminal polling crashes.
 """
 
 import os
@@ -181,7 +180,7 @@ class UserSession:
     def __init__(self):
         self.current_screen_idx = 0
         self.answers = {}
-        self.name = None  # Instantiated as None until Q1 text input sets it explicitly
+        self.name = None  
         self.awaiting_custom_field_id = None
         self.is_submitted = False
         self.last_activity = datetime.now()
@@ -233,10 +232,8 @@ class UserSession:
         }
 
 def get_personalized_text(field: dict, session: UserSession) -> str:
-    """Interceptors to seamlessly prefix or address queries natively with user's name."""
     orig_text = field['text']
     
-    # Custom baseline override triggers
     if field['id'] == "q14" and session.answers.get("q5"):
         job = str(session.answers.get("q5")).split()[-1]
         orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work?"
@@ -246,8 +243,8 @@ def get_personalized_text(field: dict, session: UserSession) -> str:
     if not session.name:
         return orig_text
 
-    # Dynamic variations to make conversions sound completely organic
-    name_clean = session.name.split()[0] # Pull first name only
+    # CRASH PROTECTION: Always extract the first word and sanitize thoroughly 
+    name_clean = html.escape(str(session.name).split()[0].strip())
     
     replacements = {
         "q2": f"Awesome {name_clean}. How many years young are you?",
@@ -267,7 +264,6 @@ def get_personalized_text(field: dict, session: UserSession) -> str:
     if field['id'] in replacements:
         return replacements[field['id']]
         
-    # Default personalization fallback structure if no explicit entry matches above
     if field['id'] not in ["q1", "q2", "q3"]:
         return f"{name_clean}, {orig_text[0].lower() + orig_text[1:]}"
         
@@ -283,10 +279,8 @@ def generate_progress_bar(pct: int) -> str:
 async def generate_voice_response(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
     if not openai_client:
         return
-        
     chat_id = update.effective_chat.id
     clean_text = text.replace("🎙️ <b>Coach Avni:</b>", "").replace("<b>", "").replace("</b>", "").replace("<code>", "").replace("</code>", "")
-    
     try:
         response = openai_client.audio.speech.create(
             model="tts-1",
@@ -295,19 +289,16 @@ async def generate_voice_response(update: Update, context: ContextTypes.DEFAULT_
         )
         audio_buffer = io.BytesIO(response.content)
         audio_buffer.name = "avni_voice.ogg"
-        
-        await context.bot.send_voice(
-            chat_id=chat_id,
-            voice=audio_buffer,
-            caption="🎙️ Audio Note from Coach Avni"
-        )
+        await context.bot.send_voice(chat_id=chat_id, voice=audio_buffer, caption="🎙️ Audio Note from Coach Avni")
     except Exception as e:
         logger.error(f"Voice generation failed: {e}")
 
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
     v = str(value)
+    # Sanitize inputs instantly before generating systemic reactions
+    val_clean = html.escape(v)
     reactions = {
-        "q1": f"Nice to meet you, {value}! Let's customize your fitness mapping engine immediately. 🚀",
+        "q1": f"Nice to meet you, {val_clean}! Let's customize your fitness mapping engine immediately. 🚀",
         "q2": "Age is just a software parameter. We are about to optimize your cellular biology split anyway! 🧬",
         "q5": {
             "💻 Engineer": "An Engineer! Excellent. Prepare to treat your macronutrients like clean lines of production code. Just don't spend three weeks refactoring your breakfast setup. 😉",
@@ -369,7 +360,6 @@ def get_funny_instant_reaction(field_id: str, value: str) -> str:
             "💪 Hypertrophy Lean Muscle": "Lean muscle hypertrophy! Excellent. Time to set up consistent progressive overload structures and track your protein synthesis."
         }
     }
-    
     if field_id in reactions:
         if isinstance(reactions[field_id], dict):
             for key, msg in reactions[field_id].items():
@@ -412,13 +402,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         [InlineKeyboardButton("📅 BOOK KICKOFF CALL VIA CALENDLY", url=CALENDLY_LINK)],
         [InlineKeyboardButton("🔄 REVIEW/OPEN DATA ENTRIES", callback_data="review_board_fallback")]
     ]
-    
-    await context.bot.send_message(
-        chat_id=target_chat_id, 
-        text=success_text, 
-        reply_markup=InlineKeyboardMarkup(keyboard), 
-        parse_mode="HTML"
-    )
+    await context.bot.send_message(chat_id=target_chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
     
     try:
         buffer = BytesIO()
@@ -453,7 +437,6 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         story.append(t)
         doc.build(story)
         buffer.seek(0)
-        
         await context.bot.send_document(
             chat_id=target_chat_id,
             document=buffer,
@@ -465,109 +448,113 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         logger.error(f"PDF generation failed: {e}")
 
 async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, target_message_id=None, target_chat_id=None):
-    user_id = update.effective_user.id
-    if not target_chat_id: target_chat_id = update.effective_chat.id
-    session = context.user_data[user_id]
-    session.last_activity = datetime.now()
-    
-    if session.current_branch_field:
-        field = session.current_branch_field
-        text = f"📝 <b>Phase: {html.escape(field['section'])}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-        ans = session.answers.get(field['id'])
-        p_text = get_personalized_text(field, session)
+    try:
+        user_id = update.effective_user.id
+        if not target_chat_id: target_chat_id = update.effective_chat.id
+        session = context.user_data[user_id]
+        session.last_activity = datetime.now()
         
-        if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type custom text or hold mic...]</i>\n\n"
-        elif ans:
-            text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(str(ans))}</code>\n\n"
-        else:
-            text += f"👉 <b>{html.escape(p_text)}</b>\n\n"
+        if session.current_branch_field:
+            field = session.current_branch_field
+            text = f"📝 <b>Phase: {html.escape(field['section'])}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            ans = session.answers.get(field['id'])
+            p_text = get_personalized_text(field, session)
             
+            if session.awaiting_custom_field_id == field['id']:
+                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type custom text or hold mic...]</i>\n\n"
+            elif ans:
+                text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(str(ans))}</code>\n\n"
+            else:
+                text += f"👉 <b>{html.escape(p_text)}</b>\n\n"
+                
+            keyboard = []
+            if field['type'] == 'buttons':
+                short_id = ID_MAP[field['id']]
+                for idx, opt in enumerate(field['options']):
+                    lbl = opt if ans != opt else f"🔥 {opt} ✓"
+                    keyboard.append([InlineKeyboardButton(lbl, callback_data=f"s_{short_id}_{idx}")])
+            
+            nav_row = [InlineKeyboardButton("CONTINUE ➡️", callback_data="next_branch")]
+            keyboard.append(nav_row)
+            
+            if target_message_id:
+                try:
+                    await context.bot.edit_message_text(text, chat_id=target_chat_id, message_id=target_message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+                    return
+                except Exception as e:
+                    if "Message is not modified" in str(e): return
+                    logger.error(f"Error editing branch message: {e}")
+            await context.bot.send_message(target_chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+            return
+
+        if session.current_screen_idx >= len(SCREENS):
+            await deliver_final_success_ui(update, context, target_chat_id)
+            return
+
+        screen_data = SCREENS[session.current_screen_idx]
+        progress = int((session.current_screen_idx / len(SCREENS)) * 100)
+        progress_bar = generate_progress_bar(progress)
+        
+        text = f"📝 <b>Phase: {html.escape(screen_data['section'])}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        
+        for field in screen_data['fields']:
+            ans = session.answers.get(field['id'])
+            p_text = get_personalized_text(field, session)
+                
+            if session.awaiting_custom_field_id == field['id']:
+                text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
+            elif ans:
+                display = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(display)}</code>\n\n"
+            else:
+                text += f"👉 <b>{html.escape(p_text)}</b>\n\n"
+
         keyboard = []
-        if field['type'] == 'buttons':
-            short_id = ID_MAP[field['id']]
-            for idx, opt in enumerate(field['options']):
-                lbl = opt if ans != opt else f"🔥 {opt} ✓"
-                keyboard.append([InlineKeyboardButton(lbl, callback_data=f"s_{short_id}_{idx}")])
+        has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
+        is_multi_question = len(screen_data['fields']) > 1
         
-        nav_row = [InlineKeyboardButton("CONTINUE ➡️", callback_data="next_branch")]
-        keyboard.append(nav_row)
-        
+        for field in screen_data['fields']:
+            if field['type'] in ['buttons', 'buttons_multi']:
+                p_text = get_personalized_text(field, session)
+                # Safeguard against string splits failing on formatting syntax
+                clean_hdr = html.escape(p_text.split('?')[0].split(':')[0].strip())
+                keyboard.append([InlineKeyboardButton(f"⬇️ {clean_hdr} ⬇️", callback_data="ignore")])
+                row, short_id = [], ID_MAP[field['id']]
+                for idx, opt in enumerate(field['options']):
+                    lbl = opt
+                    ans = session.answers.get(field['id'])
+                    if field['type'] == 'buttons' and ans == opt: lbl = f"🔥 {opt} ✓"
+                    elif field['type'] == 'buttons_multi' and ans and opt in ans: lbl = f"🔥 {opt} ✓"
+                    row.append(InlineKeyboardButton(lbl, callback_data=f"s_{short_id}_{idx}"))
+                    if len(row) == 2:
+                        keyboard.append(row)
+                        row = []
+                if row: keyboard.append(row)
+                keyboard.append([InlineKeyboardButton("🎙️ Speak / Type Custom Answer", callback_data=f"c_{short_id}")])
+            elif field['type'] == 'media':
+                keyboard.append([InlineKeyboardButton("⏭️ Skip Upload (Can do this later)", callback_data="skip_media")])
+
+        nav_row = []
+        if session.current_screen_idx > 0:
+            nav_row.append(InlineKeyboardButton("⬅️ BACK", callback_data="back_screen"))
+        if has_multi or is_multi_question:
+            if check_screen_satisfied(session, screen_data): 
+                nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
+            else: 
+                nav_row.append(InlineKeyboardButton("🔒 Finish answers to un-lock", callback_data="locked"))
+        if nav_row: keyboard.append(nav_row)
+
         if target_message_id:
             try:
                 await context.bot.edit_message_text(text, chat_id=target_chat_id, message_id=target_message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
                 return
             except Exception as e:
                 if "Message is not modified" in str(e): return
-                logger.error(f"Error editing branch message: {e}")
-        await context.bot.send_message(target_chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-        return
+                logger.error(f"Error editing screen message: {e}")
 
-    if session.current_screen_idx >= len(SCREENS):
-        await deliver_final_success_ui(update, context, target_chat_id)
-        return
-
-    screen_data = SCREENS[session.current_screen_idx]
-    progress = int((session.current_screen_idx / len(SCREENS)) * 100)
-    progress_bar = generate_progress_bar(progress)
-    
-    text = f"📝 <b>Phase: {html.escape(screen_data['section'])}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-    
-    for field in screen_data['fields']:
-        ans = session.answers.get(field['id'])
-        p_text = get_personalized_text(field, session)
-            
-        if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{html.escape(p_text)}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
-        elif ans:
-            display = ", ".join(ans) if isinstance(ans, list) else str(ans)
-            text += f"✅ <b>{html.escape(p_text)}</b>\n👉 <code>{html.escape(display)}</code>\n\n"
-        else:
-            text += f"👉 <b>{html.escape(p_text)}</b>\n\n"
-
-    keyboard = []
-    has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
-    is_multi_question = len(screen_data['fields']) > 1
-    
-    for field in screen_data['fields']:
-        if field['type'] in ['buttons', 'buttons_multi']:
-            p_text = get_personalized_text(field, session)
-            clean_hdr = p_text.split('?')[0].split(':')[0].strip()
-            keyboard.append([InlineKeyboardButton(f"⬇️ {clean_hdr} ⬇️", callback_data="ignore")])
-            row, short_id = [], ID_MAP[field['id']]
-            for idx, opt in enumerate(field['options']):
-                lbl = opt
-                ans = session.answers.get(field['id'])
-                if field['type'] == 'buttons' and ans == opt: lbl = f"🔥 {opt} ✓"
-                elif field['type'] == 'buttons_multi' and ans and opt in ans: lbl = f"🔥 {opt} ✓"
-                row.append(InlineKeyboardButton(lbl, callback_data=f"s_{short_id}_{idx}"))
-                if len(row) == 2:
-                    keyboard.append(row)
-                    row = []
-            if row: keyboard.append(row)
-            keyboard.append([InlineKeyboardButton("🎙️ Speak / Type Custom Answer", callback_data=f"c_{short_id}")])
-        elif field['type'] == 'media':
-            keyboard.append([InlineKeyboardButton("⏭️ Skip Upload (Can do this later)", callback_data="skip_media")])
-
-    nav_row = []
-    if session.current_screen_idx > 0:
-        nav_row.append(InlineKeyboardButton("⬅️ BACK", callback_data="back_screen"))
-    if has_multi or is_multi_question:
-        if check_screen_satisfied(session, screen_data): 
-            nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
-        else: 
-            nav_row.append(InlineKeyboardButton("🔒 Finish answers to un-lock", callback_data="locked"))
-    if nav_row: keyboard.append(nav_row)
-
-    if target_message_id:
-        try:
-            await context.bot.edit_message_text(text, chat_id=target_chat_id, message_id=target_message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
-            return
-        except Exception as e:
-            if "Message is not modified" in str(e): return
-            logger.error(f"Error editing screen message: {e}")
-
-    await context.bot.send_message(chat_id=target_chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+        await context.bot.send_message(chat_id=target_chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+    except Exception as fatal_render_err:
+        logger.error(f"Render engine bypass protected a crash event: {fatal_render_err}")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
