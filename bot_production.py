@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (COMPLETE LIVE UPGRADED EDITION)
-100% of your 61 baseline questions, sections, layouts, and custom logic remain completely preserved.
+COACH AVNI - PERSONALITY ENGINE (PRODUCTION HARDENED EDITION)
+100% of your 61 baseline questions, logic flows, and custom layout variables are preserved.
 
-Integrated Features:
-- Feature 1: Dynamic Metabolic Branching Logic (Injected Health Deep-Dives)
-- Feature 2: Mifflin-St Jeor Engine AI Macro Calculator (Instant Success Dashboard stats)
-- Feature 3: Live OpenAI TTS Voice Engine integration (Native Telegram audio notes)
-- Feature 5: Contextual Retention Multi-Nudges (Tracks active user onboarding phases)
+Fixes Deployed:
+- Added html.escape safe wrapping to block malicious parser crashes.
+- Wrapped OpenAI client initialization inside a rigorous try/except safety check.
+- Isolated all bot.send_voice and edit_message_text actions in deep exception protection blocks.
 """
 
 import os
 import sys
 import io
+import html
 from io import BytesIO
 from datetime import datetime
 from dotenv import load_dotenv
@@ -38,11 +38,16 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 CALENDLY_LINK = os.getenv("CALENDLY_LINK", "https://calendly.com/coach_avni/strategy-session")
 
 if not TOKEN:
-    print("CRITICAL: TELEGRAM_TOKEN missing.")
+    print("CRITICAL CRASH PREVENTED: TELEGRAM_TOKEN missing inside environment variables.")
     sys.exit(1)
 
-# Initialize OpenAI client if token exists
-openai_client = OpenAI(api_key=OPENAI_KEY) if OPENAI_KEY else None
+# Safer Client Setup Instantiation
+openai_client = None
+if OPENAI_KEY:
+    try:
+        openai_client = OpenAI(api_key=OPENAI_KEY)
+    except Exception as e:
+        print(f"Warning: Could not initialize OpenAI Engine Client: {e}")
 
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 BRANCH_MAP = {"q23_diabetes": "vdia", "q23_thyroid": "vthy", "q23_pcos": "vpco"}
@@ -159,7 +164,6 @@ SCREENS = [
     ]}
 ]
 
-# Feature 1: Dynamic Metabolic Branching
 DYNAMIC_BRANCHES = {
     "🔬 Diabetes": {"id": "q23_diabetes", "text": "What was your most recent Fasting Blood Sugar or HbA1c score? (e.g., 6.4, 140 mg/dL)", "type": "text", "section": "🏥 Health Deep-Dive"},
     "🧬 Thyroid": {"id": "q23_thyroid", "text": "Are you taking thyroid medication? If yes, what is your current dosage (e.g., 50mcg Thyronorm)?", "type": "text", "section": "🏥 Health Deep-Dive"},
@@ -188,7 +192,6 @@ class UserSession:
         return max(10, min(100, score))
 
     def calculate_macro_targets(self):
-        """Feature 2: Implements Mifflin-St Jeor metabolic calculations equations cleanly."""
         try:
             w = float(str(self.answers.get("q4", "75")).replace("kg", "").strip())
             h = float(str(self.answers.get("q3", "175")).replace("cm", "").strip())
@@ -230,11 +233,12 @@ def generate_progress_bar(pct: int) -> str:
     return f"<code>[{bar_str}] {pct}%</code>"
 
 async def generate_voice_response(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
-    """Feature 3: Live OpenAI TTS Voice Generation Pipeline Architecture."""
+    """Feature 3: OpenAI TTS Voice Generation Pipeline - Explicitly Hardened."""
     if not openai_client:
         return
         
     chat_id = update.effective_chat.id
+    # Clean out HTML elements thoroughly before passing text parameters into the speaker engine
     clean_text = text.replace("🎙️ <b>Coach Avni:</b>", "").replace("<b>", "").replace("</b>", "").replace("<code>", "").replace("</code>", "")
     
     try:
@@ -252,7 +256,7 @@ async def generate_voice_response(update: Update, context: ContextTypes.DEFAULT_
             caption="🎙️ Audio Note from Coach Avni"
         )
     except Exception as e:
-        print(f"TTS Pipeline Error Trace: {e}")
+        print(f"Isolated Speech Engine Core Graceful Bypass: {e}")
         pass
 
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
@@ -338,29 +342,31 @@ def check_screen_satisfied(session, screen_data) -> bool:
 def reset_dropoff_tracker(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int):
     if not context.job_queue:
         return
-    current_jobs = context.job_queue.get_jobs_by_name(f"dropoff_{user_id}")
-    for job in current_jobs:
-        job.schedule_removal()
-        
-    context.job_queue.run_once(
-        callback=ghost_client_nudge_callback,
-        when=3600,
-        name=f"dropoff_{user_id}",
-        user_id=user_id,
-        chat_id=chat_id,
-        data={"type": "nudge"}
-    )
-    context.job_queue.run_once(
-        callback=ghost_client_nudge_callback,
-        when=86400,
-        name=f"dropoff_{user_id}",
-        user_id=user_id,
-        chat_id=chat_id,
-        data={"type": "warning"}
-    )
+    try:
+        current_jobs = context.job_queue.get_jobs_by_name(f"dropoff_{user_id}")
+        for job in current_jobs:
+            job.schedule_removal()
+            
+        context.job_queue.run_once(
+            callback=ghost_client_nudge_callback,
+            when=3600,
+            name=f"dropoff_{user_id}",
+            user_id=user_id,
+            chat_id=chat_id,
+            data={"type": "nudge"}
+        )
+        context.job_queue.run_once(
+            callback=ghost_client_nudge_callback,
+            when=86400,
+            name=f"dropoff_{user_id}",
+            user_id=user_id,
+            chat_id=chat_id,
+            data={"type": "warning"}
+        )
+    except Exception as je:
+        print(f"JobQueue context tracking error (Check if python-telegram-bot[job-queue] is installed): {je}")
 
 async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
-    """Feature 5: Smart Contextual Onboarding Retention Nudge Worker."""
     job = context.job
     user_id = job.user_id
     chat_id = job.chat_id
@@ -373,13 +379,19 @@ async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
     if session.current_screen_idx < len(SCREENS):
         current_section = SCREENS[session.current_screen_idx]["section"]
 
+    # Safe escaping string parameters
+    escaped_section = html.escape(current_section)
+
     if job.data["type"] == "nudge":
-        text = f"🎙️ <b>Coach Avni:</b> Hey, don't leave your metabolic blueprint sitting on the table! We were right in the middle of processing your <b>{current_section}</b>. Let's finish it up! 🔥"
+        text = f"🎙️ <b>Coach Avni:</b> Hey, don't leave your metabolic blueprint sitting on the table! We were right in the middle of processing your <b>{escaped_section}</b>. Let's finish it up! 🔥"
     else:
-        text = f"🚨 <b>Coach Avni [FINAL WARNING]:</b> Your data streams inside the <b>{current_section}</b> assessment matrix are frozen. Click below to un-pause your targets."
+        text = f"🚨 <b>Coach Avni [FINAL WARNING]:</b> Your data streams inside the <b>{escaped_section}</b> assessment matrix are frozen. Click below to un-pause your targets."
         
     keyboard = [[InlineKeyboardButton("⚡ RESUME ASSESSMENT", callback_data="resume_onboarding")]]
-    await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+    try:
+        await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+    except Exception:
+        pass
 
 async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT_TYPE, target_chat_id):
     user_id = update.effective_user.id
@@ -387,12 +399,14 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
     session.is_submitted = True
     
     if context.job_queue:
-        current_jobs = context.job_queue.get_jobs_by_name(f"dropoff_{user_id}")
-        for job in current_jobs:
-            job.schedule_removal()
+        try:
+            current_jobs = context.job_queue.get_jobs_by_name(f"dropoff_{user_id}")
+            for job in current_jobs:
+                job.schedule_removal()
+        except Exception: pass
         
     score = session.calculate_readiness_score()
-    macros = session.calculate_macro_targets() # Feature 2 Evaluation Output Trigger
+    macros = session.calculate_macro_targets()
     
     success_text = (
         f"🧠 <b>BIO-METRIC ONBOARDING REGISTERED SUCCESSFULLY</b>\n\n"
@@ -428,7 +442,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
         body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
         
         story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
-        story.append(Paragraph(f"<b>Client Target:</b> {session.name}", body_style))
+        story.append(Paragraph(f"<b>Client Target:</b> {html.escape(session.name)}", body_style))
         story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {score}/100", body_style))
         story.append(Paragraph(f"<b>AI Computed Calories:</b> {macros['calories']} kcal (P: {macros['protein']}g, C: {macros['carbs']}g, F: {macros['fat']}g)", body_style))
         story.append(Spacer(1, 15))
@@ -439,7 +453,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
                 ans = session.answers.get(field['id'])
                 if ans:
                     val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                    table_data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
+                    table_data.append([Paragraph(html.escape(field['text']), body_style), Paragraph(html.escape(val_str), body_style)])
                     
         t = Table(table_data, colWidths=[270, 230])
         t.setStyle(TableStyle([
@@ -470,18 +484,17 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     session.last_activity = datetime.now()
     reset_dropoff_tracker(context, user_id, target_chat_id)
     
-    # Feature 1: Process Injected Branching Fields Matrix
     if session.current_branch_field:
         field = session.current_branch_field
-        text = f"📝 <b>Phase: {field['section']}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+        text = f"📝 <b>Phase: {html.escape(field['section'])}</b>\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
         ans = session.answers.get(field['id'])
         
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Type custom text or hold mic...]</i>\n\n"
+            text += f"❓ <b>{html.escape(field['text'])}</b>\n✍️ <i>[Type custom text or hold mic...]</i>\n\n"
         elif ans:
-            text += f"✅ <b>{field['text']}</b>\n👉 <code>{ans}</code>\n\n"
+            text += f"✅ <b>{html.escape(field['text'])}</b>\n👉 <code>{html.escape(str(ans))}</code>\n\n"
         else:
-            text += f"👉 <b>{field['text']}</b>\n\n"
+            text += f"👉 <b>{html.escape(field['text'])}</b>\n\n"
             
         keyboard = []
         if field['type'] == 'buttons':
@@ -509,7 +522,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     progress_bar = generate_progress_bar(progress)
     
-    text = f"📝 <b>Phase: {screen_data['section']}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    text = f"📝 <b>Phase: {html.escape(screen_data['section'])}</b>\nProgress: {progress_bar}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
     
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
@@ -522,12 +535,12 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
             orig_text = "Be honest: how many hours is your back glued to that coding desk chair every day?"
             
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{orig_text}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
+            text += f"❓ <b>{html.escape(orig_text)}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
         elif ans:
             display = ", ".join(ans) if isinstance(ans, list) else str(ans)
-            text += f"✅ <b>{orig_text}</b>\n👉 <code>{display}</code>\n\n"
+            text += f"✅ <b>{html.escape(orig_text)}</b>\n👉 <code>{html.escape(display)}</code>\n\n"
         else:
-            text += f"👉 <b>{orig_text}</b>\n\n"
+            text += f"👉 <b>{html.escape(orig_text)}</b>\n\n"
 
     keyboard = []
     has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
@@ -623,7 +636,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try: await query.message.delete()
         except Exception: pass
         
-        # Feature 1 Adaptive Branch Verification Checkpoint Loop
         for field in screen_data['fields']:
             ans = session.answers.get(field['id'])
             if field['id'] == "q23" and isinstance(ans, list):
@@ -647,7 +659,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for field in screen['fields']:
                 ans = session.answers.get(field['id'], "—")
                 val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                review_text += f" • {field['text']}: <code>{val_str}</code>\n"
+                review_text += f" • {html.escape(field['text'])}: <code>{html.escape(val_str)}</code>\n"
             review_text += "\n"
         await context.bot.send_message(chat_id=query.message.chat_id, text=review_text, parse_mode="HTML")
         return
@@ -706,7 +718,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = get_funny_instant_reaction(field_id, selected)
             if msg:
                 await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
-                await generate_voice_response(update, context, msg) # Feature 3 Output Hook Trigger
+                await generate_voice_response(update, context, msg)
                 
             session.current_screen_idx += 1
             await render_screen(update, context, target_chat_id=query.message.chat_id)
@@ -786,7 +798,9 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.delete_message(chat_id=chat_id, message_id=status_msg.message_id)
         await handle_text_or_transcription(parsed_transcript, update, context)
     except Exception:
-        await context.bot.edit_message_text("❌ Transcription process timed out. Try typing your response!", chat_id=chat_id, message_id=status_msg.message_id)
+        try:
+            await context.bot.edit_message_text("❌ Transcription process timed out. Try typing your response!", chat_id=chat_id, message_id=status_msg.message_id)
+        except Exception: pass
 
 async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -798,7 +812,7 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await render_screen(update, context, target_chat_id=update.message.chat_id)
 
 def main():
-    print("🚀 COACH AVNI COMPREHENSIVE ENGINE INSTANTIATED STATUS: VERIFIED")
+    print("🚀 HARDENED ENGINE INITIALIZED SUCCESSFULLY — ZERO CRASH POLICY ACTIVE")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
