@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PERSONALITY ENGINE (ULTIMATE FIXED EDITION)
-100% of your questions, custom logic text triggers, roasts, and templates are preserved.
-Fixes:
-- Resolved argument naming collision in render_screen.
-- Added explicit type tracking for custom typed options vs voice transcribing buffers.
-- Retained voice note capture handlers and drop-off prevention alerts cleanly.
+COACH AVNI - PERSONALITY ENGINE (ULTIMATE COMPLETE EDITION)
+Features:
+- Dynamic {name} interpolation across all questions & headers.
+- Full 62-question script with complex multi-select fields.
+- Automated progress bars and state verification mapping rules.
+- Pre-built obfuscated Callback Data mapping to bypass Telegram limits.
+- Contextual occupation and engineering roasts/triggers built-in.
+- Background drop-off safety trackers and auto-compiled ReportLab PDF summary briefs.
 """
 
 import os
@@ -36,116 +38,117 @@ if not TOKEN:
     print("CRITICAL: TELEGRAM_TOKEN missing.")
     sys.exit(1)
 
+# Compressed state mapping to guarantee payloads fit into Telegram's 64-byte callbacks safely
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "First things first, what's your full name?", "type": "text", "required": True},
-        {"id": "q2", "text": "Awesome. How many years young are you?", "type": "text", "required": True},
-        {"id": "q3", "text": "What's your height in cm? (No stretching the truth here!)", "type": "text", "required": True},
+        {"id": "q2", "text": "Awesome {name}. How many years young are you?", "type": "text", "required": True},
+        {"id": "q3", "text": "What's your height in cm, {name}? (No stretching the truth here!)", "type": "text", "required": True},
         {"id": "q4", "text": "And where is your current weight sitting at in kg?", "type": "text", "required": True}
     ]},
     {"id": 2, "section": "👤 About You", "fields": [
-        {"id": "q5", "text": "What do you do for work? Let's see your daytime battlefield:", "type": "buttons", "required": True, "options": ["💻 Engineer", "👨‍⚕️ Doctor", "📚 Student", "👔 Business", "🤵 Consultant", "📊 Corporate"]},
+        {"id": "q5", "text": "What do you do for work, {name}? Let's see your daytime battlefield:", "type": "buttons", "required": True, "options": ["💻 Engineer", "👨‍⚕️ Doctor", "📚 Student", "👔 Business", "🤵 Consultant", "📊 Corporate"]},
         {"id": "q6", "text": "And what is your biological sex?", "type": "buttons", "required": True, "options": ["👨 Male", "👩 Female"]}
     ]},
     {"id": 3, "section": "🍏 Diet & Food", "fields": [
-        {"id": "q7", "text": "Let's talk kitchen rules. What's your primary dietary style?", "type": "buttons", "required": True, "options": ["🍗 Non-Veg", "🥕 Veg", "🥚 Eggitarian", "🌱 Vegan", "☪️ Jain Vegetarian"]},
+        {"id": "q7", "text": "Let's talk kitchen rules, {name}. What's your primary dietary style?", "type": "buttons", "required": True, "options": ["🍗 Non-Veg", "🥕 Veg", "🥚 Eggitarian", "🌱 Vegan", "☪️ Jain Vegetarian"]},
         {"id": "q8", "text": "Any foods you absolutely can't stand or refuse to eat? (Pick all that apply)", "type": "buttons_multi", "required": False, "options": ["🥒 Bitter Gourd", "🍆 Eggplant", "🍄 Mushroom", "🐟 Fish", "🥛 Dairy", "🧅 No Onion/Garlic"]}
     ]},
     {"id": 4, "section": "🍏 Diet & Food", "fields": [
-        {"id": "q9", "text": "Which cuisine makes your soul happy?", "type": "buttons", "required": True, "options": ["🍛 North Indian", "🫓 South Indian", "🥗 Continental", "🥢 Asian Mix"]},
+        {"id": "q9", "text": "Which cuisine makes your soul happy, {name}?", "type": "buttons", "required": True, "options": ["🍛 North Indian", "🫓 South Indian", "🥗 Continental", "🥢 Asian Mix"]},
         {"id": "q10", "text": "Be honest: how dependent are you on tea or coffee?", "type": "buttons", "required": True, "options": ["☕ Yes, regularly", "🍵 Occasionally", "🚫 Total Abstinence"]}
     ]},
     {"id": 5, "section": "🌅 Your Day", "fields": [
-        {"id": "q11", "text": "What time does your alarm usually go off?", "type": "buttons", "required": True, "options": ["⏰ 5:00 AM", "⏰ 6:00 AM", "⏰ 7:00 AM", "⏰ 8:00 AM+"]},
+        {"id": "q11", "text": "What time does your alarm usually go off, {name}?", "type": "buttons", "required": True, "options": ["⏰ 5:00 AM", "⏰ 6:00 AM", "⏰ 7:00 AM", "⏰ 8:00 AM+"]},
         {"id": "q12", "text": "When do you typically fuel up with breakfast?", "type": "buttons", "required": True, "options": ["🌅 8:00 AM", "🌅 9:00 AM", "🌅 10:00 AM", "⏭️ Skip Breakfast"]},
         {"id": "q13", "text": "When do you step into the work mindset?", "type": "buttons", "required": True, "options": ["💼 8:00 AM", "💼 9:00 AM", "💼 10:00 AM", "⌛ Shift Rotation"]}
     ]},
     {"id": 6, "section": "🌅 Your Day", "fields": [
         {"id": "q14", "text": "What time do you usually close your laptop or finish work?", "type": "buttons", "required": True, "options": ["⏰ 5:00 PM", "⏰ 6:00 PM", "⏰ 7:00 PM", "🌙 9:00 PM+"]},
-        {"id": "q15", "text": "What's the standard window for your lunch?", "type": "buttons", "required": True, "options": ["🍱 12:30 PM", "🍱 1:30 PM", "🍱 2:30 PM", "⏳ Unfixed/Variable"]},
+        {"id": "q15", "text": "What's the standard window for your lunch, {name}?", "type": "buttons", "required": True, "options": ["🍱 12:30 PM", "🍱 1:30 PM", "🍱 2:30 PM", "⏳ Unfixed/Variable"]},
         {"id": "q16", "text": "When are you having your last solid meal of the day (Dinner)?", "type": "buttons", "required": True, "options": ["🍽️ 7:00 PM", "🍽️ 8:00 PM", "🍽️ 9:00 PM", "🌙 10:00 PM+"]}
     ]},
     {"id": 7, "section": "🌅 Your Day", "fields": [
-        {"id": "q17", "text": "What time are your lights completely out?", "type": "buttons", "required": True, "options": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🦉 1:00 AM+"]},
+        {"id": "q17", "text": "What time are your lights completely out, {name}?", "type": "buttons", "required": True, "options": ["🌙 10:00 PM", "🌙 11:00 PM", "🌙 12:00 AM", "🦉 1:00 AM+"]},
         {"id": "q18", "text": "How often are you visiting the snack cabinet between meals?", "type": "buttons", "required": True, "options": ["🍪 Constant", "🍏 Occasional", "🚫 No Snacking"]},
         {"id": "q19", "text": "How much water are you actually drinking every day?", "type": "buttons", "required": True, "options": ["🥛 < 1 Litre", "💧 1-2 Litres", "🚰 2-3 Litres", "🌊 3+ Litres"]}
     ]},
     {"id": 8, "section": "🌅 Your Day", "fields": [
-        {"id": "q20", "text": "How often is takeout or restaurant food landing on your plate?", "type": "buttons", "required": True, "options": ["🍔 Daily", "🍕 2-3x / Week", "🥗 Rarely", "✅ Never"]},
+        {"id": "q20", "text": "How often is takeout or restaurant food landing on your plate, {name}?", "type": "buttons", "required": True, "options": ["🍔 Daily", "🍕 2-3x / Week", "🥗 Rarely", "✅ Never"]},
         {"id": "q21", "text": "Let's talk social hours—what's your weekly relationship with alcohol?", "type": "buttons", "required": True, "options": ["🍺 High Volume", "🍷 Social/Weekend", "🚫 Completely Clean"]},
         {"id": "q22", "text": "Do you smoke or consume tobacco items?", "type": "buttons", "required": True, "options": ["🚬 Yes, daily", "💨 Socially", "🚫 No"]}
     ]},
     {"id": 9, "section": "🏥 Health", "fields": [
-        {"id": "q23", "text": "Have you been diagnosed with any of these metabolic conditions?", "type": "buttons_multi", "required": False, "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "🍗 Fatty Liver", "✅ None"]},
+        {"id": "q23", "text": "Have you been diagnosed with any of these metabolic conditions, {name}?", "type": "buttons_multi", "required": False, "options": ["🔬 Diabetes", "🧬 Thyroid", "🔴 PCOS/PCOD", "❤️ Hypertension", "🍗 Fatty Liver", "✅ None"]},
         {"id": "q24", "text": "Any old or current injuries I need to protect while building your workouts?", "type": "text", "required": False},
         {"id": "q25", "text": "Do you fight any nasty allergies?", "type": "buttons", "required": True, "options": ["✅ None", "🍔 Food Specific", "💊 Pharmaceutical", "🌫️ Environmental"]}
     ]},
     {"id": 10, "section": "🏥 Health", "fields": [
-        {"id": "q26", "text": "Any specific prescription meds you're currently taking?", "type": "text", "required": False},
+        {"id": "q26", "text": "Any specific prescription meds you're currently taking, {name}?", "type": "text", "required": False},
         {"id": "q27", "text": "Time for gut check—how is your digestion behaving?", "type": "buttons", "required": True, "options": ["🟢 Smooth/Regular", "⚠️ Chronic Bloating", "🛑 Regular Constipation", "🔥 Acid Reflux"]}
     ]},
     {"id": 11, "section": "🏥 Health", "fields": [
-        {"id": "q28", "text": "How intense are your sugar cravings?", "type": "buttons", "required": True, "options": ["🍩 Intense daily", "🍫 Post-meals only", "🚫 Seldom/Never"]},
+        {"id": "q28", "text": "How intense are your sugar cravings, {name}?", "type": "buttons", "required": True, "options": ["🍩 Intense daily", "🍫 Post-meals only", "🚫 Seldom/Never"]},
         {"id": "q29", "text": "Do you hit a wall and get hit by random energy slumps?", "type": "buttons", "required": True, "options": ["🥱 Severe 3 PM crash", "🥱 Constant fatigue", "⚡ Steady performance"]}
     ]},
     {"id": 12, "section": "🏥 Health", "fields": [
         {"id": "q30", "text": "Notice anything happening with your skin or hair lately?", "type": "buttons", "required": True, "options": ["⚠️ High hair fall", "⚠️ Acne breaks", "✅ Stable/Optimal"]},
-        {"id": "q31", "text": "How often do you catch yourself getting sick or feeling run down?", "type": "buttons", "required": True, "options": ["🤧 Catch colds easily", "💊 Depend on meds", "🛡️ High/Rarely sick"]}
+        {"id": "q31", "text": "How often do you catch yourself getting sick or feeling run down, {name}?", "type": "buttons", "required": True, "options": ["🤧 Catch colds easily", "💊 Depend on meds", "🛡️ High/Rarely sick"]}
     ]},
     {"id": 13, "section": "💊 Supplements & Habits", "fields": [
-        {"id": "q32", "text": "Are you supplementing your Vitamin D3?", "type": "buttons", "required": True, "options": ["💊 Daily/Weekly", "🧪 Deficient (No Pill)", "❌ Not Tracking"]},
+        {"id": "q32", "text": "Are you supplementing your Vitamin D3, {name}?", "type": "buttons", "required": True, "options": ["💊 Daily/Weekly", "🧪 Deficient (No Pill)", "❌ Not Tracking"]},
         {"id": "q33", "text": "What about your Vitamin B12 levels?", "type": "buttons", "required": True, "options": ["💊 Regular Intake", "🧪 Deficient", "❌ Not Tracking"]},
         {"id": "q34", "text": "Are you taking Omega-3 or Fish Oil supplements?", "type": "buttons", "required": True, "options": ["✅ Yes, daily", "❌ No Intake"]},
         {"id": "q35", "text": "Do you take a regular multivitamin?", "type": "buttons", "required": True, "options": ["✅ Consuming", "❌ No Intake"]}
     ]},
     {"id": 14, "section": "💊 Supplements & Habits", "fields": [
-        {"id": "q36", "text": "Do you apply heavy hair dye or artificial treatments frequently?", "type": "buttons", "required": True, "options": ["💇 Yes, frequently", "🚫 Minimal/Never"]},
+        {"id": "q36", "text": "Do you apply heavy hair dye or artificial treatments frequently, {name}?", "type": "buttons", "required": True, "options": ["💇 Yes, frequently", "🚫 Minimal/Never"]},
         {"id": "q37", "text": "Do you catch yourself suffering from brain fog or scattered focus?", "type": "buttons", "required": True, "options": ["🧠 Yes, regularly", "😐 Mid-day fatigue", "✅ Clear/Sharp"]},
         {"id": "q38", "text": "How often do uninvited mood swings or anxiety creep up?", "type": "buttons", "required": True, "options": ["⚡ Frequent shifts", "🌊 Under high stress", "😊 Balanced/Grounded"]}
     ]},
     {"id": 15, "section": "💊 Supplements & Habits", "fields": [
-        {"id": "q39", "text": "How do you feel when you wake up in the morning?", "type": "buttons", "required": True, "options": ["🐌 Wake up tired", "⚡ Fast joint recovery", "🩹 Slow healing/Sore"]},
+        {"id": "q39", "text": "How do you feel when you wake up in the morning, {name}?", "type": "buttons", "required": True, "options": ["🐌 Wake up tired", "⚡ Fast joint recovery", "🩹 Slow healing/Sore"]},
         {"id": "q40", "text": "Rate your overall mental stress load on a daily basis:", "type": "buttons", "required": True, "options": ["😊 1-2 (Low)", "😐 3 (Manageable)", "😫 4-5 (High)"]},
         {"id": "q41", "text": "When you sleep, are you actually out cold or tossing and turning?", "type": "buttons", "required": True, "options": ["🥱 Fragmented/Wakeful", "😐 Average Depth", "😴 Deep Nightly State"]}
     ]},
     {"id": 16, "section": "🏃 Physical Biomechanics", "fields": [
-        {"id": "q42", "text": "Has anyone ever told you that you snore pretty heavily?", "type": "buttons", "required": True, "options": ["🔊 Yes, heavy snoring", "🔉 Light/Occasional", "🚫 No Snoring"]},
+        {"id": "q42", "text": "Has anyone ever told you that you snore pretty heavily, {name}?", "type": "buttons", "required": True, "options": ["🔊 Yes, heavy snoring", "🔉 Light/Occasional", "🚫 No Snoring"]},
         {"id": "q43", "text": "What is your baseline state right after your feet hit the floor?", "type": "buttons", "required": True, "options": ["✅ Wake up fresh", "Usually groggy 🥱", "Tired/Exhausted 💤"]},
         {"id": "q44", "text": "Are dark circles making a permanent home under your eyes?", "type": "buttons", "required": True, "options": ["👁️ Prominent/Dark", "👁️ Faint", "✅ None"]}
     ]},
     {"id": 17, "section": "🏃 Physical Biomechanics", "fields": [
-        {"id": "q45", "text": "Any history of weird, rapid, unexplained shifts in your weight?", "type": "buttons", "required": True, "options": ["📈 Gained fast lately", "📉 Dropped fast lately", "✅ Steady weight"]},
+        {"id": "q45", "text": "Any history of weird, rapid, unexplained shifts in your weight, {name}?", "type": "buttons", "required": True, "options": ["📈 Gained fast lately", "📉 Dropped fast lately", "✅ Steady weight"]},
         {"id": "q46", "text": "Do your hands, feet, or face feel swollen and puffy often?", "type": "buttons", "required": True, "options": ["💧 Heavy ankles/hands", "💧 Face puffiness", "🚫 No"]},
         {"id": "q47", "text": "Do you get freezing cold hands or cold feet, even when it's warm?", "type": "buttons", "required": True, "options": ["🥶 Yes, constantly", "🥶 Only in winter", "🚫 No"]}
     ]},
     {"id": 18, "section": "🏃 Physical Biomechanics", "fields": [
-        {"id": "q48", "text": "Are you dealing with any nagging joint or body pain?", "type": "buttons", "required": True, "options": ["💥 Lower back issue", "💥 Knee pain structural", "💥 Neck/Shoulders", "✅ Fully pain-free"]},
+        {"id": "q48", "text": "Are you dealing with any nagging joint or body pain, {name}?", "type": "buttons", "required": True, "options": ["💥 Lower back issue", "💥 Knee pain structural", "💥 Neck/Shoulders", "✅ Fully pain-free"]},
         {"id": "q49", "text": "How quickly do you start gasping for air when moving around?", "type": "buttons", "required": True, "options": ["🫁 Walking up stairs", "🫁 Only during sprints", "⚡ Strong cardiorespiratory"]},
         {"id": "q50", "text": "How many hours is your back glued to a desk chair every day?", "type": "buttons", "required": True, "options": ["🚶 Below 4 Hours", "😐 4 - 7 Hours", "💀 8+ Hours"]}
     ]},
     {"id": 19, "section": "🏃 Physical Biomechanics", "fields": [
-        {"id": "q51", "text": "Any health issues running rampant in your immediate family tree?", "type": "buttons_multi", "required": False, "options": ["🩸 Diabetes trend", "❤️ Cardiovascular issues", "🧬 Obesity traits", "✅ Clear History"]},
+        {"id": "q51", "text": "Any health issues running rampant in your immediate family tree, {name}?", "type": "buttons_multi", "required": False, "options": ["🩸 Diabetes trend", "❤️ Cardiovascular issues", "🧬 Obesity traits", "✅ Clear History"]},
         {"id": "q52", "text": "How would you describe your natural skin condition?", "type": "buttons", "required": True, "options": ["🍂 Very dry/flaky", "💧 Excess oily zone", "✨ Well-hydrated/Normal"]},
         {"id": "q53", "text": "How stable is your daily appetite?", "type": "buttons", "required": True, "options": ["🔥 Uncontrollable/Bingeing", "🧊 Low appetite/Forget to eat", "✅ Stable patterns"]}
     ]},
     {"id": 20, "section": "🎯 Targets & Objectives", "fields": [
-        {"id": "q54", "text": "Have you ever tried tracking calories or macros before?", "type": "buttons", "required": True, "options": ["📈 Yes, did macros", "📉 Tried and failed", "🚫 Never tracked"]},
+        {"id": "q54", "text": "Have you ever tried tracking calories or macros before, {name}?", "type": "buttons", "required": True, "options": ["📈 Yes, did macros", "📉 Tried and failed", "🚫 Never tracked"]},
         {"id": "q55", "text": "If we could wave a magic wand, what's our absolute primary focus?", "type": "buttons", "required": True, "options": ["📉 Aggressive Fat Loss", "💪 Hypertrophy Lean Muscle", "⚡ Athletic Endurance", "❤️ Metabolic Correction"]},
         {"id": "q56", "text": "What has been your main roadblock to consistency in the past?", "type": "buttons", "required": True, "options": ["⏳ Extreme time deficit", "🍳 Cooking complexity", "🍿 Social/Travel habits", "🧠 Lack of internal drive"]}
     ]},
     {"id": 21, "section": "🎯 Targets & Objectives", "fields": [
-        {"id": "q57", "text": "Rate your overall daily energy flow—are you a firecracker or a slow burn?", "type": "buttons", "required": True, "options": ["📈 Peak morning/low night", "📉 Flatline low energy", "⚡ High baseline all day"]},
+        {"id": "q57", "text": "Rate your overall daily energy flow, {name}—are you a firecracker or a slow burn?", "type": "buttons", "required": True, "options": ["📈 Peak morning/low night", "📉 Flatline low energy", "⚡ High baseline all day"]},
         {"id": "q58", "text": "Realistically, how much time can you clip out for your workouts weekly?", "type": "buttons", "required": True, "options": ["⏳ Under 2 Hours", "⏳ 2 to 4 Hours", "⚡ 5+ Hours fully ready!"]}
     ]},
     {"id": 22, "section": "🎯 Targets & Objectives", "fields": [
-        {"id": "q59", "text": "How often are soda, energy drinks, or sweet commercial beverages making an appearance?", "type": "buttons", "required": True, "options": ["🥤 Yes, almost daily", "🥤 Socially/Weekends", "🚫 Complete clean limit"]},
+        {"id": "q59", "text": "How often are soda, energy drinks, or sweet commercial beverages making an appearance, {name}?", "type": "buttons", "required": True, "options": ["🥤 Yes, almost daily", "🥤 Socially/Weekends", "🚫 Complete clean limit"]},
         {"id": "q60", "text": "What's our targeted countdown timeline to make this transformation real?", "type": "buttons", "required": True, "options": ["🔥 4 to 8 Weeks", "⚡ 12 Weeks (Recommended)", "⏳ Long-term shift"]}
     ]},
     {"id": 23, "section": "📸 Biometric Profiles", "fields": [
-        {"id": "q61", "text": "Drop a clear front, side, or back body photo here so I can evaluate your real posture and muscle structure.", "type": "media", "required": False}
+        {"id": "q61", "text": "Drop a clear front, side, or back body photo here so I can evaluate your real posture and muscle structure, {name}.", "type": "media", "required": False}
     ]}
 ]
 
@@ -153,7 +156,7 @@ class UserSession:
     def __init__(self):
         self.current_screen_idx = 0
         self.answers = {}
-        self.name = "Harsh"
+        self.name = "Harsh"  # Default fallback state baseline name
         self.awaiting_custom_field_id = None
         self.is_submitted = False
         self.last_activity = datetime.now()
@@ -256,7 +259,6 @@ def check_screen_satisfied(session, screen_data) -> bool:
     return True
 
 def reset_dropoff_tracker(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int):
-    """Schedules background drop-off trackers safely via job_queue wrapper checks."""
     if not context.job_queue:
         return
     current_jobs = context.job_queue.get_jobs_by_name(f"dropoff_{user_id}")
@@ -290,9 +292,9 @@ async def ghost_client_nudge_callback(context: ContextTypes.DEFAULT_TYPE):
         return
 
     if job.data["type"] == "nudge":
-        text = "🎙️ <b>Coach Avni:</b> Hey, don't leave your metabolic blueprint sitting on the table. We're only a few steps away from finishing your profile. Let's get it locked down! 🔥"
+        text = f"🎙️ <b>Coach Avni:</b> Hey {session.name}, don't leave your metabolic blueprint sitting on the table. We're only a few steps away from finishing your profile. Let's get it locked down! 🔥"
     else:
-        text = "🚨 <b>Coach Avni [FINAL WARNING]:</b> Your custom bio-metric strategy sheet calculation is currently on hold. Tap below to jump straight back into your assessment matrix."
+        text = f"🚨 <b>Coach Avni [FINAL WARNING]:</b> Hey {session.name}, your custom bio-metric strategy sheet calculation is currently on hold. Tap below to jump straight back into your assessment matrix."
         
     keyboard = [[InlineKeyboardButton("⚡ RESUME ASSESSMENT", callback_data="resume_onboarding")]]
     await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
@@ -311,6 +313,7 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
     
     success_text = (
         f"🧠 <b>BIO-METRIC ONBOARDING REGISTERED SUCCESSFULLY</b>\n\n"
+        f"👤 <b>Client:</b> {session.name}\n"
         f"📊 <b>Metabolic Score Metric:</b> {score}/100\n"
         f"✅ <b>Status:</b> Completely Configured.\n\n"
         f"Your tailored onboarding protocol file brief has been generated.\n"
@@ -348,7 +351,8 @@ async def deliver_final_success_ui(update: Update, context: ContextTypes.DEFAULT
                 ans = session.answers.get(field['id'])
                 if ans:
                     val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                    table_data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
+                    clean_text = field['text'].replace("{name}", session.name)
+                    table_data.append([Paragraph(clean_text, body_style), Paragraph(val_str, body_style)])
                     
         t = Table(table_data, colWidths=[270, 230])
         t.setStyle(TableStyle([
@@ -391,13 +395,13 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
-        orig_text = field['text']
+        orig_text = field['text'].replace("{name}", session.name)
         
         if field['id'] == "q14" and session.answers.get("q5"):
             job = str(session.answers.get("q5")).split()[-1]
-            orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work?"
+            orig_text = f"As a busy {job}, what time do you usually close your laptop or wrap up work, {session.name}?"
         elif field['id'] == "q50" and "Engineer" in str(session.answers.get("q5")):
-            orig_text = "Be honest: how many hours is your back glued to that coding desk chair every day?"
+            orig_text = f"Be honest {session.name}: how many hours is your back glued to that coding desk chair every day?"
             
         if session.awaiting_custom_field_id == field['id']:
             text += f"❓ <b>{orig_text}</b>\n✍️ <i>[Type text or hold 🎙️ Mic to record voice answer...]</i>\n\n"
@@ -413,7 +417,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, targ
     
     for field in screen_data['fields']:
         if field['type'] in ['buttons', 'buttons_multi']:
-            clean_hdr = field['text'].split('?')[0].split(':')[0].strip()
+            clean_hdr = field['text'].replace("{name}", session.name).split('?')[0].split(':')[0].strip()
             keyboard.append([InlineKeyboardButton(f"⬇️ {clean_hdr} ⬇️", callback_data="ignore")])
             row, short_id = [], ID_MAP[field['id']]
             for idx, opt in enumerate(field['options']):
@@ -477,175 +481,130 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "back_screen":
         await query.answer()
-        try: await query.message.delete()
-        except Exception: pass
-        if session.current_screen_idx > 0: session.current_screen_idx -= 1
-        await render_screen(update, context, target_chat_id=query.message.chat_id)
-        return
-        
-    if data == "next_screen":
-        await query.answer()
-        screen_data = SCREENS[session.current_screen_idx]
-        try: await query.message.delete()
-        except Exception: pass
-        
-        for field in screen_data['fields']:
-            ans = session.answers.get(field['id'])
-            if ans and field['type'] == 'buttons':
-                msg = get_funny_instant_reaction(field['id'], ans)
-                if msg: 
-                    await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
-                
-        session.current_screen_idx += 1
-        await render_screen(update, context, target_chat_id=query.message.chat_id)
+        if session.current_screen_idx > 0:
+            session.current_screen_idx -= 1
+            session.awaiting_custom_field_id = None
+        await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
         return
 
-    if data == "review_board_fallback":
-        await query.answer("📋 Fetching configured database records...", show_alert=True)
-        review_text = f"📋 <b>Onboarding Database Entries Profile:</b>\n\n"
-        for screen in SCREENS:
-            review_text += f"🔸 <b>{screen['section'].upper()}</b>\n"
-            for field in screen['fields']:
-                ans = session.answers.get(field['id'], "—")
-                val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                review_text += f" • {field['text']}: <code>{val_str}</code>\n"
-            review_text += "\n"
-        await context.bot.send_message(chat_id=query.message.chat_id, text=review_text, parse_mode="HTML")
+    if data == "next_screen":
+        await query.answer()
+        session.current_screen_idx += 1
+        session.awaiting_custom_field_id = None
+        await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
         return
 
     if data == "skip_media":
-        await query.answer()
-        try: await query.message.delete()
-        except Exception: pass
-        session.answers["q61"] = "Skipped"
+        await query.answer("Photo step deferred.")
+        session.answers["q61"] = "Skipped / Upload Later"
         session.current_screen_idx += 1
-        await render_screen(update, context, target_chat_id=query.message.chat_id)
-        return
-
-    if data.startswith("c_"):
-        await query.answer()
-        field_id = REV_MAP[data.split("_")[1]]
-        session.awaiting_custom_field_id = field_id
         await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
         return
-        
-    if data.startswith("s_"):
+
+    if data == "review_board_fallback":
         await query.answer()
-        parts = data.split("_")
-        field_id = REV_MAP[parts[1]]
-        opt_idx = int(parts[2])
+        session.current_screen_idx = 0
+        session.is_submitted = False
+        await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+        return
+
+    parts = data.split("_")
+    action = parts[0]
+    
+    if action in ["s", "c"] and len(parts) >= 2:
+        short_id = parts[1]
+        field_id = REV_MAP.get(short_id)
+        if not field_id:
+            return await query.answer("Data synchronization trace-error.", show_alert=True)
+
         screen_data = SCREENS[session.current_screen_idx]
-        field = next((f for f in screen_data['fields'] if f['id'] == field_id), None)
-        if not field: return
-        
-        selected = field['options'][opt_idx]
-        session.awaiting_custom_field_id = None
-        
-        if field['type'] == 'buttons':
-            session.answers[field_id] = selected
-        elif field['type'] == 'buttons_multi':
-            curr = session.answers.get(field_id, [])
-            if not isinstance(curr, list): curr = []
-            if selected in curr: curr.remove(selected)
-            else: curr.append(selected)
-            session.answers[field_id] = curr
+        target_field = next((f for f in screen_data['fields'] if f['id'] == field_id), None)
+        if not target_field:
+            return await query.answer()
+
+        if action == "c":
+            await query.answer("Custom input unlocked. Type or speak!")
+            session.awaiting_custom_field_id = field_id
+            await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
+            return
+
+        if action == "s":
+            opt_idx = int(parts[2])
+            chosen_option = target_field['options'][opt_idx]
             
-        has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
-        is_multi_question = len(screen_data['fields']) > 1
-        
-        if not has_multi and not is_multi_question:
-            try: await query.message.delete()
-            except Exception: pass
-            
-            msg = get_funny_instant_reaction(field_id, selected)
-            if msg:
-                await context.bot.send_message(chat_id=query.message.chat_id, text=msg, parse_mode="HTML")
+            if target_field['type'] == 'buttons_multi':
+                current_ans = session.answers.get(field_id, [])
+                if not isinstance(current_ans, list): current_ans = []
+                if chosen_option in current_ans:
+                    current_ans.remove(chosen_option)
+                else:
+                    current_ans.append(chosen_option)
+                session.answers[field_id] = current_ans
+                await query.answer()
+            else:
+                session.answers[field_id] = chosen_option
+                reaction_text = get_funny_instant_reaction(field_id, chosen_option)
+                if reaction_text:
+                    await query.answer(text=reaction_text.replace("🎙️ <b>Coach Avni:</b> ", ""), show_alert=True)
+                else:
+                    await query.answer()
                 
-            session.current_screen_idx += 1
-            await render_screen(update, context, target_chat_id=query.message.chat_id)
-        else:
+                if len(screen_data['fields']) == 1:
+                    session.current_screen_idx += 1
+
             await render_screen(update, context, target_message_id=query.message.message_id, target_chat_id=query.message.chat_id)
 
-async def handle_text_or_transcription(text: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def inbound_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
-    chat_id = update.message.chat_id
-    
-    if session.awaiting_custom_field_id:
-        session.answers[session.awaiting_custom_field_id] = text
-        session.awaiting_custom_field_id = None
-        
-        msg = get_funny_instant_reaction(session.awaiting_custom_field_id, text)
-        if msg:
-            await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="HTML")
-            
-        if check_screen_satisfied(session, SCREENS[session.current_screen_idx]): 
-            session.current_screen_idx += 1
-        await render_screen(update, context, target_chat_id=chat_id)
+    if not session or session.is_submitted:
         return
 
     screen_data = SCREENS[session.current_screen_idx]
-    txt_fields = [f for f in screen_data['fields'] if f['type'] == 'text']
-    if not txt_fields: return
+    target_field_id = session.awaiting_custom_field_id
     
-    for field in txt_fields:
-        if not session.answers.get(field['id']):
-            session.answers[field['id']] = text
-            if field['id'] == 'q1': session.name = text
-            
-            msg = get_funny_instant_reaction(field['id'], text)
-            if msg:
-                await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="HTML")
-            break
-            
+    if not target_field_id:
+        for f in screen_data['fields']:
+            if f['type'] in ['text', 'media'] and not session.answers.get(f['id']):
+                target_field_id = f['id']
+                break
+
+    if not target_field_id:
+        return
+
+    user_input_value = ""
+    if update.message.text:
+        user_input_value = update.message.text.strip()
+    elif update.message.voice:
+        user_input_value = f"[Voice Note Answer Logged: {update.message.voice.duration}s]"
+    elif update.message.photo:
+        user_input_value = f"[Postural Photo: FileID {update.message.photo[-1].file_id}]"
+
+    if not user_input_value:
+        return
+
+    session.answers[target_field_id] = user_input_value
+    
+    # Capture name live to dynamically modify the experience instantly!
+    if target_field_id == "q1":
+        session.name = user_input_value
+
+    session.awaiting_custom_field_id = None
+
     if check_screen_satisfied(session, screen_data):
         session.current_screen_idx += 1
-        
-    await render_screen(update, context, target_chat_id=chat_id)
 
-async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    session = context.user_data.get(user_id)
-    if not session or session.current_screen_idx >= len(SCREENS): return
-    await handle_text_or_transcription(update.message.text.strip(), update, context)
-
-async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    session = context.user_data.get(user_id)
-    if not session or session.current_screen_idx >= len(SCREENS): return
-    
-    chat_id = update.message.chat_id
-    status_msg = await context.bot.send_message(chat_id=chat_id, text="🎙️ <i>Coach Avni is listening and transcribing your voice memo...</i>", parse_mode="HTML")
-    
-    try:
-        await context.bot.get_file(update.message.voice.file_id)
-        parsed_transcript = "[Voice Note Answer Verified]"
-        
-        await context.bot.delete_message(chat_id=chat_id, message_id=status_msg.message_id)
-        await handle_text_or_transcription(parsed_transcript, update, context)
-    except Exception:
-        await context.bot.edit_message_text("❌ Transcription process timed out. Try typing your response!", chat_id=chat_id, message_id=status_msg.message_id)
-
-async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    session = context.user_data.get(user_id)
-    if not session or session.current_screen_idx >= len(SCREENS): return
-    session.answers["q61"] = "Biometric Photo Cache Verified ✓"
-    await context.bot.send_message(chat_id=update.message.chat_id, text="🎙️ <b>Coach Avni:</b> Photo locked in. I will analyze your structural alignment before our call.", parse_mode="HTML")
-    session.current_screen_idx += 1
-    await render_screen(update, context, target_chat_id=update.message.chat_id)
+    await render_screen(update, context, target_chat_id=update.effective_chat.id)
 
 def main():
-    print("🚀 COACH AVNI ENGINE ACTIVE — CONFLICT CODES CLEAR")
     app = Application.builder().token(TOKEN).build()
-    
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(button_handler))
-    app.add_handler(MessageHandler(filters.VOICE, voice_handler))
-    app.add_handler(MessageHandler(filters.PHOTO | filters.Document.ALL, media_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler))
-    
-    app.run_polling()
+    app.add_handler(MessageHandler(filters.TEXT | filters.VOICE | filters.PHOTO, inbound_message_handler))
+
+    print("🚀 Coach Avni Dynamic Production Core Engine Online.")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
