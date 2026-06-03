@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-COACH AVNI - PREMIUM CONVERSATION ENGINE (PERMANENT REACTION EDITION)
-Upgrades: Coach reactions are sent as standalone permanent messages, keeping the chat 
-alive with humor, real-time intelligence, and sharp guidance.
+COACH AVNI - PREMIUM CONVERSATION ENGINE (SMART SCREEN-FLOW EDITION)
+Fixes: Multi-question screens update silently until completely satisfied.
+Standalone witty remarks only drop into permanent chat history when a screen is fully answered.
 """
 
 import os
@@ -15,7 +15,6 @@ from telegram.ext import (
     filters, ContextTypes
 )
 
-# Safe ReportLab Isolation Layer
 try:
     from reportlab.lib.pagesizes import letter
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -36,7 +35,6 @@ if not TOKEN:
 ID_MAP = {f"q{i}": f"v{i}" for i in range(1, 62)}
 REV_MAP = {v: k for k, v in ID_MAP.items()}
 
-# All 61 Questions Mapped Cleanly
 SCREENS = [
     {"id": 1, "section": "👤 About You", "fields": [
         {"id": "q1", "text": "First things first, what's your full name?", "type": "text", "required": True},
@@ -166,17 +164,17 @@ class UserSession:
         return max(10, min(100, score))
 
 def get_funny_instant_reaction(field_id: str, value: str) -> str:
-    """
-    HUMAN INSTANT CHAT HISTORY COMMENTS
-    Returns a funny, supportive, or sharp coach comment based on the selected answer.
-    """
     v = str(value)
     reactions = {
         "q2": "Age is just a baseline number. We are about to optimize your cellular age anyway! 🧬",
         "q5": {
             "💻 Engineer": "An Engineer! Prepare to analyze your macros like code. Just don't over-engineer the workout. 😉",
-            "👨‍⚕️ Doctor": "A Doctor! Respect for the brutal shifts. Let's make sure you aren't ignoring your own charts while saving everyone else.",
+            "👨‍⚕️ Doctor": "A Doctor! Respect for the brutal shifts. Let's make sure you aren't ignoring your own charts.",
             "📊 Corporate": "Corporate life! High status, higher sitting hours. Time to optimize your corporate engine."
+        },
+        "q6": {
+            "👨 Male": "Got it, optimizing hormones and training split for male biology profile. 💪",
+            "👩 Female": "Got it, designing meal structures matching female endocrine optimization profiles. ✨"
         },
         "q7": {
             "🍗 Non-Veg": "Non-veg makes hitting our daily complete protein targets much easier. Perfect.",
@@ -184,38 +182,31 @@ def get_funny_instant_reaction(field_id: str, value: str) -> str:
             "🌱 Vegan": "Vegan! Plant-powered engine. We will need to be tactical with amino-acid pairing."
         },
         "q10": {
-            "☕ Yes, regularly": "Regular caffeine dependency? Classic dynamic. Let's make sure it's not masking system fatigue. ☕",
+            "☕ Yes, regularly": "Regular caffeine dependency? Let's make sure it's not masking deep system fatigue. ☕",
             "🚫 Total Abstinence": "Zero caffeine? Wow, running on pure natural ATP. Love to see it! 🙌"
         },
         "q11": {
             "⏰ 5:00 AM": "5 AM club! Early bird efficiency. Your circadian rhythms are already in prime position.",
-            "⏰ 8:00 AM+": "Waking up past 8 AM? Night owl tendencies or corporate recovery mode? No judgment, we'll adapt."
-        },
-        "q12": {
-            "⏭️ Skip Breakfast": "Skipping breakfast? Intermittent fasting by choice or just rushed mornings? I'll check your cortisol later."
+            "⏰ 8:00 AM+": "Waking up past 8 AM? Night owl tendencies or corporate recovery mode? We will adapt."
         },
         "q17": {
             "🦉 1:00 AM+": "Past 1 AM? Ouch. Those blue screens are actively tricking your brain into thinking it's noon. 🦉"
         },
         "q19": {
-            "🥛 < 1 Litre": "Wait... less than 1L of water?! Your blood is practically running on thick sludge right now. Drink a glass immediately! 🚰",
+            "🥛 < 1 Litre": "Wait... less than 1L of water?! Your blood is practically running on thick sludge right now. Drink up! 🚰",
             "🌊 3+ Litres": "Over 3 Litres? Hydro-homie status unlocked! Your metabolic processes thank you. 🌊"
         },
         "q20": {
-            "🍔 Daily": "Daily takeout?! Safe to say your body is swimming in industrial seed oils. Time for an emergency intervention! 🚨",
-            "🍕 2-3x / Week": "2-3x outside food? Understandable with a busy schedule, but those hidden sugars are adding up."
+            "🍔 Daily": "Daily takeout?! Safe to say your body is swimming in industrial seed oils. Time for an intervention! 🚨"
         },
         "q28": {
-            "🍩 Intense daily": "Intense daily sugar cravings? Remember: that's your gut microbiome screaming for bad fuel, not a willpower failure. Let's change the gut team."
+            "🍩 Intense daily": "Intense daily sugar cravings? Remember: that's your gut microbiome screaming for bad fuel, not a lack of willpower."
         },
         "q29": {
             "🥱 Severe 3 PM crash": "Ah, the classic 3 PM energy flatline. That's your glucose spiking up and crashing hard. We'll end that rollercoaster. 📉"
         },
         "q40": {
             "😫 4-5 (High)": "High stress overload. Cortisol is the ultimate enemy of fat loss. We are heavily prioritizing recovery protocols for you. 🧘‍♂️"
-        },
-        "q41": {
-            "🥱 Fragmented/Wakeful": "Tossing and turning? Your brain isn't dropping into deep REM repair phase. Fixable."
         },
         "q50": {
             "💀 8+ Hours": "8+ hours glued to a desk chair is the absolute kryptonite for active posture. We will introduce micro-movements. 🛋️"
@@ -232,46 +223,7 @@ def get_funny_instant_reaction(field_id: str, value: str) -> str:
                 if key in v: return f"🎙️ <b>Coach Avni:</b> {msg}"
         else:
             return f"🎙️ <b>Coach Avni:</b> {reactions[field_id]}"
-            
-    # Funny default reactions based on sections
-    return f"🎙️ <b>Coach Avni:</b> Got it. Response captured cleanly. Let's keep going!"
-
-def generate_onboarding_pdf(session) -> BytesIO:
-    if not HAS_REPORTLAB: return None
-    try:
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
-        story = []
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#1A365D"), spaceAfter=12)
-        body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
-        
-        story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
-        story.append(Paragraph(f"<b>Client Profile Target:</b> {session.name}", body_style))
-        story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {session.calculate_readiness_score()}/100", body_style))
-        story.append(Spacer(1, 15))
-        
-        data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
-        for screen in SCREENS:
-            for field in screen['fields']:
-                ans = session.answers.get(field['id'])
-                if ans:
-                    val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
-                    data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
-                    
-        t = Table(data, colWidths=[270, 230])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
-            ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
-            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
-        ]))
-        story.append(t)
-        doc.build(story)
-        buffer.seek(0)
-        return buffer
-    except Exception: return None
+    return f"🎙️ <b>Coach Avni:</b> Configured standard profile log for {field_id.upper()}."
 
 def check_screen_satisfied(session, screen_data) -> bool:
     for field in screen_data['fields']:
@@ -280,14 +232,14 @@ def check_screen_satisfied(session, screen_data) -> bool:
             return False
     return True
 
-async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, query=None, chat_id=None):
+async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, message_id=None, chat_id=None):
     user_id = update.effective_user.id
     if not chat_id: chat_id = update.effective_chat.id
     session = context.user_data[user_id]
     
-    # Review Board Phase
+    # Summary Review Phase
     if session.current_screen_idx >= len(SCREENS) and not session.is_submitted:
-        review_text = f"📋 <b>Alright {session.name}, here is your full metabolic profile board:</b>\n\n"
+        review_text = f"📋 <b>Alright {session.name}, here is your full profile board. Review before locking it down:</b>\n\n"
         processed_sections = []
         for screen in SCREENS:
             sec_name = screen['section']
@@ -309,24 +261,24 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
                 keyboard.append(row)
                 row = []
         if row: keyboard.append(row)
-        keyboard.append([InlineKeyboardButton("🚀 LOOKS SOLID - SUBMIT PROFILE", callback_data="final_submit")])
+        keyboard.append([InlineKeyboardButton("🚀 LOOKS PERFECT, SUBMIT PROFILE", callback_data="final_submit")])
         
         await context.bot.send_message(chat_id, text=review_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # Success / Finish Booking Call Phase
+    # Call Booking Phase
     if session.current_screen_idx >= len(SCREENS) and session.is_submitted:
         score = session.calculate_readiness_score()
         success_text = (
-            f"🎯 <b>PROTOCOL SUBMITTED AND INSTALLED successfully!</b>\n\n"
-            f"📈 <b>Metabolic Readiness Health Score: {score}/100</b>\n\n"
-            f"<b>Final Move:</b> Hit the link below right now to claim your time window so we can hop on our Kickoff Call!"
+            f"🎯 <b>DATA LOGGED IN SAFELY.</b>\n\n"
+            f"📈 <b>Metabolic Readiness Score: {score}/100</b>\n\n"
+            f"<b>Final Move:</b> Use the active scheduler link below right now to lock in your live Strategy Kickoff Call!"
         )
-        keyboard = [[InlineKeyboardButton("📅 BOOK STRATEGY KICKOFF CALL", url=CALENDLY_LINK)]]
+        keyboard = [[InlineKeyboardButton("📅 BOOK STRATEGY KICKOFF CALL HERE", url=CALENDLY_LINK)]]
         await context.bot.send_message(chat_id, text=success_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
         return
 
-    # Standard Questionnaire Presentation
+    # Active Questionnaire Presentation
     screen_data = SCREENS[session.current_screen_idx]
     progress = int((session.current_screen_idx / len(SCREENS)) * 100)
     
@@ -335,7 +287,7 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
     for field in screen_data['fields']:
         ans = session.answers.get(field['id'])
         if session.awaiting_custom_field_id == field['id']:
-            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Type your custom answer below...]</i>\n\n"
+            text += f"❓ <b>{field['text']}</b>\n✍️ <i>[Type custom input directly into chat box...]</i>\n\n"
         elif ans:
             display = ", ".join(ans) if isinstance(ans, list) else str(ans)
             text += f"✅ <b>{field['text']}</b>\n👉 <code>{display}</code>\n\n"
@@ -372,8 +324,15 @@ async def render_screen(update: Update, context: ContextTypes.DEFAULT_TYPE, quer
         if check_screen_satisfied(session, screen_data): 
             nav_row.append(InlineKeyboardButton("CONTINUE ➡️", callback_data="next_screen"))
         else: 
-            nav_row.append(InlineKeyboardButton("🔒 Answer above to continue", callback_data="locked"))
+            nav_row.append(InlineKeyboardButton("🔒 Finish all answers above", callback_data="locked"))
     if nav_row: keyboard.append(nav_row)
+
+    # SMART INTERFACE ENGINE: Update current message if on a multi-question screen, else push forward freshly
+    if message_id:
+        try:
+            await context.bot.edit_message_text(text, chat_id=chat_id, message_id=message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
+            return
+        except Exception: pass
 
     await context.bot.send_message(chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
@@ -382,8 +341,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data[user_id] = UserSession()
     text = (
         "🔥 <b>Welcome to Coach Avni's Strategic Onboarding Funnel.</b>\n\n"
-        "We are mapping your specific lifestyle baseline metrics. No cookie-cutter files here.\n\n"
-        "Let's check out what's going on under your hood 👇"
+        "We are mapping your specific lifestyle baseline metrics.\n\n"
+        "Let's see what's going on under your hood 👇"
     )
     keyboard = [[InlineKeyboardButton("⚡ INITIALIZE ASSESSMENT PROTOCOL", callback_data="start")]]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
@@ -392,58 +351,110 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
     session = context.user_data.get(user_id)
-    if not session: return await query.answer("Session timed out! Tap /start.", show_alert=True)
+    if not session: return await query.answer("Session timed out! Tap /start fresh.", show_alert=True)
     
     data = query.data
     if data in ["ignore", "locked"]: return await query.answer()
     
-    # Clean/delete current keyboard to prevent multi-clicking old forms
-    try: await query.message.edit_reply_markup(reply_markup=None)
-    except Exception: pass
-    
     if data == "start":
         await query.answer()
+        try: await query.message.delete()
+        except Exception: pass
         session.current_screen_idx = 0
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data == "back_screen":
         await query.answer()
+        try: await query.message.delete()
+        except Exception: pass
         if session.current_screen_idx > 0: session.current_screen_idx -= 1
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
         
     if data == "next_screen":
         await query.answer()
+        # SCREEN ADVANCEMENT: Drop reactions permanently into historical text layout
+        screen_data = SCREENS[session.current_screen_idx]
+        try: await query.message.delete()
+        except Exception: pass
+        
+        for field in screen_data['fields']:
+            ans = session.answers.get(field['id'])
+            if ans and field['type'] == 'buttons':
+                await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(field['id'], ans), parse_mode="HTML")
+                
         session.current_screen_idx += 1
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data.startswith("edit_sec_"):
         await query.answer()
+        try: await query.message.delete()
+        except Exception: pass
         target_section = data.replace("edit_sec_", "")
-        session.current_screen_idx = get_section_start_index(target_section)
+        session.current_screen_idx = next((i for i, s in enumerate(SCREENS) if s['section'] == target_section), 0)
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
         
     if data == "final_submit":
-        await query.answer("💾 Compiling Assessment PDF...", show_alert=True)
+        await query.answer("💾 Finalizing profile dossier...", show_alert=True)
+        try: await query.message.delete()
+        except Exception: pass
         session.is_submitted = True
         
-        pdf_file = generate_onboarding_pdf(session)
-        if pdf_file:
+        # Safe execution of dynamic PDF rendering engine
+        try:
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib import colors
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40)
+            story = []
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor("#1A365D"), spaceAfter=12)
+            body_style = ParagraphStyle('BodyTextCustom', parent=styles['Normal'], fontSize=10, leading=14, textColor=colors.HexColor("#2D3748"))
+            
+            story.append(Paragraph(f"COACH AVNI — STRATEGIC BIOMETRIC BRIEF", title_style))
+            story.append(Paragraph(f"<b>Client Target:</b> {session.name}", body_style))
+            story.append(Paragraph(f"<b>Metabolic Blueprint Score:</b> {session.calculate_readiness_score()}/100", body_style))
+            story.append(Spacer(1, 15))
+            
+            table_data = [["Assessment Metric Pillar", "Customer Onboarding Response Log"]]
+            for screen in SCREENS:
+                for field in screen['fields']:
+                    ans = session.answers.get(field['id'])
+                    if ans:
+                        val_str = ", ".join(ans) if isinstance(ans, list) else str(ans)
+                        table_data.append([Paragraph(field['text'], body_style), Paragraph(val_str, body_style)])
+                        
+            t = Table(table_data, colWidths=[270, 230])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (1,0), colors.HexColor("#1A365D")),
+                ('TEXTCOLOR', (0,0), (1,0), colors.whitesmoke),
+                ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor("#F7FAFC"), colors.white]),
+                ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor("#E2E8F0")),
+            ]))
+            story.append(t)
+            doc.build(story)
+            buffer.seek(0)
             await context.bot.send_document(
                 chat_id=query.message.chat_id,
-                document=pdf_file,
+                document=buffer,
                 filename=f"Coach_Avni_{session.name.replace(' ', '_')}_Brief.pdf",
-                caption="📄 <b>Here is your strategic diagnostic summary dossier.</b>",
+                caption="📄 <b>Here is your strategic diagnostic summary asset. Keep this close.</b>",
                 parse_mode="HTML"
             )
+        except Exception: pass
+        
         await render_screen(update, context, chat_id=query.message.chat_id)
         return
 
     if data == "skip_media":
         await query.answer()
+        try: await query.message.delete()
+        except Exception: pass
         session.answers["q61"] = "Skipped"
         session.current_screen_idx += 1
         await render_screen(update, context, chat_id=query.message.chat_id)
@@ -453,7 +464,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         field_id = REV_MAP[data.split("_")[1]]
         session.awaiting_custom_field_id = field_id
-        await render_screen(update, context, chat_id=query.message.chat_id)
+        await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
         return
         
     if data.startswith("s_"):
@@ -470,9 +481,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if field['type'] == 'buttons':
             session.answers[field_id] = selected
-            # DROPS THE INTERJECTION REMARK DIRECTLY TO THE PERMANENT CHAT STREAM
-            reaction_msg = get_funny_instant_reaction(field_id, selected)
-            await context.bot.send_message(chat_id=query.message.chat_id, text=reaction_msg, parse_mode="HTML")
         elif field['type'] == 'buttons_multi':
             curr = session.answers.get(field_id, [])
             if not isinstance(curr, list): curr = []
@@ -483,10 +491,28 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         has_multi = any(f['type'] == 'buttons_multi' for f in screen_data['fields'])
         is_multi_question = len(screen_data['fields']) > 1
         
-        if not has_multi and not is_multi_question: 
+        # SMART LAYER FLOW CHECK
+        if not has_multi and not is_multi_question:
+            # Single question screen: Clean old message, output witty chat commentary, advance cleanly
+            try: await query.message.delete()
+            except Exception: pass
+            await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(field_id, selected), parse_mode="HTML")
             session.current_screen_idx += 1
-            
-        await render_screen(update, context, chat_id=query.message.chat_id)
+            await render_screen(update, context, chat_id=query.message.chat_id)
+        else:
+            # Multi-question screen: Edit current message layout quietly so user can tap remaining choices
+            if check_screen_satisfied(session, screen_data):
+                try: await query.message.delete()
+                except Exception: pass
+                # Dump reactions for all questions on this completed screen into chat history blocks
+                for f in screen_data['fields']:
+                    ans = session.answers.get(f['id'])
+                    if ans and f['type'] == 'buttons':
+                        await context.bot.send_message(chat_id=query.message.chat_id, text=get_funny_instant_reaction(f['id'], ans), parse_mode="HTML")
+                session.current_screen_idx += 1
+                await render_screen(update, context, chat_id=query.message.chat_id)
+            else:
+                await render_screen(update, context, message_id=query.message.message_id, chat_id=query.message.chat_id)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -498,10 +524,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if session.awaiting_custom_field_id:
         session.answers[session.awaiting_custom_field_id] = text
         session.awaiting_custom_field_id = None
-        
-        reaction_msg = get_funny_instant_reaction(session.awaiting_custom_field_id, text)
-        await context.bot.send_message(chat_id=chat_id, text=reaction_msg, parse_mode="HTML")
-        
+        await context.bot.send_message(chat_id=chat_id, text=get_funny_instant_reaction(session.awaiting_custom_field_id, text), parse_mode="HTML")
         if check_screen_satisfied(session, SCREENS[session.current_screen_idx]): 
             session.current_screen_idx += 1
         await render_screen(update, context, chat_id=chat_id)
@@ -515,9 +538,7 @@ async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not session.answers.get(field['id']):
             session.answers[field['id']] = text
             if field['id'] == 'q1': session.name = text
-            
-            reaction_msg = get_funny_instant_reaction(field['id'], text)
-            await context.bot.send_message(chat_id=chat_id, text=reaction_msg, parse_mode="HTML")
+            await context.bot.send_message(chat_id=chat_id, text=get_funny_instant_reaction(field['id'], text), parse_mode="HTML")
             break
             
     if check_screen_satisfied(session, screen_data):
@@ -529,24 +550,13 @@ async def media_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session = context.user_data.get(user_id)
     if not session or session.current_screen_idx >= len(SCREENS): return
-    session.answers["q61"] = "Biometric Photo Stored Confidentially ✓"
-    
-    await context.bot.send_message(
-        chat_id=update.message.chat_id, 
-        text="🎙️ <b>Coach Avni:</b> Photo locked in. I'll analyze your kinetic posture from this before our call.", 
-        parse_mode="HTML"
-    )
-    
+    session.answers["q61"] = "Biometric Photo Cache Verified ✓"
+    await context.bot.send_message(chat_id=update.message.chat_id, text="🎙️ <b>Coach Avni:</b> Photo locked in. I will analyze your structural alignment before our call.", parse_mode="HTML")
     session.current_screen_idx += 1
     await render_screen(update, context, chat_id=update.message.chat_id)
 
-def get_section_start_index(section_name: str) -> int:
-    for idx, screen in enumerate(SCREENS):
-        if screen['section'] == section_name: return idx
-    return 0
-
 def main():
-    print("🚀 COACH AVNI ONLINE — PERMANENT CONVERSATIONAL HISTORY LAYER INITIALIZED")
+    print("🚀 COACH AVNI ONLINE — SCREEN INTERACTION PIPELINE ACTIVE")
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
